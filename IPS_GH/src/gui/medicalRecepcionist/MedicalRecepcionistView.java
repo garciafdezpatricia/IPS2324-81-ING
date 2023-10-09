@@ -111,64 +111,16 @@ public class MedicalRecepcionistView extends JFrame {
 
 	/**
 	 * Create the frame.
+	 * @throws Exception 
 	 */
-	public MedicalRecepcionistView() {
-		try {
-			// Establecer la conexión
-			Connection connection = ConnectionFactory.getOracleConnection();
+	public MedicalRecepcionistView() throws Exception {
+		doctors = ConnectionFactory.getDoctors();
+		doctorsReset = ConnectionFactory.getDoctors();
 
-			// Crear una sentencia SQL
-			Statement statement = connection.createStatement();
-			Statement statement_patient = connection.createStatement();
+		patients = ConnectionFactory.getPatients();		
+		patientsReset = ConnectionFactory.getPatients();
 
-			// Ejecutar una consulta SQL
-			String sql = "SELECT * FROM DOCTOR";
-			ResultSet resultSet = statement.executeQuery(sql);
-
-			String sql_patients = "SELECT * FROM PATIENT";
-			ResultSet resultSet_patients = statement_patient.executeQuery(sql_patients);
-
-			// Procesar los resultados
-			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
-				String numcolegiado = resultSet.getString("numcolegiado");
-				String name = resultSet.getString("name");
-				String surname = resultSet.getString("surname");
-				String email = resultSet.getString("email");
-				// Procesa otros campos según la estructura de tu tabla
-				doctors.addElement(new Doctor(id, numcolegiado, name, surname, email));
-				doctorsReset.addElement(new Doctor(id, numcolegiado, name, surname, email));
-
-			}
-
-			// Cerrar la conexión
-			resultSet.close();
-			statement.close();
-
-			// Procesar los resultados
-			while (resultSet_patients.next()) {
-				int id = resultSet_patients.getInt("id");
-				String contactinfo = resultSet_patients.getString("contactinfo");
-				String name = resultSet_patients.getString("firstname");
-				String surname = resultSet_patients.getString("surname");
-				String dni = resultSet_patients.getString("dni");
-				int ssnumber = resultSet_patients.getInt("ssnumber");
-
-
-				patients.addElement(new Patient(id, name, surname, dni, contactinfo, ssnumber));
-				patientsReset.addElement(new Patient(id, name, surname, dni, contactinfo, ssnumber));
-
-			}
-
-			// Cerrar la conexión
-			resultSet_patients.close();
-			statement_patient.close();
-
-			connection.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 906, 553);
 		contentPane = new JPanel();
