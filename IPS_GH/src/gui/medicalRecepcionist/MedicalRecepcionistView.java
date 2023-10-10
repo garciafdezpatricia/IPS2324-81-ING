@@ -44,6 +44,8 @@ import com.toedter.calendar.JDateChooser;
 import db.Doctor;
 import db.Patient;
 import util.ConnectionFactory;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class MedicalRecepcionistView extends JFrame {
 
@@ -754,12 +756,13 @@ public class MedicalRecepcionistView extends JFrame {
 	private JDateChooser getDateChooser_1() {
 		if (dateChooser == null) {
 			dateChooser = new JDateChooser();
-			dateChooser.getCalendarButton().setEnabled(false);
-			dateChooser.getCalendarButton().addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
+			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
 					comboBoxFrom.setEnabled(true);
+
 				}
 			});
+			dateChooser.getCalendarButton().setEnabled(false);
 			dateChooser.setMinSelectableDate(new Date());
 
 		}
