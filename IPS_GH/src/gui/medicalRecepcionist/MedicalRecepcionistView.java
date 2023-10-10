@@ -28,21 +28,22 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.toedter.calendar.JDateChooser;
 
 import db.Doctor;
 import db.Patient;
 import util.ConnectionFactory;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 
 public class MedicalRecepcionistView extends JFrame {
 
@@ -115,6 +116,10 @@ public class MedicalRecepcionistView extends JFrame {
 	private JRadioButton rdbtnUrgent;
 	private JButton btnReset;
 	private JDateChooser dateChooser;
+	private JTextArea txtContactInfo;
+	private JPanel panelSouthPatient;
+	private JButton btnEdit;
+	private JButton btnSave;
 
 	/**
 	 * Create the frame.
@@ -212,6 +217,8 @@ public class MedicalRecepcionistView extends JFrame {
 			panel_information.setBorder(
 					new TitledBorder(null, "Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panel_information.setLayout(new BorderLayout(0, 0));
+			panel_information.add(getTxtContactInfo(), BorderLayout.CENTER);
+			panel_information.add(getPanelSouthPatient(), BorderLayout.SOUTH);
 		}
 		return panel_information;
 	}
@@ -353,6 +360,16 @@ public class MedicalRecepcionistView extends JFrame {
 		if (list_patients == null) {
 			list_patients = new JList<>(patients); // Asegúrate de especificar el tipo de elemento en la JList
 			list_patients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			list_patients.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					Patient p = (Patient) getList_patients().getSelectedValue();
+					if (p != null)
+						getTxtContactInfo().setText(p.getContactInfo());
+					else
+						getTxtContactInfo().setText("");
+				}
+
+			});
 		}
 		return list_patients;
 	}
@@ -747,5 +764,46 @@ public class MedicalRecepcionistView extends JFrame {
 
 		}
 		return dateChooser;
+	}
+
+	private JTextArea getTxtContactInfo() {
+		if (txtContactInfo == null) {
+			txtContactInfo = new JTextArea();
+			txtContactInfo.setEditable(false);
+		}
+		return txtContactInfo;
+	}
+
+	private JPanel getPanelSouthPatient() {
+		if (panelSouthPatient == null) {
+			panelSouthPatient = new JPanel();
+			panelSouthPatient.setLayout(new GridLayout(0, 2, 0, 0));
+			panelSouthPatient.add(getBtnEdit());
+			panelSouthPatient.add(getBtnSave());
+		}
+		return panelSouthPatient;
+	}
+
+	private JButton getBtnEdit() {
+		if (btnEdit == null) {
+			btnEdit = new JButton("Edit");
+			btnEdit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					getBtnSave().setEnabled(true); // when the edit button is pressed, is assumed that the contact info
+													// of the patient is modified so the save button is enabled
+					getTxtContactInfo().setEditable(true);
+				}
+			});
+
+		}
+		return btnEdit;
+	}
+
+	private JButton getBtnSave() {
+		if (btnSave == null) {
+			btnSave = new JButton("Save");
+			btnSave.setEnabled(false);
+		}
+		return btnSave;
 	}
 }
