@@ -10,11 +10,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 
+import db.Appointment;
 import db.Doctor;
 import db.Patient;
 import db.WorkDay;
 import db.WorkPeriod;
+import gui.medicalRecepcionist.MedicalRecepcionistView;
 
 public class ConnectionFactory {
 
@@ -161,7 +164,7 @@ public class ConnectionFactory {
 				// Cerrar la conexión
 				resultSet_workday.close();
 				statement_workday.close();
-				
+
 				SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 
 				Calendar calendar = Calendar.getInstance();
@@ -170,25 +173,84 @@ public class ConnectionFactory {
 
 				// Convertir el valor numérico a nombre del día
 				String nombreDia = obtenerNombreDia(diaSemana);
-				System.out.println(workday);
-				for(int i = 0; i < workday.size(); i++) {
-					System.out.println("dd  "+nombreDia.toLowerCase());
-					System.out.println(workday.get(i).getWeekday().toLowerCase());
+				for (int i = 0; i < workday.size(); i++) {
 					if (workday.get(i).getWeekday().toLowerCase().equals(nombreDia.toLowerCase())
 							&& sdf3.parse(utilDate + " " + hourFrom + ":00")
 									.after(sdf3.parse(utilDate + " " + workday.get(i).getStartHour()))
 							&& sdf3.parse(utilDate + " " + hourTo + ":00")
 									.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour()))) {
-						
+
 						return true;
 					}
 				}
-				
+
 			}
 
 			connection.close();
 
-			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+	public static boolean hasAnAppointment(Doctor doctor, String start, String end) throws Exception {
+		DefaultListModel<Appointment> apps = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			String sql = "SELECT * FROM APPOINTMENT WHERE DOCTORID = ?";
+			// Crear una sentencia SQL
+			PreparedStatement statement = connection.prepareStatement(sql);
+
+			statement.setInt(1, doctor.getId());
+
+			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				int id = resultSet.getInt("id");
+				int patientId = resultSet.getInt("patientid");
+				int doctorId = resultSet.getInt("doctorid");
+				String startdate = resultSet.getString("startdate");
+				String endate = resultSet.getString("enddate");
+				int urgency = resultSet.getInt("urgency");
+				int attended = resultSet.getInt("attended");
+				int checkedin = resultSet.getInt("checkedin");
+				int checkedout = resultSet.getInt("checkedout");
+
+				apps.addElement(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
+						checkedin, checkedout));
+
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+			SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+
+			for (int i = 0; i < apps.size(); i++) {
+				//si la hora de empezar de la appointment ya hecha es despues de la de empezar
+				// nueva y la hora de empezar de l anueva es antes de que acabe la hecha
+				if ((sdf3.parse(apps.get(i).getStartdate()).after(sdf3.parse(start))
+						&& sdf3.parse(start).before(sdf3.parse(apps.get(i).getEnddate()))
+						|| (
+								//la hora de entrada de la nueva es antes del final de la reservada 
+								//y despues del comienzo de la reservada
+								(sdf3.parse(start).before(sdf3.parse(apps.get(i).getEnddate())))
+								&& (sdf3.parse(start).after(sdf3.parse(apps.get(i).getStartdate()))
+										))
+						|| (
+								//la hora de entrada de la nueva es antes del final de la reservada 
+								//y despues del comienzo de la reservada
+								(sdf3.parse(start).compareTo(sdf3.parse(apps.get(i).getStartdate()))==0)))) {
+					return true;
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

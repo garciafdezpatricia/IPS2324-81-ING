@@ -266,6 +266,32 @@ public class MedicalRecepcionistView extends JFrame {
 						System.out.println("Acción cancelada.");
 					}
 
+					for (int i = 0; i < listDoctor.getSelectedValuesList().size(); i++) {
+						try {
+							if (ConnectionFactory.hasAnAppointment(listDoctor.getSelectedValuesList().get(i),
+									new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+											+ comboBoxFrom.getSelectedItem().toString() + ":00",
+											new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+													+ comboBoxTo.getSelectedItem().toString() + ":00")) {
+								int opcion2 = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
+										"The doctor has another appointment at that time, do you want to reserve this appointment either?",
+										"Confirmation", JOptionPane.YES_NO_OPTION);
+
+								// Verificar la respuesta del usuario
+								if (opcion2 == JOptionPane.YES_OPTION) {
+									// El usuario ha confirmado, realiza la acción
+									// Puedes poner aquí el código que quieras ejecutar después de la confirmación
+									System.out.println("Appointment saved.");
+								} else {
+									// El usuario ha cancelado la acción
+									System.out.println("Appointment cancelled.");
+								}
+							}
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					}
+					
 				}
 			});
 		}
@@ -709,26 +735,29 @@ public class MedicalRecepcionistView extends JFrame {
 					horas[index++] = horaStr;
 				}
 			}
-			
+
 			comboBoxTo = new JComboBox(horas);
 			comboBoxTo.addFocusListener(new FocusAdapter() {
 				@Override
 				public void focusLost(FocusEvent e) {
 					for (int i = 0; i < listDoctor.getSelectedValuesList().size(); i++) {
 						try {
-							if (!ConnectionFactory.isWorking(new java.sql.Date(getDateChooser_1().getDate().getTime()), comboBoxFrom.getSelectedItem().toString(),
-									comboBoxTo.getSelectedItem().toString(), listDoctor.getSelectedValuesList().get(i).getId())) {
-						        JOptionPane.showMessageDialog(MedicalRecepcionistView.this, "The doctor is not working.", "Warning", JOptionPane.INFORMATION_MESSAGE);
-						        System.out.println("no está trabajando");
-							}
-							else {
+							if (!ConnectionFactory.isWorking(new java.sql.Date(getDateChooser_1().getDate().getTime()),
+									comboBoxFrom.getSelectedItem().toString(), comboBoxTo.getSelectedItem().toString(),
+									listDoctor.getSelectedValuesList().get(i).getId())) {
+								JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+										"The doctor is not working.", "Warning", JOptionPane.INFORMATION_MESSAGE);
+								System.out.println("no está trabajando");
+							} else {
 								System.out.println("está trabajando");
 							}
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
-							
+						
+
 					}
+
 				}
 			});
 			comboBoxTo.setEnabled(false);
