@@ -709,7 +709,28 @@ public class MedicalRecepcionistView extends JFrame {
 					horas[index++] = horaStr;
 				}
 			}
+			
 			comboBoxTo = new JComboBox(horas);
+			comboBoxTo.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					for (int i = 0; i < listDoctor.getSelectedValuesList().size(); i++) {
+						try {
+							if (!ConnectionFactory.isWorking(new java.sql.Date(getDateChooser_1().getDate().getTime()), comboBoxFrom.getSelectedItem().toString(),
+									comboBoxTo.getSelectedItem().toString(), listDoctor.getSelectedValuesList().get(i).getId())) {
+						        JOptionPane.showMessageDialog(MedicalRecepcionistView.this, "The doctor is not working.", "Warning", JOptionPane.INFORMATION_MESSAGE);
+						        System.out.println("no está trabajando");
+							}
+							else {
+								System.out.println("está trabajando");
+							}
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+							
+					}
+				}
+			});
 			comboBoxTo.setEnabled(false);
 		}
 		return comboBoxTo;
