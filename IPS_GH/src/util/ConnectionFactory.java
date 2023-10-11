@@ -5,19 +5,18 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JOptionPane;
 
 import db.Appointment;
 import db.Doctor;
 import db.Patient;
 import db.WorkDay;
 import db.WorkPeriod;
-import gui.medicalRecepcionist.MedicalRecepcionistView;
 
 public class ConnectionFactory {
 
@@ -221,9 +220,10 @@ public class ConnectionFactory {
 				int attended = resultSet.getInt("attended");
 				int checkedin = resultSet.getInt("checkedin");
 				int checkedout = resultSet.getInt("checkedout");
+				int officeid = resultSet.getInt("officeid");
 
 				apps.addElement(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
-						checkedin, checkedout));
+						checkedin, checkedout, officeid));
 
 			}
 
@@ -234,20 +234,13 @@ public class ConnectionFactory {
 			SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 
 			for (int i = 0; i < apps.size(); i++) {
-				//si la hora de empezar de la appointment ya hecha es despues de la de empezar
+				// si la hora de empezar de la appointment ya hecha es despues de la de empezar
 				// nueva y la hora de empezar de l anueva es antes de que acabe la hecha
-				if ((sdf3.parse(apps.get(i).getStartdate()).after(sdf3.parse(start))
-						&& sdf3.parse(start).before(sdf3.parse(apps.get(i).getEnddate()))
-						|| (
-								//la hora de entrada de la nueva es antes del final de la reservada 
-								//y despues del comienzo de la reservada
-								(sdf3.parse(start).before(sdf3.parse(apps.get(i).getEnddate())))
-								&& (sdf3.parse(start).after(sdf3.parse(apps.get(i).getStartdate()))
-										))
-						|| (
-								//la hora de entrada de la nueva es antes del final de la reservada 
-								//y despues del comienzo de la reservada
-								(sdf3.parse(start).compareTo(sdf3.parse(apps.get(i).getStartdate()))==0)))) {
+				if ((sdf3.parse(start).after(sdf3.parse(apps.get(i).getStartdate()))
+						&& sdf3.parse(start).before(sdf3.parse(apps.get(i).getEnddate())) || (
+				// la hora de entrada de la nueva es antes del final de la reservada
+				// y despues del comienzo de la reservada
+				(sdf3.parse(start).compareTo(sdf3.parse(apps.get(i).getStartdate())) == 0)))) {
 					return true;
 				}
 			}
@@ -256,6 +249,53 @@ public class ConnectionFactory {
 		}
 
 		return false;
+	}
+
+	public static void createAppointment(int patientID, int doctorID, String startDate, String endDate, int urgency,
+			int officeId) throws Exception {
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		// Datos para la inserción
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL con parámetros
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+			// Crear un PreparedStatement
+			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+			// Establecer valores para los parámetros
+			preparedStatement.setInt(1, patientID);
+			preparedStatement.setInt(2, doctorID);
+			preparedStatement.setString(3, startDate);
+			preparedStatement.setString(4, endDate);
+			preparedStatement.setInt(5, urgency);
+			preparedStatement.setInt(6, 0);
+			preparedStatement.setInt(7, 0);
+			preparedStatement.setInt(8, 0);
+			preparedStatement.setInt(8, 0);
+			preparedStatement.setInt(9, officeId);
+
+			// Ejecutar la inserción
+			int filasAfectadas = preparedStatement.executeUpdate();
+
+			if (filasAfectadas > 0) {
+				System.out.println("Inserción exitosa.");
+			} else {
+				System.out.println("La inserción no se pudo realizar.");
+			}
+
+			// Cerrar la conexión y el PreparedStatement
+			preparedStatement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static String obtenerNombreDia(int diaSemana) {

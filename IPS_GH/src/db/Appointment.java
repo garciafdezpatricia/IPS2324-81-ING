@@ -3,12 +3,12 @@ package db;
 public class Appointment {
 	private int id;
 	private int patientid;
-	private int doctorid;
+	private int doctorid, officeId;;
 	private String startdate, enddate;
 	private int urgency, attended, checkedin, checkedout;
 
 	public Appointment(int id, int patientid, int doctorid, String startdate, String enddate, int urgency, int attended,
-			int checkedin, int checkedout) {
+			int checkedin, int checkedout, int officeId) {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -19,6 +19,7 @@ public class Appointment {
 		this.attended = attended;
 		this.checkedin = checkedin;
 		this.checkedout = checkedout;
+		this.officeId = officeId;
 	}
 
 	public int getId() {
@@ -91,6 +92,15 @@ public class Appointment {
 
 	public void setCheckedout(int checkedout) {
 		this.checkedout = checkedout;
+	}
+
+	
+	public int getOfficeId() {
+		return officeId;
+	}
+
+	public void setOfficeId(int officeId) {
+		this.officeId = officeId;
 	}
 
 	@Override
