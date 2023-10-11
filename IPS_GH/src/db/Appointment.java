@@ -4,11 +4,11 @@ public class Appointment {
 	private int id;
 	private int patientid;
 	private int doctorid, officeId;;
-	private String startdate, enddate;
+	private String startdate, enddate, information;
 	private int urgency, attended, checkedin, checkedout;
 
 	public Appointment(int id, int patientid, int doctorid, String startdate, String enddate, int urgency, int attended,
-			int checkedin, int checkedout, int officeId) {
+			int checkedin, int checkedout, int officeId, String information) {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -20,6 +20,7 @@ public class Appointment {
 		this.checkedin = checkedin;
 		this.checkedout = checkedout;
 		this.officeId = officeId;
+		this.information = information;
 	}
 
 	public int getId() {
@@ -101,6 +102,15 @@ public class Appointment {
 
 	public void setOfficeId(int officeId) {
 		this.officeId = officeId;
+	}
+
+	
+	public String getInformation() {
+		return information;
+	}
+
+	public void setInformation(String information) {
+		this.information = information;
 	}
 
 	@Override

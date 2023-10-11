@@ -221,9 +221,10 @@ public class ConnectionFactory {
 				int checkedin = resultSet.getInt("checkedin");
 				int checkedout = resultSet.getInt("checkedout");
 				int officeid = resultSet.getInt("officeid");
+				String information = resultSet.getString("information");
 
 				apps.addElement(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
-						checkedin, checkedout, officeid));
+						checkedin, checkedout, officeid, information));
 
 			}
 

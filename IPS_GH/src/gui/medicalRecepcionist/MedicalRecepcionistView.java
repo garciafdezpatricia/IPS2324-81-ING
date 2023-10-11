@@ -303,14 +303,14 @@ public class MedicalRecepcionistView extends JFrame {
 //						+ comboBoxFrom.getSelectedItem().toString() + ":00",
 //				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
 //						+ comboBoxTo.getSelectedItem().toString() + ":00",
-//						1, aqui hay que poner el id de la office);
+//						1, aqui hay que poner el id de la office, aqui la informacion de contacto);
 //
 //			} else {
 //				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
 //						+ comboBoxFrom.getSelectedItem().toString() + ":00",
 //				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
 //						+ comboBoxTo.getSelectedItem().toString() + ":00",
-//						0, aqui hay que poner el id de la office);
+//						0, aqui hay que poner el id de la office, aqui la informacion de contacto);
 //			}
 		} else {
 			// El usuario ha cancelado la acción
