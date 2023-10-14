@@ -363,8 +363,11 @@ public class MedicalRecepcionistView extends JFrame {
 			list_patients.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					Patient p = (Patient) getList_patients().getSelectedValue();
-					if (p != null)
+					if (p != null) {
 						getTxtContactInfo().setText(p.getContactInfo());
+						getBtnEdit().setEnabled(true);
+					}
+
 					else
 						getTxtContactInfo().setText("");
 				}
@@ -787,8 +790,10 @@ public class MedicalRecepcionistView extends JFrame {
 	private JButton getBtnEdit() {
 		if (btnEdit == null) {
 			btnEdit = new JButton("Edit");
+			btnEdit.setEnabled(false);
 			btnEdit.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					btnEdit.setEnabled(false); // by default, the edit button is disabled until a patient is selected
 					getBtnSave().setEnabled(true); // when the edit button is pressed, is assumed that the contact info
 													// of the patient is modified so the save button is enabled
 					getTxtContactInfo().setEditable(true);
@@ -802,7 +807,17 @@ public class MedicalRecepcionistView extends JFrame {
 	private JButton getBtnSave() {
 		if (btnSave == null) {
 			btnSave = new JButton("Save");
+			btnSave.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String newCInfo = getTxtContactInfo().getText();
+					Patient p = (Patient) getList_patients().getSelectedValue();
+					p.setContactInfo(newCInfo);
+					btnSave.setEnabled(false);
+				}
+
+			});
 			btnSave.setEnabled(false);
+
 		}
 		return btnSave;
 	}
