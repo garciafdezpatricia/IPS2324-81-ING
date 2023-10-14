@@ -1,6 +1,9 @@
 package db;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,11 +13,14 @@ import util.ConnectionFactory;
 public class Appointment {
 
 	public static List<AppointmentBLDto> getAppointmentsByDoctorId(int doctorId) {
+		Connection con = null;
+		PreparedStatement ps= null;
+		ResultSet rs = null;
 		try {
-			Connection con = ConnectionFactory.getOracleConnection();
-			var ps = con.prepareStatement("SELECT * FROM APPOINTMENT JOIN OFFICE on officeid = office.id  WHERE doctorid = ?");
+			con = ConnectionFactory.getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM APPOINTMENT JOIN OFFICE on officeid = office.id  WHERE doctorid = ?");
 			ps.setInt(1, doctorId);
-			var rs = ps.executeQuery();
+			rs = ps.executeQuery();
 			List<AppointmentBLDto> appointments = new ArrayList<AppointmentBLDto>();
 			AppointmentBLDto apmnt = null;
 		
@@ -32,7 +38,7 @@ public class Appointment {
 				apmnt.checkOut = rs.getInt(9)==0?false:true;
 				apmnt.officeid = rs.getInt(10);
 				apmnt.information = rs.getString(11);
-				apmnt.officeCode = rs.getString(12);
+				apmnt.officeCode = rs.getString(13);
 				
 				appointments.add(apmnt);
 				
@@ -43,6 +49,14 @@ public class Appointment {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();
-		}
+		}finally {
+			try {
+				if(con!=null) con.close();
+				if(ps!=null) ps.close();
+				if(rs!=null) rs.close();
+					} catch (SQLException e) {
+						throw new RuntimeException();
+					}
+			}
 	}
 }

@@ -37,7 +37,6 @@ public class Schedule extends JFrame {
 	private JPanel leftPanel;
 	private JPanel rightPanel;
 	private JLabel lblDescription;
-	private JScrollPane pnAppointments;
 	private JCalendar calendar;
 	private JLabel lblDate;
 	private JButton btnViewInfo;
@@ -48,6 +47,7 @@ public class Schedule extends JFrame {
 	private JPanel panel;
 	private JButton btnBack;
 	private JButton btnFilter;
+	private JPanel pnAppointments;
 
 	/**
 	 * Launch the application.
@@ -58,6 +58,7 @@ public class Schedule extends JFrame {
 				try {										
 					Schedule frame = new Schedule();
 					frame.setVisible(true);
+
 					
 					
 				} catch (Exception e) {
@@ -79,12 +80,15 @@ public class Schedule extends JFrame {
 			}
 		}
 		this.filteredApmnts = filtered;
-		
 		getPnAppointments().removeAll();
 		for(AppointmentBLDto p : filteredApmnts) {
 			System.out.println(p);
 			getPnAppointments().add(newButton(p));
 		}
+		
+		getPnAppointments().invalidate();
+		getPnAppointments().validate();
+		getPnAppointments().repaint();
 	}
 	
 	
@@ -135,18 +139,6 @@ public class Schedule extends JFrame {
 		}
 		return lblDescription;
 	}
-	private JScrollPane getPnAppointments() {
-		if (pnAppointments == null) {
-			pnAppointments = new JScrollPane();
-			pnAppointments.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			pnAppointments.removeAll();
-			for(AppointmentBLDto p : filteredApmnts) {
-				System.out.println(p);
-				pnAppointments.add(newButton(p));
-			}
-		}
-		return pnAppointments;
-	}
 	private JCalendar getCalendar() {
 		if (calendar == null) {
 			calendar = new JCalendar();
@@ -192,5 +184,21 @@ public class Schedule extends JFrame {
 			});
 		}
 		return btnFilter;
+	}
+	private JPanel getPnAppointments() {
+		if (pnAppointments == null) {
+			pnAppointments = new JPanel();
+			pnAppointments.setBackground(Color.WHITE);
+			pnAppointments.removeAll();
+			for(AppointmentBLDto p : filteredApmnts) {
+				System.out.println(p);
+				pnAppointments.add(newButton(p));
+			}
+			pnAppointments.invalidate();
+			pnAppointments.validate();
+			pnAppointments.repaint();
+		
+		}
+		return pnAppointments;
 	}
 }
