@@ -207,6 +207,10 @@ public class MedicalRecepcionistView extends JFrame {
 	private JPanel getPanel_office() {
 		if (panel_office == null) {
 			panel_office = new JPanel();
+			panel_office.setLayout(new BorderLayout(0, 0));
+			
+			panel_office
+			.setBorder(new TitledBorder(null, "Office ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		}
 		return panel_office;
 	}
