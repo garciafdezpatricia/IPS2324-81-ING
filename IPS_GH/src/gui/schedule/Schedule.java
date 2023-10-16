@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import com.toedter.calendar.JCalendar;
 
 import db.Appointment;
+import gui.doctor.DoctorAppointmentView;
 import oracle.sql.DATE;
 import util.AppointmentBLDto;
 
@@ -48,6 +49,12 @@ public class Schedule extends JFrame {
 	private JButton btnBack;
 	private JButton btnFilter;
 	private JPanel pnAppointments;
+	
+	
+	// ***** REFERENCES TO WINDOWS ******
+	DoctorAppointmentView doctorView;
+	
+	
 
 	/**
 	 * Launch the application.
@@ -94,6 +101,13 @@ public class Schedule extends JFrame {
 	
 	private JButton newButton(AppointmentBLDto p) {
 		JButton button = new JButton(p.toString());
+		button.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					doctorView = new DoctorAppointmentView(p);
+					doctorView.setVisible(true);
+				}
+			});
 		button.setVisible(true);
 		return button;
 	}

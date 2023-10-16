@@ -13,6 +13,8 @@ public class AppointmentBLDto {
 	public boolean checkOut;
 	public String information;
 	public String officeCode;
+	public String patientName;
+	public String patientSurname;
 	
 	public String toString() {
 		String aux = "Info:"+ information+" - ";
@@ -21,4 +23,5 @@ public class AppointmentBLDto {
 		return aux;
 	}
 
+	
 }
