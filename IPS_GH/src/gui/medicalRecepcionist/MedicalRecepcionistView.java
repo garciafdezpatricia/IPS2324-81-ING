@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -18,6 +19,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -42,6 +44,7 @@ import javax.swing.event.ListSelectionListener;
 import com.toedter.calendar.JDateChooser;
 
 import db.Doctor;
+import db.Office;
 import db.Patient;
 import util.ConnectionFactory;
 
@@ -71,6 +74,7 @@ public class MedicalRecepcionistView extends JFrame {
 	private DefaultListModel<Doctor> doctorsReset = new DefaultListModel<>();
 	private DefaultListModel<Patient> patients = new DefaultListModel<>();
 	private DefaultListModel<Patient> patientsReset = new DefaultListModel<>();
+	private List<Office> offices = new ArrayList<Office>();
 
 	/**
 	 * Launch the application.
@@ -120,6 +124,9 @@ public class MedicalRecepcionistView extends JFrame {
 	private JPanel panelSouthPatient;
 	private JButton btnEdit;
 	private JButton btnSave;
+	private JPanel panel_office_north;
+	private JLabel lblChooseOffice;
+	private JComboBox<String> comboBoxOffices;
 
 	/**
 	 * Create the frame.
@@ -132,6 +139,8 @@ public class MedicalRecepcionistView extends JFrame {
 
 		patients = ConnectionFactory.getPatients();
 		patientsReset = ConnectionFactory.getPatients();
+		
+		offices = ConnectionFactory.getOffices();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 906, 553);
@@ -211,6 +220,7 @@ public class MedicalRecepcionistView extends JFrame {
 			
 			panel_office
 			.setBorder(new TitledBorder(null, "Office ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			panel_office.add(getPanel_office_north(), BorderLayout.NORTH);
 		}
 		return panel_office;
 	}
@@ -824,5 +834,32 @@ public class MedicalRecepcionistView extends JFrame {
 
 		}
 		return btnSave;
+	}
+	private JPanel getPanel_office_north() {
+		if (panel_office_north == null) {
+			panel_office_north = new JPanel();
+			panel_office_north.setLayout(new GridLayout(1, 0, 0, 0));
+			panel_office_north.add(getLblChooseOffice());
+			panel_office_north.add(getComboBoxOffices());
+		}
+		return panel_office_north;
+	}
+	private JLabel getLblChooseOffice() {
+		if (lblChooseOffice == null) {
+			lblChooseOffice = new JLabel("Choose an office to book:");
+		}
+		return lblChooseOffice;
+	}
+	private JComboBox<String> getComboBoxOffices() {
+		if (comboBoxOffices == null) {
+			comboBoxOffices = new JComboBox<String>();
+			try {
+				comboBoxOffices.setModel(new DefaultComboBoxModel<>(ConnectionFactory.getOfficesCodes()));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return comboBoxOffices;
 	}
 }
