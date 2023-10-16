@@ -8,12 +8,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 
 import db.Appointment;
 import db.Doctor;
+import db.Office;
 import db.Patient;
 import db.WorkDay;
 import db.WorkPeriod;
@@ -318,6 +321,48 @@ public class ConnectionFactory {
 		default:
 			return "Día no válido";
 		}
+	}
+
+	public static List<Office> getOffices() throws Exception {
+		List<Office> offices = new ArrayList<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM OFFICE";
+			ResultSet resultSet_offices = statement.executeQuery(sql);
+
+			// Procesar los resultados
+			while (resultSet_offices.next()) {
+				int id = resultSet_offices.getInt("id");
+				String officeCode = resultSet_offices.getString("officeCode");
+
+				offices.add(new Office(id, officeCode));
+			}
+
+			// Cerrar la conexión
+			resultSet_offices.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return offices;
+	}
+
+	public static String[] getOfficesCodes() throws Exception {
+		String[] aux = new String[getOffices().size()];
+		for (int i = 0; i < getOffices().size(); i++) {
+			aux[i] = String.valueOf(getOffices().get(i).getOfficeCode());
+		}
+
+		return aux;
 	}
 
 }
