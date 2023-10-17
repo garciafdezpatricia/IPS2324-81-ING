@@ -9,8 +9,8 @@ public class AppointmentBLDto {
 	public String endDate;
 	public boolean urgency;
 	public boolean attended;
-	public boolean checkIn;
-	public boolean checkOut;
+	public String checkIn;
+	public String checkOut;
 	public String information;
 	public String officeCode;
 	public String patientName;

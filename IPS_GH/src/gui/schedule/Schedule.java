@@ -13,10 +13,10 @@ import java.awt.BorderLayout;
 import javax.swing.JButton;
 import com.toedter.calendar.JCalendar;
 
-import db.Appointment;
 import gui.doctor.DoctorAppointmentView;
 import oracle.sql.DATE;
 import util.AppointmentBLDto;
+import util.ConnectionFactory;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -116,7 +116,7 @@ public class Schedule extends JFrame {
 	 */
 	public Schedule() {
 
-		appointments = Appointment.getAppointmentsByDoctorId(doctorId);	
+		appointments = ConnectionFactory.getAppointmentsByDoctorId(doctorId);	
 		filterAppointments();
 		setBounds(100, 100, 498, 340);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

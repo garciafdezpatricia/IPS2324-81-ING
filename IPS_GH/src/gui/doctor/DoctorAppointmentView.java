@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import creator.CausesCreator;
-import db.Appointment;
 import util.AppointmentBLDto;
 
 import java.awt.BorderLayout;
