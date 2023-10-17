@@ -1,6 +1,8 @@
 package gui.schedule;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+
 import javax.swing.JButton;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
