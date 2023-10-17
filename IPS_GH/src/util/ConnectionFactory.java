@@ -119,13 +119,13 @@ public class ConnectionFactory {
 			// TODO: falta por añadir las causas
 			con = getOracleConnection();
 			ps = con.prepareStatement("UPDATE APPOINTMENT SET "
-					+ " appointment.attended = ? appointment.checkedin = ? appointment.checkedout = ? "
-					+ "WHERE appointment.id = ?");
+					+ "attended = ?, checkedin = ?, checkedout = ? "
+					+ "WHERE id = ?");
 			ps.setInt(1, appointment.attended ? 1 : 0);
 			ps.setString(2, appointment.checkIn);
 			ps.setString(3, appointment.checkOut); 
 			ps.setInt(4, appointment.id);
-			rs = ps.executeQuery();
+			ps.executeUpdate();
 		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -147,7 +147,8 @@ public class ConnectionFactory {
 		ResultSet rs = null;
 		try {
 			con = getOracleConnection();
-			ps = con.prepareStatement("SELECT * FROM APPOINTMENT JOIN OFFICE on officeid = office.id  WHERE doctorid = ?");
+			ps = con.prepareStatement("SELECT * FROM (APPOINTMENT JOIN PATIENT on appointment.patientid = patient.id) "
+					+ "JOIN OFFICE on officeid = office.id  WHERE doctorid = ?");
 			ps.setInt(1, doctorId);
 			rs = ps.executeQuery();
 			List<AppointmentBLDto> appointments = new ArrayList<AppointmentBLDto>();
@@ -167,7 +168,9 @@ public class ConnectionFactory {
 				apmnt.checkOut = rs.getString(9);
 				apmnt.officeid = rs.getInt(10);
 				apmnt.information = rs.getString(11);
-				apmnt.officeCode = rs.getString(13);
+				apmnt.patientName = rs.getString(15);
+				apmnt.patientSurname = rs.getString(16);
+				apmnt.officeCode = rs.getString(19);
 				
 				appointments.add(apmnt);
 				

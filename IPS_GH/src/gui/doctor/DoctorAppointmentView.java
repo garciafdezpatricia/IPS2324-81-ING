@@ -8,6 +8,7 @@ import javax.swing.border.EmptyBorder;
 
 import creator.CausesCreator;
 import util.AppointmentBLDto;
+import util.ConnectionFactory;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -263,8 +264,15 @@ public class DoctorAppointmentView extends JFrame {
 	private JButton getBtnSave() {
 		if (btnSave == null) {
 			btnSave = new JButton("Save");
-			appointment.attended = rdbtnYes.isSelected();
-			//TODO: checkin y checkout + causes
+			btnSave.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					appointment.attended = rdbtnYes.isSelected();
+					appointment.checkIn = txtCheckInTime.getText();
+					appointment.checkOut = txtCheckOutTime.getText();
+					//TODO: add causes to DB
+					ConnectionFactory.updateAppointment(appointment);
+				}
+			});
 		}
 		return btnSave;
 	}
