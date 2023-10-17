@@ -1,35 +1,25 @@
 package gui.schedule;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import java.awt.GridLayout;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import java.awt.Color;
-import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
-import javax.swing.JButton;
-import com.toedter.calendar.JCalendar;
-
-import oracle.sql.DATE;
-import util.AppointmentBLDto;
-import util.ConnectionFactory;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.border.EmptyBorder;
-import javax.swing.ListSelectionModel;
-import javax.swing.AbstractListModel;
-import javax.swing.border.LineBorder;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import javax.swing.ScrollPaneConstants;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import com.toedter.calendar.JCalendar;
+
+import util.AppointmentBLDto;
+import util.ConnectionFactory;
 
 public class Schedule extends JFrame {
 

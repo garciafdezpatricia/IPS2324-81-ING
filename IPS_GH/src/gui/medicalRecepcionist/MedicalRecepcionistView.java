@@ -44,11 +44,8 @@ import javax.swing.event.ListSelectionListener;
 import com.toedter.calendar.JDateChooser;
 
 import db.Doctor;
-import db.Office;
 import db.Patient;
 import util.ConnectionFactory;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 public class MedicalRecepcionistView extends JFrame {
 
