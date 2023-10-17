@@ -7,8 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -112,34 +110,35 @@ public class ConnectionFactory {
 	}
 
 	public static void updateAppointment(AppointmentBLDto appointment) {
-		Connection con = null;
-		PreparedStatement ps= null;
-		ResultSet rs = null;
-		try {
-			// TODO: falta por añadir las causas
-			con = getOracleConnection();
-			ps = con.prepareStatement("UPDATE APPOINTMENT SET "
-					+ " appointment.attended = ? appointment.checkedin = ? appointment.checkedout = ? "
-					+ "WHERE appointment.id = ?");
-			ps.setInt(1, appointment.attended ? 1 : 0);
-			ps.setString(2, appointment.checkIn);
-			ps.setString(3, appointment.checkOut); 
-			ps.setInt(4, appointment.id);
-			rs = ps.executeQuery();
-		
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException();
-		}finally {
-			try {
-				if(con!=null) con.close();
-				if(ps!=null) ps.close();
-				if(rs!=null) rs.close();
-					} catch (SQLException e) {
-						throw new RuntimeException();
-					}
-			}
-	}
+        Connection con = null;
+        PreparedStatement ps= null;
+        ResultSet rs = null;
+        try {
+            // TODO: falta por añadir las causas
+            con = getOracleConnection();
+            ps = con.prepareStatement("UPDATE APPOINTMENT SET "
+                    + "attended = ?, checkedin = ?, checkedout = ? "
+                    + "WHERE id = ?");
+            ps.setInt(1, appointment.attended ? 1 : 0);
+            ps.setString(2, appointment.checkIn);
+            ps.setString(3, appointment.checkOut); 
+            ps.setInt(4, appointment.id);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }finally {
+            try {
+                if(con!=null) con.close();
+                if(ps!=null) ps.close();
+                if(rs!=null) rs.close();
+                    } catch (SQLException e) {
+                        throw new RuntimeException();
+                    }
+            }
+    }
+
 
 	public static List<AppointmentBLDto> getAppointmentsByDoctorId(int doctorId) {
 		Connection con = null;
@@ -147,7 +146,8 @@ public class ConnectionFactory {
 		ResultSet rs = null;
 		try {
 			con = getOracleConnection();
-			ps = con.prepareStatement("SELECT * FROM APPOINTMENT JOIN OFFICE on officeid = office.id  WHERE doctorid = ?");
+			ps = con.prepareStatement("SELECT * FROM (APPOINTMENT JOIN PATIENT on appointment.patientid = patient.id) "
+					+ "JOIN OFFICE on officeid = office.id  WHERE doctorid = ?");
 			ps.setInt(1, doctorId);
 			rs = ps.executeQuery();
 			List<AppointmentBLDto> appointments = new ArrayList<AppointmentBLDto>();
@@ -167,7 +167,9 @@ public class ConnectionFactory {
 				apmnt.checkOut = rs.getString(9);
 				apmnt.officeid = rs.getInt(10);
 				apmnt.information = rs.getString(11);
-				apmnt.officeCode = rs.getString(13);
+				apmnt.patientName = rs.getString(15);
+				apmnt.patientSurname = rs.getString(16);
+				apmnt.officeCode = rs.getString(19);
 				
 				appointments.add(apmnt);
 				
@@ -188,7 +190,7 @@ public class ConnectionFactory {
 					}
 			}
 	}
-
+	
 	public static boolean isWorking(Date utilDate, String hourFrom, String hourTo, int idDoctor) throws Exception {
 		DefaultListModel<WorkPeriod> workperiod = new DefaultListModel<>();
 
@@ -220,52 +222,60 @@ public class ConnectionFactory {
 
 			DefaultListModel<WorkDay> workday = new DefaultListModel<>();
 
-			if (utilDate.after(workperiod.get(0).getStartDate()) && utilDate.before(workperiod.get(0).getEndDate())) {
-				System.out.println("esta en el workperiod");
-				String sql_workday = "SELECT * FROM WORKDAY WHERE WORKPERIODID = ?";
+//			if (utilDate == null || workperiod.get(0).getStartDate()==null || workperiod.get(0).getEndDate()==null) {
+//				System.out.println();
+//			}
+			try {
+				if (utilDate.after(workperiod.get(0).getStartDate()) && utilDate.before(workperiod.get(0).getEndDate())) {
+					System.out.println("esta en el workperiod");
+					String sql_workday = "SELECT * FROM WORKDAY WHERE WORKPERIODID = ?";
 
-				// Crear una sentencia SQL
-				PreparedStatement statement_workday = connection.prepareStatement(sql_workday);
+					// Crear una sentencia SQL
+					PreparedStatement statement_workday = connection.prepareStatement(sql_workday);
 
-				statement_workday.setInt(1, workperiod.get(0).getId());
+					statement_workday.setInt(1, workperiod.get(0).getId());
 
-				ResultSet resultSet_workday = statement_workday.executeQuery();
+					ResultSet resultSet_workday = statement_workday.executeQuery();
 
-				// Procesar los resultados
-				while (resultSet_workday.next()) {
-					int id = resultSet_workday.getInt("id");
-					String weekday = resultSet_workday.getString("weekday");
-					String starthour = resultSet_workday.getString("starthour");
-					System.out.println(starthour);
-					String endhour = resultSet_workday.getString("endhour");
-					int workperiodid = workperiod.get(0).getId();
+					// Procesar los resultados
+					while (resultSet_workday.next()) {
+						int id = resultSet_workday.getInt("id");
+						String weekday = resultSet_workday.getString("weekday");
+						String starthour = resultSet_workday.getString("starthour");
+						System.out.println(starthour);
+						String endhour = resultSet_workday.getString("endhour");
+						int workperiodid = workperiod.get(0).getId();
 
-					workday.addElement(new WorkDay(id, weekday, starthour, endhour, workperiodid));
+						workday.addElement(new WorkDay(id, weekday, starthour, endhour, workperiodid));
 
-				}
-				// Cerrar la conexión
-				resultSet_workday.close();
-				statement_workday.close();
-
-				SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
-
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(utilDate);
-				int diaSemana = calendar.get(Calendar.DAY_OF_WEEK);
-
-				// Convertir el valor numérico a nombre del día
-				String nombreDia = obtenerNombreDia(diaSemana);
-				for (int i = 0; i < workday.size(); i++) {
-					if (workday.get(i).getWeekday().toLowerCase().equals(nombreDia.toLowerCase())
-							&& sdf3.parse(utilDate + " " + hourFrom + ":00")
-									.after(sdf3.parse(utilDate + " " + workday.get(i).getStartHour()))
-							&& sdf3.parse(utilDate + " " + hourTo + ":00")
-									.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour()))) {
-
-						return true;
 					}
-				}
+					// Cerrar la conexión
+					resultSet_workday.close();
+					statement_workday.close();
 
+					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(utilDate);
+					int diaSemana = calendar.get(Calendar.DAY_OF_WEEK);
+
+					// Convertir el valor numérico a nombre del día
+					String nombreDia = obtenerNombreDia(diaSemana);
+					for (int i = 0; i < workday.size(); i++) {
+						if (workday.get(i).getWeekday().toLowerCase().equals(nombreDia.toLowerCase())
+								&& sdf3.parse(utilDate + " " + hourFrom + ":00")
+										.after(sdf3.parse(utilDate + " " + workday.get(i).getStartHour()))
+								&& sdf3.parse(utilDate + " " + hourTo + ":00")
+										.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour()))) {
+
+							return true;
+						}
+					}
+
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
 			connection.close();

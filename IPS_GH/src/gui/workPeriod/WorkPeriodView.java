@@ -81,7 +81,7 @@ public class WorkPeriodView extends JFrame {
 	public WorkPeriodView() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(WorkPeriodView.class.getResource("/img/descarga.jpg")));
 		setTitle("Work period");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 702, 583);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

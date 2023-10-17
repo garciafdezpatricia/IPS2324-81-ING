@@ -6,6 +6,7 @@ import java.awt.Color;
 import javax.swing.JButton;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
@@ -21,6 +22,8 @@ import javax.swing.border.EmptyBorder;
 import com.toedter.calendar.JCalendar;
 
 import gui.doctor.DoctorAppointmentView;
+import gui.doctor.MenuDoctor;
+import gui.medicalRecepcionist.MenuMedicalRecepcionist;
 import oracle.sql.DATE;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
@@ -29,6 +32,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.border.EmptyBorder;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.AbstractListModel;
 import javax.swing.border.LineBorder;
 import java.awt.event.MouseAdapter;
@@ -131,11 +137,24 @@ public class Schedule extends JFrame {
 	 * Create the frame.
 	 */
 	public Schedule() {
-
+		setIconImage(Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
+		setTitle("Schedule");
 		appointments = ConnectionFactory.getAppointmentsByDoctorId(doctorId);	
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
 		filterAppointments();
 		setBounds(100, 100, 498, 340);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		getContentPane().setLayout(new GridLayout(1, 0, 0, 0));
 		getContentPane().add(getLeftPanel());
 		getContentPane().add(getRightPanel());
@@ -197,6 +216,21 @@ public class Schedule extends JFrame {
 	private JButton getBtnBack() {
 		if (btnBack == null) {
 			btnBack = new JButton("Back");
+			btnBack.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					setVisible(false);
+					MenuDoctor mr;
+					try {
+						mr = new MenuDoctor();
+						mr.setVisible(true);
+						mr.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
 		}
 		return btnBack;
 	}

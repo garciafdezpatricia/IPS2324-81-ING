@@ -1,4 +1,4 @@
-package gui;
+package gui.doctor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -15,22 +15,25 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 
-import gui.doctor.MenuDoctor;
 import gui.medicalRecepcionist.MenuMedicalRecepcionist;
+import gui.prescription.AddPrescription;
+import gui.schedule.Schedule;
 
-public class Main extends JFrame {
+public class MenuDoctor extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JPanel pnNorth;
+	private JPanel panelNorth;
+	private JLabel lblToDo;
 	private JPanel panelCenter;
-	private JLabel lblDocOrRece;
-	private JButton btnDoctor;
-	private JButton btnMedicalRecepcionist;
+	private JButton btnSch;
+	private JButton btnCreateRecipe;
+	private JPanel panelSouth;
+	private JButton btnCancel;
 
 	/**
 	 * Launch the application.
@@ -39,7 +42,8 @@ public class Main extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Main frame = new Main();
+					MenuDoctor frame = new MenuDoctor();
+
 					frame.setVisible(true);
 					frame.setLocationRelativeTo(null); // centrar pantalla
 
@@ -53,11 +57,10 @@ public class Main extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Main() {
-		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
-		setTitle("Main menu");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public MenuDoctor() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
+		setTitle("Doctor menu");
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -73,49 +76,46 @@ public class Main extends JFrame {
 			e.printStackTrace();
 		}
 		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
-		
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
-		contentPane.add(getPnNorth(), BorderLayout.NORTH);
+		contentPane.add(getPanelNorth(), BorderLayout.NORTH);
 		contentPane.add(getPanelCenter(), BorderLayout.CENTER);
+		contentPane.add(getPanelSouth(), BorderLayout.SOUTH);
 	}
 
-	private JPanel getPnNorth() {
-		if (pnNorth == null) {
-			pnNorth = new JPanel();
-			pnNorth.setLayout(new BorderLayout(0, 0));
-			pnNorth.add(getLblDocOrRece());
+	private JPanel getPanelNorth() {
+		if (panelNorth == null) {
+			panelNorth = new JPanel();
+			panelNorth.setLayout(new BorderLayout(0, 0));
+			panelNorth.add(getLblToDo(), BorderLayout.NORTH);
 		}
-		return pnNorth;
+		return panelNorth;
 	}
-
+	private JLabel getLblToDo() {
+		if (lblToDo == null) {
+			lblToDo = new JLabel("What do you want to do?");
+			lblToDo.setFont(new Font("Tahoma", Font.BOLD, 17));
+			lblToDo.setHorizontalAlignment(SwingConstants.CENTER);
+		}
+		return lblToDo;
+	}
 	private JPanel getPanelCenter() {
 		if (panelCenter == null) {
 			panelCenter = new JPanel();
 			panelCenter.setLayout(new GridLayout(0, 2, 0, 0));
-			panelCenter.add(getBtnDoctor());
-			panelCenter.add(getBtnMedicalRecepcionist());
+			panelCenter.add(getBtnSch());
+			panelCenter.add(getBtnCreateRecipe());
 		}
 		return panelCenter;
 	}
-
-	private JLabel getLblDocOrRece() {
-		if (lblDocOrRece == null) {
-			lblDocOrRece = new JLabel("Are you a doctor or a medical recepcionist?");
-			lblDocOrRece.setHorizontalAlignment(SwingConstants.CENTER);
-			lblDocOrRece.setFont(new Font("Tahoma", Font.BOLD, 17));
-		}
-		return lblDocOrRece;
-	}
-
-	private JButton getBtnDoctor() {
-		if (btnDoctor == null) {
-			btnDoctor = new JButton("Doctor");
-			btnDoctor.addActionListener(new ActionListener() {
+	private JButton getBtnSch() {
+		if (btnSch == null) {
+			btnSch = new JButton("Consult the schedule");
+			btnSch.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					MenuDoctor mr;
+					Schedule mr;
 					try {
-						mr = new MenuDoctor();
+						mr = new Schedule();
 						mr.setVisible(true);
 						mr.setLocationRelativeTo(null);
 
@@ -126,17 +126,16 @@ public class Main extends JFrame {
 				}
 			});
 		}
-		return btnDoctor;
+		return btnSch;
 	}
-
-	private JButton getBtnMedicalRecepcionist() {
-		if (btnMedicalRecepcionist == null) {
-			btnMedicalRecepcionist = new JButton("Medical recepcionist");
-			btnMedicalRecepcionist.addActionListener(new ActionListener() {
+	private JButton getBtnCreateRecipe() {
+		if (btnCreateRecipe == null) {
+			btnCreateRecipe = new JButton("Create prescription");
+			btnCreateRecipe.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					MenuMedicalRecepcionist mr;
+					AddPrescription mr;
 					try {
-						mr = new MenuMedicalRecepcionist();
+						mr = new AddPrescription();
 						mr.setVisible(true);
 						mr.setLocationRelativeTo(null);
 
@@ -147,6 +146,26 @@ public class Main extends JFrame {
 				}
 			});
 		}
-		return btnMedicalRecepcionist;
+		return btnCreateRecipe;
+	}
+	private JPanel getPanelSouth() {
+		if (panelSouth == null) {
+			panelSouth = new JPanel();
+			panelSouth.setLayout(new BorderLayout(0, 0));
+			panelSouth.add(getBtnCancel(), BorderLayout.NORTH);
+		}
+		return panelSouth;
+	}
+	private JButton getBtnCancel() {
+		if (btnCancel == null) {
+			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
+			btnCancel.setBackground(new Color(255, 0, 0));
+		}
+		return btnCancel;
 	}
 }
