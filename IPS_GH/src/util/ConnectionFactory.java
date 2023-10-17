@@ -256,7 +256,7 @@ public class ConnectionFactory {
 	}
 
 	public static void createAppointment(int patientID, int doctorID, String startDate, String endDate, int urgency,
-			int officeId) throws Exception {
+			int officeId, String information) throws Exception {
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
 
@@ -267,8 +267,8 @@ public class ConnectionFactory {
 			Connection connection = ConnectionFactory.getOracleConnection();
 
 			// Consulta SQL con parámetros
-			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId) "
-					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
@@ -284,6 +284,7 @@ public class ConnectionFactory {
 			preparedStatement.setInt(8, 0);
 			preparedStatement.setInt(8, 0);
 			preparedStatement.setInt(9, officeId);
+			preparedStatement.setString(10, information);
 
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
@@ -363,6 +364,14 @@ public class ConnectionFactory {
 		}
 
 		return aux;
+	}
+	
+	public static int officeIdFrom(String code) throws Exception {
+		for (int i = 0; i < getOffices().size(); i++) {
+			if (getOffices().get(i).getOfficeCode().equals(code))
+				return getOffices().get(i).getId();
+		}
+		return -1;
 	}
 
 }

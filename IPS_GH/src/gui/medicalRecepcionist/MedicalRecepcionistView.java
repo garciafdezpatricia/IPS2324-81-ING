@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -43,8 +44,11 @@ import javax.swing.event.ListSelectionListener;
 import com.toedter.calendar.JDateChooser;
 
 import db.Doctor;
+import db.Office;
 import db.Patient;
 import util.ConnectionFactory;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class MedicalRecepcionistView extends JFrame {
 
@@ -131,6 +135,7 @@ public class MedicalRecepcionistView extends JFrame {
 	private JPanel panelSouthPatient;
 	private JButton btnEdit;
 	private JButton btnSave;
+	private String newContactInfo = "";
 
 	/**
 	 * Create the frame.
@@ -138,6 +143,9 @@ public class MedicalRecepcionistView extends JFrame {
 	 * @throws Exception
 	 */
 	public MedicalRecepcionistView() throws Exception {
+				
+		setTitle("Reservation of appointment");
+		setIconImage(Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		doctors = ConnectionFactory.getDoctors();
 		doctorsReset = ConnectionFactory.getDoctors();
 
@@ -317,7 +325,7 @@ public class MedicalRecepcionistView extends JFrame {
 						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
 						+ " on  " + dateChooser.getDate().getDay() + "/" + dateChooser.getDate().getMonth() + "/"
 						+ dateChooser.getDate().getYear() + " at " + getComboBoxFrom().getSelectedItem()
-						+ " in the office xxxx?",
+						+ " in the office " + getComboBoxOffices().getSelectedItem() + "?",
 				"Confirmation", JOptionPane.YES_NO_OPTION);
 
 		// Verificar la respuesta del usuario
@@ -331,20 +339,24 @@ public class MedicalRecepcionistView extends JFrame {
 				}
 			}
 			Patient p = (Patient) list_patients.getSelectedValue();
-//			if (rdbtnUrgent.isSelected()) {
-//				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-//						+ comboBoxFrom.getSelectedItem().toString() + ":00",
-//				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-//						+ comboBoxTo.getSelectedItem().toString() + ":00",
-//						1, aqui hay que poner el id de la office, aqui la informacion de contacto);
-//
-//			} else {
-//				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-//						+ comboBoxFrom.getSelectedItem().toString() + ":00",
-//				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-//						+ comboBoxTo.getSelectedItem().toString() + ":00",
-//						0, aqui hay que poner el id de la office, aqui la informacion de contacto);
-//			}
+			if (rdbtnUrgent.isSelected()) {
+				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+						+ comboBoxFrom.getSelectedItem().toString() + ":00",
+				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+						+ comboBoxTo.getSelectedItem().toString() + ":00",
+						1, 
+						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+						newContactInfo);
+
+			} else {
+				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+						+ comboBoxFrom.getSelectedItem().toString() + ":00",
+				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+						+ comboBoxTo.getSelectedItem().toString() + ":00",
+						0, 
+						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()), 
+						newContactInfo);
+			}
 		} else {
 			// El usuario ha cancelado la acción
 			System.out.println("Acción cancelada.");
@@ -447,10 +459,13 @@ public class MedicalRecepcionistView extends JFrame {
 					Patient p = (Patient) getList_patients().getSelectedValue();
 					if (p != null) {
 						getTxtContactInfo().setText(p.getContactInfo());
+						getBtnEdit().setEnabled(true);
 
 						patientChoosed = true;
 
 						checkFinishBtnEnabled();
+						
+						newContactInfo = p.getContactInfo();
 					} else {
 						getTxtContactInfo().setText("");
 
@@ -469,13 +484,12 @@ public class MedicalRecepcionistView extends JFrame {
 			listDoctor.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					if (!listDoctor.getSelectedValuesList().isEmpty()) {
-						dateChooser.setEnabled(true);
+						doctorChoosed = true;
 
-//						doctorChoosed = true;
-//
-//						checkFinishBtnEnabled();
-					} else
+						dateChooser.setEnabled(true);
+					} else {
 						doctorChoosed = false;
+					}
 				}
 			});
 		}
@@ -790,14 +804,11 @@ public class MedicalRecepcionistView extends JFrame {
 
 			comboBoxFrom.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-
 					fromDateChoosed = true;
 
 					comboBoxTo.setEnabled(true);
 
 					comboBoxTo.setSelectedIndex(comboBoxFrom.getSelectedIndex() + 1);
-
-					checkFinishBtnEnabled();
 				}
 			});
 			comboBoxFrom.setEnabled(false);
@@ -829,13 +840,11 @@ public class MedicalRecepcionistView extends JFrame {
 				@Override
 				public void focusLost(FocusEvent e) {
 					if (comboBoxTo.getSelectedIndex() < comboBoxFrom.getSelectedIndex()) {
-						toDateChoosed = true;
 						JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
 								"The end hour of the appointment must be later than the start one.", "Warning",
 								JOptionPane.INFORMATION_MESSAGE);
 						btnFinish.setEnabled(false);
 						comboBoxTo.setSelectedIndex(comboBoxFrom.getSelectedIndex() + 1);
-
 					}
 
 				}
@@ -891,7 +900,6 @@ public class MedicalRecepcionistView extends JFrame {
 			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					comboBoxFrom.setEnabled(true);
-
 				}
 			});
 			dateChooser.getCalendarButton().setEnabled(false);
@@ -943,6 +951,9 @@ public class MedicalRecepcionistView extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					String newCInfo = getTxtContactInfo().getText();
 					Patient p = (Patient) getList_patients().getSelectedValue();
+					
+					newContactInfo = newCInfo;
+					
 					p.setContactInfo(newCInfo);
 					btnSave.setEnabled(false);
 				}
@@ -992,7 +1003,7 @@ public class MedicalRecepcionistView extends JFrame {
 	}
 
 	private void checkFinishBtnEnabled() {
-		if (doctorChoosed && patientChoosed && officeChoosed && fromDateChoosed && toDateChoosed)
+		if (doctorChoosed && patientChoosed && officeChoosed && fromDateChoosed)
 			getBtnFinish().setEnabled(true);
 
 	}

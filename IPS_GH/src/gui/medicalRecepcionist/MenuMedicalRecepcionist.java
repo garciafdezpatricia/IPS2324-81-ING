@@ -15,6 +15,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import gui.workPeriod.WorkPeriodView;
+
+import java.awt.Toolkit;
+
 public class MenuMedicalRecepcionist extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -48,6 +52,8 @@ public class MenuMedicalRecepcionist extends JFrame {
 	 * Create the frame.
 	 */
 	public MenuMedicalRecepcionist() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
+		setTitle("Menu");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -88,6 +94,7 @@ public class MenuMedicalRecepcionist extends JFrame {
 						try {
 							mr = new MedicalRecepcionistView();
 							mr.setVisible(true);
+							mr.setLocationRelativeTo(null);
 
 						} catch (Exception e1) {
 							// TODO Auto-generated catch block
@@ -126,6 +133,21 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JButton getBtnAssignWorkPeriod() {
 		if (btnAssignWorkPeriod == null) {
 			btnAssignWorkPeriod = new JButton("Assign Workperiod");
+			
+			btnAssignWorkPeriod.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					WorkPeriodView wp;
+						try {
+							wp = new WorkPeriodView();
+							wp.setVisible(true);
+							wp.setLocationRelativeTo(null);
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+
+				}
+			});
 		}
 		return btnAssignWorkPeriod;
 	}
