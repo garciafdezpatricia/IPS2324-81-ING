@@ -5,11 +5,12 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -20,8 +21,10 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -29,10 +32,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import com.toedter.calendar.JDateChooser;
 
 import db.Doctor;
 import db.Patient;
@@ -58,13 +67,22 @@ public class MedicalRecepcionistView extends JFrame {
 	private JScrollPane scrollPane_patients;
 	private JList list_patients;
 	private JScrollPane scrollPaneDoctor;
-	private JList listDoctor;
 	private JLabel lblSSNumber;
 	private JTextField textFieldSSNumber;
 	private DefaultListModel<Doctor> doctors = new DefaultListModel<>();
 	private DefaultListModel<Doctor> doctorsReset = new DefaultListModel<>();
 	private DefaultListModel<Patient> patients = new DefaultListModel<>();
 	private DefaultListModel<Patient> patientsReset = new DefaultListModel<>();
+
+	private JPanel panel_office_north;
+	private JLabel lblChooseOffice;
+	private JComboBox<String> comboBoxOffices;
+
+	private boolean doctorChoosed = false;
+	private boolean patientChoosed = false;
+	private boolean officeChoosed = false;
+	private boolean fromDateChoosed = false;
+	private boolean toDateChoosed = false;
 
 	/**
 	 * Launch the application.
@@ -92,35 +110,45 @@ public class MedicalRecepcionistView extends JFrame {
 	private JTextField textNameDoctor;
 	private JLabel lblRegistrationNumber;
 	private JTextField textRegNumber;
-	private JPanel panelDate;
-	private JLabel lblDay;
-	private JTextField textFieldDay;
-	private JLabel lblFrom;
-	private JTextField textFieldFrom;
-	private JLabel lblTo;
-	private JTextField textFieldTo;
 	private JButton btnFilterName;
 	private JButton btnRegNumber;
-	private JPanel panelSurDoctor;
-	private JRadioButton rdbtnUrgent;
-	private JButton btnReset;
 	private JButton btnFilterPatientName;
 	private JButton btnFilterSS;
 	private JPanel panelPatientsReset;
 	private JButton btnResetPatients;
+	private JTextField textField;
+	private JList<Doctor> listDoctor;
+	private JPanel panelSur;
+	private JPanel panelDate;
+	private JLabel lblFrom;
+	private JComboBox comboBoxFrom;
+	private JLabel lblTo;
+	private JComboBox comboBoxTo;
+	private JPanel panelSurDoctor;
+	private JRadioButton rdbtnUrgent;
+	private JButton btnReset;
+	private JDateChooser dateChooser;
+	private JTextArea txtContactInfo;
+	private JPanel panelSouthPatient;
+	private JButton btnEdit;
+	private JButton btnSave;
+	private String newContactInfo = "";
 
 	/**
 	 * Create the frame.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	public MedicalRecepcionistView() throws Exception {
+				
+		setTitle("Reservation of appointment");
+		setIconImage(Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		doctors = ConnectionFactory.getDoctors();
 		doctorsReset = ConnectionFactory.getDoctors();
 
-		patients = ConnectionFactory.getPatients();		
+		patients = ConnectionFactory.getPatients();
 		patientsReset = ConnectionFactory.getPatients();
 
-		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 906, 553);
 		contentPane = new JPanel();
@@ -174,8 +202,7 @@ public class MedicalRecepcionistView extends JFrame {
 					.setBorder(new TitledBorder(null, "Doctor ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panel_doctor.setLayout(new BorderLayout(0, 0));
 			panel_doctor.add(getPanel_5(), BorderLayout.NORTH);
-			panel_doctor.add(getScrollPaneDoctor(), BorderLayout.CENTER);
-			panel_doctor.add(getPanelSurDoctor(), BorderLayout.SOUTH);
+			panel_doctor.add(getPanelSur(), BorderLayout.SOUTH);
 		}
 		return panel_doctor;
 	}
@@ -196,6 +223,10 @@ public class MedicalRecepcionistView extends JFrame {
 	private JPanel getPanel_office() {
 		if (panel_office == null) {
 			panel_office = new JPanel();
+			panel_office.setLayout(new BorderLayout(0, 0));
+			panel_office
+					.setBorder(new TitledBorder(null, "Office ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			panel_office.add(getPanel_office_north(), BorderLayout.NORTH);
 		}
 		return panel_office;
 	}
@@ -206,6 +237,8 @@ public class MedicalRecepcionistView extends JFrame {
 			panel_information.setBorder(
 					new TitledBorder(null, "Information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panel_information.setLayout(new BorderLayout(0, 0));
+			panel_information.add(getTxtContactInfo(), BorderLayout.CENTER);
+			panel_information.add(getPanelSouthPatient(), BorderLayout.SOUTH);
 		}
 		return panel_information;
 	}
@@ -223,38 +256,109 @@ public class MedicalRecepcionistView extends JFrame {
 	private JButton getBtnFinish() {
 		if (btnFinish == null) {
 			btnFinish = new JButton("Finish");
+			btnFinish.setEnabled(false);
+
 			btnFinish.addActionListener(new ActionListener() {
 
 				// TODO: si hay mas citas resrrvadas a esa hora para ese doctor poner un aviso
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					int opcion = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
-							"Are you sure you want to reserve the appointment between the doctor(s) "
-									+ listDoctor.getSelectedValuesList() + " and the patient "
-									+ list_patients.getSelectedValue() + " on "
-											+ getTextFieldDay().getText() + " "
-													+ "at " + getTextFieldFrom().getText() + "in the office xxxx?",
-							"Confirmation", JOptionPane.YES_NO_OPTION);
+					// si el doctor no trabaja a esa hora ese día
 
-					// Verificar la respuesta del usuario
-					if (opcion == JOptionPane.YES_OPTION) {
-						// El usuario ha confirmado, realiza la acción
-						// Puedes poner aquí el código que quieras ejecutar después de la confirmación
-						System.out.println("Acción realizada.");
-						if (rdbtnUrgent.isSelected()) {
-							for (int i = 0; i < listDoctor.getSelectedValuesList().size(); i++) {
-								sendEmail(((Doctor) listDoctor.getSelectedValuesList().get(i)).getEmail());
+					for (int i = 0; i < listDoctor.getSelectedValuesList().size(); i++) {
+						try {
+							if (!ConnectionFactory.isWorking(new java.sql.Date(getDateChooser_1().getDate().getTime()),
+									comboBoxFrom.getSelectedItem().toString(), comboBoxTo.getSelectedItem().toString(),
+									listDoctor.getSelectedValuesList().get(i).getId())) {
+								JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+										"The doctor is not working.", "Warning", JOptionPane.INFORMATION_MESSAGE);
+								System.out.println("no está trabajando");
+							} else {
+								System.out.println("está trabajando");
+								// el doctor tiene otra cita a esa hora
+								try {
+									if (ConnectionFactory.hasAnAppointment(listDoctor.getSelectedValuesList().get(i),
+											new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+													+ comboBoxFrom.getSelectedItem().toString() + ":00",
+											new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+													+ comboBoxTo.getSelectedItem().toString() + ":00")) {
+										int opcion2 = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
+												"The doctor has another appointment at that time, do you want to reserve this appointment either?",
+												"Confirmation", JOptionPane.YES_NO_OPTION);
+
+										// Verificar la respuesta del usuario
+										if (opcion2 == JOptionPane.YES_OPTION) {
+											// El usuario ha confirmado, realiza la acción
+											// Puedes poner aquí el código que quieras ejecutar después de la
+											// confirmación
+											areYouSureJOP();
+										} else {
+											// El usuario ha cancelado la acción
+											System.out.println("Appointment cancelled.");
+										}
+									} else {
+										areYouSureJOP();
+									}
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}
 							}
+						} catch (Exception e1) {
+							e1.printStackTrace();
 						}
-					} else {
-						// El usuario ha cancelado la acción
-						System.out.println("Acción cancelada.");
+
 					}
 
 				}
+
 			});
 		}
 		return btnFinish;
+	}
+
+	private void areYouSureJOP() throws Exception {
+		int opcion = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
+				"Are you sure you want to reserve the appointment between the doctor(s) "
+						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
+						+ " on  " + dateChooser.getDate().getDay() + "/" + dateChooser.getDate().getMonth() + "/"
+						+ dateChooser.getDate().getYear() + " at " + getComboBoxFrom().getSelectedItem()
+						+ " in the office " + getComboBoxOffices().getSelectedItem() + "?",
+				"Confirmation", JOptionPane.YES_NO_OPTION);
+
+		// Verificar la respuesta del usuario
+		if (opcion == JOptionPane.YES_OPTION) {
+			// El usuario ha confirmado, realiza la acción
+			// Puedes poner aquí el código que quieras ejecutar después de la confirmación
+			System.out.println("Acción realizada.");
+			if (rdbtnUrgent.isSelected()) {
+				for (int j = 0; j < listDoctor.getSelectedValuesList().size(); j++) {
+					sendEmail(((Doctor) listDoctor.getSelectedValuesList().get(j)).getEmail());
+				}
+			}
+			Patient p = (Patient) list_patients.getSelectedValue();
+			if (rdbtnUrgent.isSelected()) {
+				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+						+ comboBoxFrom.getSelectedItem().toString() + ":00",
+				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+						+ comboBoxTo.getSelectedItem().toString() + ":00",
+						1, 
+						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+						newContactInfo);
+
+			} else {
+				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+						+ comboBoxFrom.getSelectedItem().toString() + ":00",
+				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+						+ comboBoxTo.getSelectedItem().toString() + ":00",
+						0, 
+						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()), 
+						newContactInfo);
+			}
+		} else {
+			// El usuario ha cancelado la acción
+			System.out.println("Acción cancelada.");
+		}
+
 	}
 
 	// TODO: poner más datos
@@ -297,7 +401,7 @@ public class MedicalRecepcionistView extends JFrame {
 			panel_doctor_filter = new JPanel();
 			panel_doctor_filter.setLayout(new BorderLayout(0, 0));
 			panel_doctor_filter.add(getPanelNameAndNumber());
-			panel_doctor_filter.add(getPanelDate(), BorderLayout.NORTH);
+			panel_doctor.add(getScrollPaneDoctor(), BorderLayout.SOUTH);
 		}
 		return panel_doctor_filter;
 	}
@@ -347,8 +451,46 @@ public class MedicalRecepcionistView extends JFrame {
 		if (list_patients == null) {
 			list_patients = new JList<>(patients); // Asegúrate de especificar el tipo de elemento en la JList
 			list_patients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			list_patients.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					Patient p = (Patient) getList_patients().getSelectedValue();
+					if (p != null) {
+						getTxtContactInfo().setText(p.getContactInfo());
+						getBtnEdit().setEnabled(true);
+
+						patientChoosed = true;
+
+						checkFinishBtnEnabled();
+						
+						newContactInfo = p.getContactInfo();
+					} else {
+						getTxtContactInfo().setText("");
+
+						patientChoosed = false;
+					}
+				}
+
+			});
 		}
 		return list_patients;
+	}
+
+	private JList getListDoctor() {
+		if (listDoctor == null) {
+			listDoctor = new JList<>(doctors);
+			listDoctor.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					if (!listDoctor.getSelectedValuesList().isEmpty()) {
+						doctorChoosed = true;
+
+						dateChooser.setEnabled(true);
+					} else {
+						doctorChoosed = false;
+					}
+				}
+			});
+		}
+		return listDoctor;
 	}
 
 	private JScrollPane getScrollPaneDoctor() {
@@ -357,13 +499,6 @@ public class MedicalRecepcionistView extends JFrame {
 			scrollPaneDoctor.setViewportView(getListDoctor());
 		}
 		return scrollPaneDoctor;
-	}
-
-	private JList getListDoctor() {
-		if (listDoctor == null) {
-			listDoctor = new JList<>(doctors);
-		}
-		return listDoctor;
 	}
 
 	private JLabel getLblSSNumber() {
@@ -429,73 +564,6 @@ public class MedicalRecepcionistView extends JFrame {
 
 		}
 		return textRegNumber;
-	}
-
-	private JPanel getPanelDate() {
-		if (panelDate == null) {
-			panelDate = new JPanel();
-			panelDate.setBorder(
-					new TitledBorder(null, "Day and hour", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-			panelDate.setLayout(new GridLayout(0, 6, 0, 0));
-			panelDate.add(getLblDay());
-			panelDate.add(getTextFieldDay());
-			panelDate.add(getLblFrom());
-			panelDate.add(getTextFieldFrom());
-			panelDate.add(getLblTo());
-			panelDate.add(getTextFieldTo());
-		}
-		return panelDate;
-	}
-
-	private JLabel getLblDay() {
-		if (lblDay == null) {
-			lblDay = new JLabel("Day:");
-			lblDay.setFont(new Font("Tahoma", Font.BOLD, 10));
-		}
-		return lblDay;
-	}
-
-	private JTextField getTextFieldDay() {
-		if (textFieldDay == null) {
-			textFieldDay = new JTextField();
-			textFieldDay.setText("mm/dd/yy");
-			textFieldDay.setColumns(10);
-		}
-		return textFieldDay;
-	}
-
-	private JLabel getLblFrom() {
-		if (lblFrom == null) {
-			lblFrom = new JLabel("From:");
-			lblFrom.setFont(new Font("Tahoma", Font.BOLD, 10));
-		}
-		return lblFrom;
-	}
-
-	private JTextField getTextFieldFrom() {
-		if (textFieldFrom == null) {
-			textFieldFrom = new JTextField();
-			textFieldFrom.setText("hh:mm");
-			textFieldFrom.setColumns(10);
-		}
-		return textFieldFrom;
-	}
-
-	private JLabel getLblTo() {
-		if (lblTo == null) {
-			lblTo = new JLabel("To:");
-			lblTo.setFont(new Font("Tahoma", Font.BOLD, 10));
-		}
-		return lblTo;
-	}
-
-	private JTextField getTextFieldTo() {
-		if (textFieldTo == null) {
-			textFieldTo = new JTextField();
-			textFieldTo.setText("hh:mm");
-			textFieldTo.setColumns(10);
-		}
-		return textFieldTo;
 	}
 
 	private JButton getBtnFilterName() {
@@ -564,40 +632,6 @@ public class MedicalRecepcionistView extends JFrame {
 		return btnRegNumber;
 	}
 
-	private JPanel getPanelSurDoctor() {
-		if (panelSurDoctor == null) {
-			panelSurDoctor = new JPanel();
-			panelSurDoctor.setLayout(new GridLayout(0, 2, 0, 0));
-			panelSurDoctor.add(getRdbtnUrgent());
-			panelSurDoctor.add(getBtnReset());
-		}
-		return panelSurDoctor;
-	}
-
-	private JRadioButton getRdbtnUrgent() {
-		if (rdbtnUrgent == null) {
-			rdbtnUrgent = new JRadioButton("Urgent");
-		}
-		return rdbtnUrgent;
-	}
-
-	private JButton getBtnReset() {
-		if (btnReset == null) {
-			btnReset = new JButton("Reset Filters");
-			btnReset.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					doctors.removeAllElements();
-					for (int i = 0; i < doctorsReset.size(); i++) {
-						doctors.addElement(doctorsReset.get(i));
-					}
-					textNameDoctor.setText("");
-					textRegNumber.setText("");
-				}
-			});
-		}
-		return btnReset;
-	}
-
 	private JButton getBtnFilterPatientName() {
 		if (btnFilterPatientName == null) {
 			btnFilterPatientName = new JButton("Filter");
@@ -638,11 +672,9 @@ public class MedicalRecepcionistView extends JFrame {
 			DefaultListModel<Patient> filteredBySSNumber = new DefaultListModel<>();
 			btnFilterSS.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if (!getTextFieldSSNumber().getText().isBlank()
-							&& !getTextFieldSSNumber().getText().isEmpty()) {
+					if (!getTextFieldSSNumber().getText().isBlank() && !getTextFieldSSNumber().getText().isEmpty()) {
 						for (int i = 0; i < patients.getSize(); i++) {
-							if (Integer.valueOf(getTextFieldSSNumber().getText())==
-									patients.get(i).getSsnumber()) {
+							if (Integer.valueOf(getTextFieldSSNumber().getText()) == patients.get(i).getSsnumber()) {
 								filteredBySSNumber.addElement(patients.get(i));
 							}
 						}
@@ -686,9 +718,290 @@ public class MedicalRecepcionistView extends JFrame {
 					}
 					textFieldNamePatient.setText("");
 					textFieldSSNumber.setText("");
+					btnFinish.setEnabled(false);
+
 				}
 			});
 		}
 		return btnResetPatients;
+	}
+
+	private JTextField getTextField() {
+		if (textField == null) {
+			textField = new JTextField();
+			textField.setColumns(10);
+		}
+		return textField;
+	}
+
+	private JList<Doctor> getListDoctor_1() {
+		if (listDoctor == null) {
+			listDoctor = new JList<Doctor>((ListModel) null);
+		}
+		return listDoctor;
+	}
+
+	private JPanel getPanelSur() {
+		if (panelSur == null) {
+			panelSur = new JPanel();
+			panelSur.setLayout(new GridLayout(0, 2, 0, 0));
+			panelSur.add(getPanelDate_1());
+			panelSur.add(getPanelSurDoctor_1());
+		}
+		return panelSur;
+	}
+
+	private JPanel getPanelDate_1() {
+		if (panelDate == null) {
+			panelDate = new JPanel();
+			panelDate.setBorder(
+					new TitledBorder(null, "Day and hour", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			panelDate.setLayout(new GridLayout(0, 5, 0, 0));
+			panelDate.add(getLblFrom_1());
+			panelDate.add(getComboBoxFrom());
+			panelDate.add(getLblTo_1());
+			panelDate.add(getComboBoxTo());
+			panelDate.add(getDateChooser_1());
+		}
+		return panelDate;
+	}
+
+	private JLabel getLblFrom_1() {
+		if (lblFrom == null) {
+			lblFrom = new JLabel("From:");
+			lblFrom.setFont(new Font("Tahoma", Font.BOLD, 10));
+		}
+		return lblFrom;
+	}
+
+	private JComboBox getComboBoxFrom() {
+		if (comboBoxFrom == null) {
+			String[] horas = new String[24 * 4];
+			int index = 0;
+			for (int hora = 0; hora < 24; hora++) {
+				for (int minuto = 0; minuto < 60; minuto += 15) {
+					String horaStr = String.format("%02d:%02d", hora, minuto);
+					horas[index++] = horaStr;
+				}
+			}
+			comboBoxFrom = new JComboBox(horas);
+			comboBoxFrom.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (comboBoxTo.getSelectedIndex() < comboBoxFrom.getSelectedIndex()) {
+						JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+								"The end hour of the appointment must be later than the start one.", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
+						btnFinish.setEnabled(false);
+
+					}
+				}
+			});
+			comboBoxFrom.setSelectedIndex(36);
+
+			comboBoxFrom.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					fromDateChoosed = true;
+
+					comboBoxTo.setEnabled(true);
+
+					comboBoxTo.setSelectedIndex(comboBoxFrom.getSelectedIndex() + 1);
+				}
+			});
+			comboBoxFrom.setEnabled(false);
+		}
+		return comboBoxFrom;
+	}
+
+	private JLabel getLblTo_1() {
+		if (lblTo == null) {
+			lblTo = new JLabel("To:");
+			lblTo.setFont(new Font("Tahoma", Font.BOLD, 10));
+		}
+		return lblTo;
+	}
+
+	private JComboBox getComboBoxTo() {
+		if (comboBoxTo == null) {
+			String[] horas = new String[24 * 4];
+			int index = 0;
+			for (int hora = 0; hora < 24; hora++) {
+				for (int minuto = 0; minuto < 60; minuto += 15) {
+					String horaStr = String.format("%02d:%02d", hora, minuto);
+					horas[index++] = horaStr;
+				}
+			}
+
+			comboBoxTo = new JComboBox(horas);
+			comboBoxTo.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (comboBoxTo.getSelectedIndex() < comboBoxFrom.getSelectedIndex()) {
+						JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+								"The end hour of the appointment must be later than the start one.", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
+						btnFinish.setEnabled(false);
+						comboBoxTo.setSelectedIndex(comboBoxFrom.getSelectedIndex() + 1);
+					}
+
+				}
+			});
+			comboBoxTo.setEnabled(false);
+		}
+		return comboBoxTo;
+	}
+
+	private JPanel getPanelSurDoctor_1() {
+		if (panelSurDoctor == null) {
+			panelSurDoctor = new JPanel();
+			panelSurDoctor.setLayout(new GridLayout(0, 2, 0, 0));
+			panelSurDoctor.add(getRdbtnUrgent_1());
+			panelSurDoctor.add(getBtnResetDoctor());
+		}
+		return panelSurDoctor;
+	}
+
+	private JRadioButton getRdbtnUrgent_1() {
+		if (rdbtnUrgent == null) {
+			rdbtnUrgent = new JRadioButton("Urgent");
+		}
+		return rdbtnUrgent;
+	}
+
+	private JButton getBtnResetDoctor() {
+		if (btnReset == null) {
+			btnReset = new JButton("Reset Filters");
+			btnReset.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					doctors.removeAllElements();
+					for (int i = 0; i < doctorsReset.size(); i++) {
+						doctors.addElement(doctorsReset.get(i));
+					}
+					textNameDoctor.setText("");
+					textRegNumber.setText("");
+					dateChooser.setEnabled(false);
+					comboBoxFrom.setEnabled(false);
+					comboBoxTo.setEnabled(false);
+					btnFinish.setEnabled(false);
+
+				}
+			});
+
+		}
+		return btnReset;
+	}
+
+	private JDateChooser getDateChooser_1() {
+		if (dateChooser == null) {
+			dateChooser = new JDateChooser();
+			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					comboBoxFrom.setEnabled(true);
+				}
+			});
+			dateChooser.getCalendarButton().setEnabled(false);
+			dateChooser.setMinSelectableDate(new Date());
+
+		}
+		return dateChooser;
+	}
+
+	private JTextArea getTxtContactInfo() {
+		if (txtContactInfo == null) {
+			txtContactInfo = new JTextArea();
+			txtContactInfo.setEditable(false);
+		}
+		return txtContactInfo;
+	}
+
+	private JPanel getPanelSouthPatient() {
+		if (panelSouthPatient == null) {
+			panelSouthPatient = new JPanel();
+			panelSouthPatient.setLayout(new GridLayout(0, 2, 0, 0));
+			panelSouthPatient.add(getBtnEdit());
+			panelSouthPatient.add(getBtnSave());
+		}
+		return panelSouthPatient;
+	}
+
+	private JButton getBtnEdit() {
+		if (btnEdit == null) {
+			btnEdit = new JButton("Edit");
+			btnEdit.setEnabled(false);
+			btnEdit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					btnEdit.setEnabled(false); // by default, the edit button is disabled until a patient is selected
+					getBtnSave().setEnabled(true); // when the edit button is pressed, is assumed that the contact info
+													// of the patient is modified so the save button is enabled
+					getTxtContactInfo().setEditable(true);
+				}
+			});
+
+		}
+		return btnEdit;
+	}
+
+	private JButton getBtnSave() {
+		if (btnSave == null) {
+			btnSave = new JButton("Save");
+			btnSave.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String newCInfo = getTxtContactInfo().getText();
+					Patient p = (Patient) getList_patients().getSelectedValue();
+					
+					newContactInfo = newCInfo;
+					
+					p.setContactInfo(newCInfo);
+					btnSave.setEnabled(false);
+				}
+
+			});
+			btnSave.setEnabled(false);
+
+		}
+		return btnSave;
+	}
+
+	private JPanel getPanel_office_north() {
+		if (panel_office_north == null) {
+			panel_office_north = new JPanel();
+			panel_office_north.setLayout(new GridLayout(1, 0, 0, 0));
+			panel_office_north.add(getLblChooseOffice());
+			panel_office_north.add(getComboBoxOffices());
+		}
+		return panel_office_north;
+	}
+
+	private JLabel getLblChooseOffice() {
+		if (lblChooseOffice == null) {
+			lblChooseOffice = new JLabel("Choose an office to book:");
+		}
+		return lblChooseOffice;
+	}
+
+	private JComboBox<String> getComboBoxOffices() {
+		if (comboBoxOffices == null) {
+			comboBoxOffices = new JComboBox<String>();
+			comboBoxOffices.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					officeChoosed = true;
+
+					checkFinishBtnEnabled();
+				}
+			});
+			try {
+				comboBoxOffices.setModel(new DefaultComboBoxModel<>(ConnectionFactory.getOfficesCodes()));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return comboBoxOffices;
+	}
+
+	private void checkFinishBtnEnabled() {
+		if (doctorChoosed && patientChoosed && officeChoosed && fromDateChoosed)
+			getBtnFinish().setEnabled(true);
+
 	}
 }
