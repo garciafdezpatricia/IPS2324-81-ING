@@ -4,11 +4,11 @@ public class Appointment {
 	private int id;
 	private int patientid;
 	private int doctorid, officeId;;
-	private String startdate, enddate, information;
-	private int urgency, attended, checkedin, checkedout;
+	private String startdate, enddate, information, checkedin, checkedout;
+	private int urgency, attended;
 
 	public Appointment(int id, int patientid, int doctorid, String startdate, String enddate, int urgency, int attended,
-			int checkedin, int checkedout, int officeId, String information) {
+			String checkedin, String checkedout, int officeId, String information) {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -79,19 +79,19 @@ public class Appointment {
 		this.attended = attended;
 	}
 
-	public int getCheckedin() {
+	public String getCheckedin() {
 		return checkedin;
 	}
 
-	public void setCheckedin(int checkedin) {
+	public void setCheckedin(String checkedin) {
 		this.checkedin = checkedin;
 	}
 
-	public int getCheckedout() {
+	public String getCheckedout() {
 		return checkedout;
 	}
 
-	public void setCheckedout(int checkedout) {
+	public void setCheckedout(String checkedout) {
 		this.checkedout = checkedout;
 	}
 

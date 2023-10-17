@@ -221,8 +221,8 @@ public class ConnectionFactory {
 				String endate = resultSet.getString("enddate");
 				int urgency = resultSet.getInt("urgency");
 				int attended = resultSet.getInt("attended");
-				int checkedin = resultSet.getInt("checkedin");
-				int checkedout = resultSet.getInt("checkedout");
+				String checkedin = resultSet.getString("checkedin");
+				String checkedout = resultSet.getString("checkedout");
 				int officeid = resultSet.getInt("officeid");
 				String information = resultSet.getString("information");
 
@@ -280,8 +280,8 @@ public class ConnectionFactory {
 			preparedStatement.setString(4, endDate);
 			preparedStatement.setInt(5, urgency);
 			preparedStatement.setInt(6, 0);
-			preparedStatement.setInt(7, 0);
-			preparedStatement.setInt(8, 0);
+			preparedStatement.setString(7, "");
+			preparedStatement.setString(8, "");
 			preparedStatement.setInt(8, 0);
 			preparedStatement.setInt(9, officeId);
 			preparedStatement.setString(10, information);
