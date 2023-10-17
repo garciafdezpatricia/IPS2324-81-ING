@@ -1,5 +1,14 @@
 package gui.doctor;
 
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import creator.CausesCreator;
+import util.AppointmentBLDto;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -21,6 +30,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
@@ -47,7 +58,6 @@ public class DoctorAppointmentView extends JFrame {
 	private JRadioButton rdbtnYes;
 	private JRadioButton rdbtnNo;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
-	private JLabel lblValueButtonGroup;
 	private JList causesList;
 	private JScrollPane scrollPane;
 	private JLabel lblListCauses;
@@ -66,27 +76,37 @@ public class DoctorAppointmentView extends JFrame {
 
 	private DefaultListModel<String> finalCauses = new DefaultListModel<String>();
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					DoctorAppointmentView frame = new DoctorAppointmentView();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	
+	private AppointmentBLDto appointment;
+//	/**
+//	 * Launch the application.
+//	 */
+//	public static void main(String[] args) {
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					DoctorAppointmentView frame = new DoctorAppointmentView();
+//					frame.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Create the frame.
 	 */
-	public DoctorAppointmentView() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public DoctorAppointmentView(AppointmentBLDto appointment) {
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				//TODO: make confirmation message
+				setVisible(false);
+			}
+		});
+		this.appointment = appointment;
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 695, 571);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -114,7 +134,7 @@ public class DoctorAppointmentView extends JFrame {
 		if (lblAppointmentPatient == null) {
 			lblAppointmentPatient = new JLabel("New label");
 			lblAppointmentPatient.setFont(new Font("Tahoma", Font.PLAIN, 16));
-			lblAppointmentPatient.setText("MARGARITA RAMOS ARIAS");
+			lblAppointmentPatient.setText(appointment.patientName.toUpperCase() + " " + appointment.patientSurname.toUpperCase());
 		}
 		return lblAppointmentPatient;
 	}
@@ -123,7 +143,7 @@ public class DoctorAppointmentView extends JFrame {
 		if (lblAppointmentDate == null) {
 			lblAppointmentDate = new JLabel("New label");
 			lblAppointmentDate.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			lblAppointmentDate.setText("12/10/2024 10.15");
+			lblAppointmentDate.setText(appointment.startDate);
 		}
 		return lblAppointmentDate;
 	}
@@ -141,7 +161,6 @@ public class DoctorAppointmentView extends JFrame {
 			appointmentOptionsPanel.add(getLblAttendance());
 			appointmentOptionsPanel.add(getRdbtnYes());
 			appointmentOptionsPanel.add(getRdbtnNo());
-			appointmentOptionsPanel.add(getLblValueButtonGroup());
 			appointmentOptionsPanel.add(getScrollPane());
 			appointmentOptionsPanel.add(getLblListCauses());
 			appointmentOptionsPanel.add(getBtnAddCause());
@@ -244,6 +263,8 @@ public class DoctorAppointmentView extends JFrame {
 	private JButton getBtnSave() {
 		if (btnSave == null) {
 			btnSave = new JButton("Save");
+			appointment.attended = rdbtnYes.isSelected();
+			//TODO: checkin y checkout + causes
 		}
 		return btnSave;
 	}
@@ -265,8 +286,6 @@ public class DoctorAppointmentView extends JFrame {
 					getTxtCheckOutTime().setEnabled(true);
 					getBtnCheckOutTime().setEnabled(true);
 					getBtnCheckInTime().setEnabled(true);
-					String value = rdbtnYes.isSelected() ? "Yes" : "No";
-					getLblValueButtonGroup().setText(value);
 				}
 			});
 			rdbtnYes.setSelected(true);
@@ -286,8 +305,6 @@ public class DoctorAppointmentView extends JFrame {
 					getTxtCheckOutTime().setEnabled(false);
 					getBtnCheckOutTime().setEnabled(false);
 					getBtnCheckInTime().setEnabled(false);
-					String value = rdbtnNo.isSelected() ? "No" : "Yes";
-					getLblValueButtonGroup().setText(value);
 				}
 			});
 
@@ -295,14 +312,6 @@ public class DoctorAppointmentView extends JFrame {
 			rdbtnNo.setBounds(372, 18, 59, 23);
 		}
 		return rdbtnNo;
-	}
-
-	private JLabel getLblValueButtonGroup() {
-		if (lblValueButtonGroup == null) {
-			lblValueButtonGroup = new JLabel("");
-			lblValueButtonGroup.setBounds(479, 21, 77, 14);
-		}
-		return lblValueButtonGroup;
 	}
 
 	private JList getCausesList() {

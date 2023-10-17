@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -109,6 +111,36 @@ public class ConnectionFactory {
 		return patients;
 	}
 
+	public static void updateAppointment(AppointmentBLDto appointment) {
+		Connection con = null;
+		PreparedStatement ps= null;
+		ResultSet rs = null;
+		try {
+			// TODO: falta por añadir las causas
+			con = getOracleConnection();
+			ps = con.prepareStatement("UPDATE APPOINTMENT SET "
+					+ " appointment.attended = ? appointment.checkedin = ? appointment.checkedout = ? "
+					+ "WHERE appointment.id = ?");
+			ps.setInt(1, appointment.attended ? 1 : 0);
+			ps.setString(2, appointment.checkIn);
+			ps.setString(3, appointment.checkOut); 
+			ps.setInt(4, appointment.id);
+			rs = ps.executeQuery();
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}finally {
+			try {
+				if(con!=null) con.close();
+				if(ps!=null) ps.close();
+				if(rs!=null) rs.close();
+					} catch (SQLException e) {
+						throw new RuntimeException();
+					}
+			}
+	}
+
 	public static List<AppointmentBLDto> getAppointmentsByDoctorId(int doctorId) {
 		Connection con = null;
 		PreparedStatement ps= null;
@@ -131,8 +163,8 @@ public class ConnectionFactory {
 	
 				apmnt.urgency = rs.getInt(6)==0?false:true;
 				apmnt.attended = rs.getInt(7)==0?false:true;
-				apmnt.checkIn = rs.getInt(8)==0?false:true;
-				apmnt.checkOut = rs.getInt(9)==0?false:true;
+				apmnt.checkIn = rs.getString(8);
+				apmnt.checkOut = rs.getString(9);
 				apmnt.officeid = rs.getInt(10);
 				apmnt.information = rs.getString(11);
 				apmnt.officeCode = rs.getString(13);

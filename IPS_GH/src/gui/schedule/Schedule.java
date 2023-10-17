@@ -2,8 +2,35 @@ package gui.schedule;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+
+import javax.swing.JButton;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import com.toedter.calendar.JCalendar;
+
+import gui.doctor.DoctorAppointmentView;
+import oracle.sql.DATE;
+import util.AppointmentBLDto;
+import util.ConnectionFactory;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.border.EmptyBorder;
+import javax.swing.ListSelectionModel;
+import javax.swing.AbstractListModel;
+import javax.swing.border.LineBorder;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
@@ -38,6 +65,12 @@ public class Schedule extends JFrame {
 	private JButton btnBack;
 	private JButton btnFilter;
 	private JPanel pnAppointments;
+	
+	
+	// ***** REFERENCES TO WINDOWS ******
+	DoctorAppointmentView doctorView;
+	
+	
 
 	/**
 	 * Launch the application.
@@ -84,6 +117,13 @@ public class Schedule extends JFrame {
 	
 	private JButton newButton(AppointmentBLDto p) {
 		JButton button = new JButton(p.toString());
+		button.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					doctorView = new DoctorAppointmentView(p);
+					doctorView.setVisible(true);
+				}
+			});
 		button.setVisible(true);
 		return button;
 	}
