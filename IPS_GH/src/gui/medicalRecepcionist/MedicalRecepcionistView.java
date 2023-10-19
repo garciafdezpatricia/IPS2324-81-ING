@@ -6,11 +6,14 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -125,9 +128,7 @@ public class MedicalRecepcionistView extends JFrame {
 	private JPanel panelSur;
 	private JPanel panelDate;
 	private JLabel lblFrom;
-	private JComboBox comboBoxFrom;
 	private JLabel lblTo;
-	private JComboBox comboBoxTo;
 	private JPanel panelSurDoctor;
 	private JRadioButton rdbtnUrgent;
 	private JButton btnReset;
@@ -137,6 +138,8 @@ public class MedicalRecepcionistView extends JFrame {
 	private JButton btnEdit;
 	private JButton btnSave;
 	private String newContactInfo = "";
+	private JTextField textFieldFrom;
+	private JTextField textFieldTo;
 
 	/**
 	 * Create the frame.
@@ -285,7 +288,7 @@ public class MedicalRecepcionistView extends JFrame {
 					for (int i = 0; i < listDoctor.getSelectedValuesList().size(); i++) {
 						try {
 							if (!ConnectionFactory.isWorking(new java.sql.Date(getDateChooser_1().getDate().getTime()),
-									comboBoxFrom.getSelectedItem().toString(), comboBoxTo.getSelectedItem().toString(),
+									getTextFieldFrom().getText(), getTextFieldTo().getText(),
 									listDoctor.getSelectedValuesList().get(i).getId())) {
 								JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
 										"The doctor is not working.", "Warning", JOptionPane.INFORMATION_MESSAGE);
@@ -296,9 +299,9 @@ public class MedicalRecepcionistView extends JFrame {
 								try {
 									if (ConnectionFactory.hasAnAppointment(listDoctor.getSelectedValuesList().get(i),
 											new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-													+ comboBoxFrom.getSelectedItem().toString() + ":00",
+													+ getTextFieldFrom().getText() + ":00",
 											new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-													+ comboBoxTo.getSelectedItem().toString() + ":00")) {
+													+ getTextFieldTo().getText() + ":00")) {
 										int opcion2 = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
 												"The doctor has another appointment at that time, do you want to reserve this appointment either?",
 												"Confirmation", JOptionPane.YES_NO_OPTION);
@@ -338,7 +341,7 @@ public class MedicalRecepcionistView extends JFrame {
 				"Are you sure you want to reserve the appointment between the doctor(s) "
 						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
 						+ " on  " + dateChooser.getDate().getDay() + "/" + dateChooser.getDate().getMonth() + "/"
-						+ dateChooser.getDate().getYear() + " at " + getComboBoxFrom().getSelectedItem()
+						+ dateChooser.getDate().getYear() + " at " + getTextFieldFrom().getText()
 						+ " in the office " + getComboBoxOffices().getSelectedItem() + "?",
 				"Confirmation", JOptionPane.YES_NO_OPTION);
 
@@ -356,18 +359,18 @@ public class MedicalRecepcionistView extends JFrame {
 			if (rdbtnUrgent.isSelected()) {
 				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
 						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-								+ comboBoxFrom.getSelectedItem().toString() + ":00",
+								+ textFieldFrom.getText() + ":00",
 						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-								+ comboBoxTo.getSelectedItem().toString() + ":00",
+								+ textFieldTo.getText() + ":00",
 						1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 
 			} else {
 				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
 						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-								+ comboBoxFrom.getSelectedItem().toString() + ":00",
+								+ textFieldFrom.getText() + ":00",
 						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-								+ comboBoxTo.getSelectedItem().toString() + ":00",
+								+ textFieldTo.getText() + ":00",
 						0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 			}
@@ -775,9 +778,9 @@ public class MedicalRecepcionistView extends JFrame {
 					new TitledBorder(null, "Day and hour", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panelDate.setLayout(new GridLayout(0, 5, 0, 0));
 			panelDate.add(getLblFrom_1());
-			panelDate.add(getComboBoxFrom());
+			panelDate.add(getTextFieldFrom());
 			panelDate.add(getLblTo_1());
-			panelDate.add(getComboBoxTo());
+			panelDate.add(getTextFieldTo());
 			panelDate.add(getDateChooser_1());
 		}
 		return panelDate;
@@ -785,87 +788,18 @@ public class MedicalRecepcionistView extends JFrame {
 
 	private JLabel getLblFrom_1() {
 		if (lblFrom == null) {
-			lblFrom = new JLabel("From:");
+			lblFrom = new JLabel("From (hh:mm):");
 			lblFrom.setFont(new Font("Tahoma", Font.BOLD, 10));
 		}
 		return lblFrom;
 	}
 
-	private JComboBox getComboBoxFrom() {
-		if (comboBoxFrom == null) {
-			String[] horas = new String[24 * 4];
-			int index = 0;
-			for (int hora = 0; hora < 24; hora++) {
-				for (int minuto = 0; minuto < 60; minuto += 15) {
-					String horaStr = String.format("%02d:%02d", hora, minuto);
-					horas[index++] = horaStr;
-				}
-			}
-			comboBoxFrom = new JComboBox(horas);
-			comboBoxFrom.addFocusListener(new FocusAdapter() {
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (comboBoxTo.getSelectedIndex() < comboBoxFrom.getSelectedIndex()) {
-						JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
-								"The end hour of the appointment must be later than the start one.", "Warning",
-								JOptionPane.INFORMATION_MESSAGE);
-						btnFinish.setEnabled(false);
-
-					}
-				}
-			});
-			comboBoxFrom.setSelectedIndex(36);
-
-			comboBoxFrom.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					fromDateChoosed = true;
-
-					comboBoxTo.setEnabled(true);
-
-					comboBoxTo.setSelectedIndex(comboBoxFrom.getSelectedIndex() + 1);
-				}
-			});
-			comboBoxFrom.setEnabled(false);
-		}
-		return comboBoxFrom;
-	}
-
 	private JLabel getLblTo_1() {
 		if (lblTo == null) {
-			lblTo = new JLabel("To:");
+			lblTo = new JLabel("To (hh:mm):");
 			lblTo.setFont(new Font("Tahoma", Font.BOLD, 10));
 		}
 		return lblTo;
-	}
-
-	private JComboBox getComboBoxTo() {
-		if (comboBoxTo == null) {
-			String[] horas = new String[24 * 4];
-			int index = 0;
-			for (int hora = 0; hora < 24; hora++) {
-				for (int minuto = 0; minuto < 60; minuto += 15) {
-					String horaStr = String.format("%02d:%02d", hora, minuto);
-					horas[index++] = horaStr;
-				}
-			}
-
-			comboBoxTo = new JComboBox(horas);
-			comboBoxTo.addFocusListener(new FocusAdapter() {
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (comboBoxTo.getSelectedIndex() < comboBoxFrom.getSelectedIndex()) {
-						JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
-								"The end hour of the appointment must be later than the start one.", "Warning",
-								JOptionPane.INFORMATION_MESSAGE);
-						btnFinish.setEnabled(false);
-						comboBoxTo.setSelectedIndex(comboBoxFrom.getSelectedIndex() + 1);
-					}
-
-				}
-			});
-			comboBoxTo.setEnabled(false);
-		}
-		return comboBoxTo;
 	}
 
 	private JPanel getPanelSurDoctor_1() {
@@ -897,8 +831,8 @@ public class MedicalRecepcionistView extends JFrame {
 					textNameDoctor.setText("");
 					textRegNumber.setText("");
 					dateChooser.setEnabled(false);
-					comboBoxFrom.setEnabled(false);
-					comboBoxTo.setEnabled(false);
+					textFieldFrom.setEnabled(false);
+					textFieldTo.setEnabled(false);
 					btnFinish.setEnabled(false);
 
 				}
@@ -913,7 +847,10 @@ public class MedicalRecepcionistView extends JFrame {
 			dateChooser = new JDateChooser();
 			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					comboBoxFrom.setEnabled(true);
+					textFieldFrom.setEnabled(true);
+					textFieldFrom.setEditable(true);
+					textFieldTo.setEnabled(true);
+					textFieldTo.setEditable(true);
 				}
 			});
 			dateChooser.getCalendarButton().setEnabled(false);
@@ -1017,8 +954,65 @@ public class MedicalRecepcionistView extends JFrame {
 	}
 
 	private void checkFinishBtnEnabled() {
-		if (doctorChoosed && patientChoosed && officeChoosed && fromDateChoosed)
+		if (doctorChoosed && patientChoosed && officeChoosed)
 			getBtnFinish().setEnabled(true);
 
+	}
+	private JTextField getTextFieldFrom() {
+		if (textFieldFrom == null) {
+			textFieldFrom = new JTextField();
+			
+			textFieldFrom.setEnabled(false);
+			textFieldFrom.setEditable(false);
+			textFieldFrom.setColumns(10);
+			SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm:ss");
+			
+//			textFieldFrom.addFocusListener(new FocusAdapter() {
+//				@Override
+//				public void focusLost(FocusEvent e) {
+//					try {
+//						if (sdf3.parse(textFieldFrom.getText() + ":00").after(sdf3.parse(textFieldTo.getText()+ ":00"))) {
+//							JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+//									"The end hour of the appointment must be later than the start one.", "Warning",
+//									JOptionPane.INFORMATION_MESSAGE);
+//							btnFinish.setEnabled(false);
+//
+//						}
+//					} catch (HeadlessException | ParseException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//				}
+//			});
+		}
+		return textFieldFrom;
+	}
+	private JTextField getTextFieldTo() {
+		if (textFieldTo == null) {
+			textFieldTo = new JTextField();
+			textFieldTo.setEnabled(false);
+			textFieldTo.setEditable(false);
+			textFieldTo.setColumns(10);
+			SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm:ss");
+
+			textFieldTo.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					try {
+						if (sdf3.parse(textFieldFrom.getText()+ ":00").after(sdf3.parse(textFieldTo.getText()+ ":00"))) {
+							JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+									"The end hour of the appointment must be later than the start one.", "Warning",
+									JOptionPane.INFORMATION_MESSAGE);
+							btnFinish.setEnabled(false);
+						}
+					} catch (HeadlessException | ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				}
+			});
+		}
+		return textFieldTo;
 	}
 }

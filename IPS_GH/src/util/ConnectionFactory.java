@@ -279,9 +279,9 @@ public class ConnectionFactory {
 					for (int i = 0; i < workday.size(); i++) {
 						if (workday.get(i).getWeekday().toLowerCase().equals(nombreDia.toLowerCase())
 								&& sdf3.parse(utilDate + " " + hourFrom + ":00")
-										.after(sdf3.parse(utilDate + " " + workday.get(i).getStartHour()))
+										.after(sdf3.parse(utilDate + " " + workday.get(i).getStartHour() + ":00"))
 								&& sdf3.parse(utilDate + " " + hourTo + ":00")
-										.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour()))) {
+										.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour()+ ":00"))) {
 
 							return true;
 						}
