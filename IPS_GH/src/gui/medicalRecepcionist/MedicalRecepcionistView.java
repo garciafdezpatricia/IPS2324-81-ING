@@ -144,9 +144,10 @@ public class MedicalRecepcionistView extends JFrame {
 	 * @throws Exception
 	 */
 	public MedicalRecepcionistView() throws Exception {
-				
+
 		setTitle("Reservation of appointment");
-		setIconImage(Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		doctors = ConnectionFactory.getDoctors();
 		doctorsReset = ConnectionFactory.getDoctors();
 
@@ -353,21 +354,21 @@ public class MedicalRecepcionistView extends JFrame {
 			}
 			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
-				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-						+ comboBoxFrom.getSelectedItem().toString() + ":00",
-				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-						+ comboBoxTo.getSelectedItem().toString() + ":00",
-						1, 
-						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+								+ comboBoxFrom.getSelectedItem().toString() + ":00",
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+								+ comboBoxTo.getSelectedItem().toString() + ":00",
+						1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 
 			} else {
-				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-						+ comboBoxFrom.getSelectedItem().toString() + ":00",
-				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-						+ comboBoxTo.getSelectedItem().toString() + ":00",
-						0, 
-						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()), 
+				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+								+ comboBoxFrom.getSelectedItem().toString() + ":00",
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+								+ comboBoxTo.getSelectedItem().toString() + ":00",
+						0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 			}
 		} else {
@@ -477,7 +478,7 @@ public class MedicalRecepcionistView extends JFrame {
 						patientChoosed = true;
 
 						checkFinishBtnEnabled();
-						
+
 						newContactInfo = p.getContactInfo();
 					} else {
 						getTxtContactInfo().setText("");
@@ -964,9 +965,9 @@ public class MedicalRecepcionistView extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					String newCInfo = getTxtContactInfo().getText();
 					Patient p = (Patient) getList_patients().getSelectedValue();
-					
+
 					newContactInfo = newCInfo;
-					
+
 					p.setContactInfo(newCInfo);
 					btnSave.setEnabled(false);
 				}

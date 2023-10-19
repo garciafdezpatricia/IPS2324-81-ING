@@ -1,5 +1,7 @@
 package util;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -49,13 +51,15 @@ public class ConnectionFactory {
 
 			// Procesar los resultados
 			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
+				BigDecimal id = resultSet.getBigDecimal("id");
+				BigInteger aux = id.toBigInteger();
+
 				String numcolegiado = resultSet.getString("numcolegiado");
 				String name = resultSet.getString("name");
 				String surname = resultSet.getString("surname");
 				String email = resultSet.getString("email");
 				// Procesa otros campos según la estructura de tu tabla
-				doctors.addElement(new Doctor(id, numcolegiado, name, surname, email));
+				doctors.addElement(new Doctor(aux, numcolegiado, name, surname, email));
 			}
 
 			// Cerrar la conexión
@@ -110,39 +114,40 @@ public class ConnectionFactory {
 	}
 
 	public static void updateAppointment(AppointmentBLDto appointment) {
-        Connection con = null;
-        PreparedStatement ps= null;
-        ResultSet rs = null;
-        try {
-            // TODO: falta por añadir las causas
-            con = getOracleConnection();
-            ps = con.prepareStatement("UPDATE APPOINTMENT SET "
-                    + "attended = ?, checkedin = ?, checkedout = ? "
-                    + "WHERE id = ?");
-            ps.setInt(1, appointment.attended ? 1 : 0);
-            ps.setString(2, appointment.checkIn);
-            ps.setString(3, appointment.checkOut); 
-            ps.setInt(4, appointment.id);
-            ps.executeUpdate();
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			// TODO: falta por añadir las causas
+			con = getOracleConnection();
+			ps = con.prepareStatement(
+					"UPDATE APPOINTMENT SET " + "attended = ?, checkedin = ?, checkedout = ? " + "WHERE id = ?");
+			ps.setInt(1, appointment.attended ? 1 : 0);
+			ps.setString(2, appointment.checkIn);
+			ps.setString(3, appointment.checkOut);
+			ps.setInt(4, appointment.id);
+			ps.executeUpdate();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }finally {
-            try {
-                if(con!=null) con.close();
-                if(ps!=null) ps.close();
-                if(rs!=null) rs.close();
-                    } catch (SQLException e) {
-                        throw new RuntimeException();
-                    }
-            }
-    }
-
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+	}
 
 	public static List<AppointmentBLDto> getAppointmentsByDoctorId(int doctorId) {
 		Connection con = null;
-		PreparedStatement ps= null;
+		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
 			con = getOracleConnection();
@@ -152,17 +157,17 @@ public class ConnectionFactory {
 			rs = ps.executeQuery();
 			List<AppointmentBLDto> appointments = new ArrayList<AppointmentBLDto>();
 			AppointmentBLDto apmnt = null;
-		
-			while(rs.next()) {
+
+			while (rs.next()) {
 				apmnt = new AppointmentBLDto();
 				apmnt.id = rs.getInt(1);
 				apmnt.patientid = rs.getInt(2);
 				apmnt.doctorid = rs.getInt(3);
 				apmnt.startDate = rs.getString(4);
 				apmnt.endDate = rs.getString(5);
-	
-				apmnt.urgency = rs.getInt(6)==0?false:true;
-				apmnt.attended = rs.getInt(7)==0?false:true;
+
+				apmnt.urgency = rs.getInt(6) == 0 ? false : true;
+				apmnt.attended = rs.getInt(7) == 0 ? false : true;
 				apmnt.checkIn = rs.getString(8);
 				apmnt.checkOut = rs.getString(9);
 				apmnt.officeid = rs.getInt(10);
@@ -170,28 +175,31 @@ public class ConnectionFactory {
 				apmnt.patientName = rs.getString(15);
 				apmnt.patientSurname = rs.getString(16);
 				apmnt.officeCode = rs.getString(19);
-				
+
 				appointments.add(apmnt);
-				
-				
+
 			}
 			return appointments;
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();
-		}finally {
+		} finally {
 			try {
-				if(con!=null) con.close();
-				if(ps!=null) ps.close();
-				if(rs!=null) rs.close();
-					} catch (SQLException e) {
-						throw new RuntimeException();
-					}
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
 			}
+		}
 	}
-	
-	public static boolean isWorking(Date utilDate, String hourFrom, String hourTo, int idDoctor) throws Exception {
+
+	public static boolean isWorking(Date utilDate, String hourFrom, String hourTo, BigInteger idDoctor)
+			throws Exception {
 		DefaultListModel<WorkPeriod> workperiod = new DefaultListModel<>();
 
 		try {
@@ -202,18 +210,21 @@ public class ConnectionFactory {
 			// Crear una sentencia SQL
 			PreparedStatement statement_workperiod = connection.prepareStatement(sql_workperiod);
 
-			statement_workperiod.setInt(1, idDoctor);
+			BigDecimal doc = new BigDecimal(idDoctor);
+			statement_workperiod.setBigDecimal(1, doc);
 
 			ResultSet resultSet_workperiod = statement_workperiod.executeQuery();
 
 			// Procesar los resultados
 			while (resultSet_workperiod.next()) {
-				int id = resultSet_workperiod.getInt("id");
+				BigDecimal id = resultSet_workperiod.getBigDecimal("id");
+				BigInteger aux = id.toBigInteger();
+
 				Date startDate = resultSet_workperiod.getDate("startday");
 				Date finalDate = resultSet_workperiod.getDate("finalday");
-				int id_doctor = idDoctor;
+				BigInteger id_doctor = idDoctor;
 
-				workperiod.addElement(new WorkPeriod(id, startDate, finalDate, id_doctor));
+				workperiod.addElement(new WorkPeriod(aux, startDate, finalDate, id_doctor));
 
 			}
 
@@ -226,27 +237,31 @@ public class ConnectionFactory {
 //				System.out.println();
 //			}
 			try {
-				if (utilDate.after(workperiod.get(0).getStartDate()) && utilDate.before(workperiod.get(0).getEndDate())) {
+				if (utilDate.after(workperiod.get(0).getStartDate())
+						&& utilDate.before(workperiod.get(0).getEndDate())) {
 					System.out.println("esta en el workperiod");
 					String sql_workday = "SELECT * FROM WORKDAY WHERE WORKPERIODID = ?";
 
 					// Crear una sentencia SQL
 					PreparedStatement statement_workday = connection.prepareStatement(sql_workday);
 
-					statement_workday.setInt(1, workperiod.get(0).getId());
+					BigDecimal a = new BigDecimal(workperiod.get(0).getId());
+					statement_workday.setBigDecimal(1, a);
 
 					ResultSet resultSet_workday = statement_workday.executeQuery();
 
 					// Procesar los resultados
 					while (resultSet_workday.next()) {
-						int id = resultSet_workday.getInt("id");
+						BigDecimal id = resultSet_workday.getBigDecimal("id");
+						BigInteger aux = id.toBigInteger();
+
 						String weekday = resultSet_workday.getString("weekday");
 						String starthour = resultSet_workday.getString("starthour");
 						System.out.println(starthour);
 						String endhour = resultSet_workday.getString("endhour");
-						int workperiodid = workperiod.get(0).getId();
+						BigInteger workperiodid = workperiod.get(0).getId();
 
-						workday.addElement(new WorkDay(id, weekday, starthour, endhour, workperiodid));
+						workday.addElement(new WorkDay(aux, weekday, starthour, endhour, workperiodid));
 
 					}
 					// Cerrar la conexión
@@ -298,7 +313,9 @@ public class ConnectionFactory {
 			// Crear una sentencia SQL
 			PreparedStatement statement = connection.prepareStatement(sql);
 
-			statement.setInt(1, doctor.getId());
+			BigDecimal doc = new BigDecimal(doctor.getId());
+
+			statement.setBigDecimal(1, doc);
 
 			ResultSet resultSet = statement.executeQuery();
 
@@ -345,8 +362,8 @@ public class ConnectionFactory {
 		return false;
 	}
 
-	public static void createAppointment(int patientID, int doctorID, String startDate, String endDate, int urgency,
-			int officeId, String information) throws Exception {
+	public static void createAppointment(int patientID, BigInteger doctorID, String startDate, String endDate,
+			int urgency, int officeId, String information) throws Exception {
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
 
@@ -363,9 +380,11 @@ public class ConnectionFactory {
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
+			BigDecimal doc = new BigDecimal(doctorID);
+
 			// Establecer valores para los parámetros
 			preparedStatement.setInt(1, patientID);
-			preparedStatement.setInt(2, doctorID);
+			preparedStatement.setBigDecimal(2, doc);
 			preparedStatement.setString(3, startDate);
 			preparedStatement.setString(4, endDate);
 			preparedStatement.setInt(5, urgency);
@@ -455,7 +474,7 @@ public class ConnectionFactory {
 
 		return aux;
 	}
-	
+
 	public static int officeIdFrom(String code) throws Exception {
 		for (int i = 0; i < getOffices().size(); i++) {
 			if (getOffices().get(i).getOfficeCode().equals(code))
@@ -464,4 +483,105 @@ public class ConnectionFactory {
 		return -1;
 	}
 
+	public static void createWorkPeriod(BigInteger id, Date startDate, Date endDate, BigInteger id_doctor)
+			throws Exception {
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		// Datos para la inserción
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL con parámetros
+			String insertQuery = "INSERT INTO WorkPeriod (startday, finalday, fk_doctorid) "
+					+ "VALUES (?, ?, ?)";
+			// Crear un PreparedStatement
+			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+//			// Establecer valores para los parámetros
+			BigDecimal aux2 = new BigDecimal(id_doctor);
+
+			preparedStatement.setDate(1, startDate);
+			preparedStatement.setDate(2, endDate);
+			preparedStatement.setBigDecimal(3, aux2);
+			
+
+			// Ejecutar la inserción
+			int filasAfectadas = preparedStatement.executeUpdate();
+
+			if (filasAfectadas > 0) {
+				System.out.println("Inserción exitosa.");
+			} else {
+				System.out.println("La inserción no se pudo realizar.");
+			}
+
+			// Cerrar la conexión y el PreparedStatement
+			preparedStatement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void createWorkDay(BigInteger id, String weekday, String startHour, String endHour,
+			BigInteger workperiod_id, BigInteger doctorid) {
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		// Datos para la inserción
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL con parámetros
+			String insertQuery = "INSERT INTO WorkDay (weekday, startHour, endHour, workperiodid) "
+					+ "VALUES (?, ?, ?, ?)";
+			String query2 = "SELECT id FROM workperiod WHERE fk_doctorid = ?";
+
+			PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+			BigDecimal b = new BigDecimal(doctorid);
+			preparedStatement2.setBigDecimal(1, b);
+
+			ResultSet resultSet = preparedStatement2.executeQuery();
+			BigDecimal wpid  = null;
+			
+			while (resultSet.next()) {
+				 wpid = resultSet.getBigDecimal("id");
+				
+
+			}
+
+			
+			// Crear un PreparedStatement
+			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+			// Establecer valores para los parámetros
+			
+
+			BigDecimal aux2 = new BigDecimal(workperiod_id);
+
+			preparedStatement.setString(1, weekday);
+			preparedStatement.setString(2, startHour);
+			preparedStatement.setString(3, endHour);
+			preparedStatement.setBigDecimal(4, wpid);
+
+			// Ejecutar la inserción
+			int filasAfectadas = preparedStatement.executeUpdate();
+
+			if (filasAfectadas > 0) {
+				System.out.println("Inserción exitosa.");
+			} else {
+				System.out.println("La inserción no se pudo realizar.");
+			}
+
+			// Cerrar la conexión y el PreparedStatement
+			preparedStatement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

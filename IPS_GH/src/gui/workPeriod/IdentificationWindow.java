@@ -23,11 +23,14 @@ public class IdentificationWindow extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
 	private JLabel lblChooseDoctor;
-	private JList listDoctors;
+	private JList<Doctor> listDoctors;
 
 	private DefaultListModel<Doctor> doctors = new DefaultListModel<>();
 
 	private Doctor selectedDoctor;
+	private JButton btnNext;
+	private JButton btnCancel;
+
 
 	/**
 	 * Launch the application.
@@ -46,6 +49,7 @@ public class IdentificationWindow extends JDialog {
 	 * Create the dialog.
 	 */
 	public IdentificationWindow() {
+		selectedDoctor = null;
 		setIconImage(Toolkit.getDefaultToolkit().getImage(IdentificationWindow.class.getResource("/img/descarga.jpg")));
 		setTitle("Doctor selection");
 		try {
@@ -62,29 +66,10 @@ public class IdentificationWindow extends JDialog {
 		contentPanel.setLayout(null);
 		contentPanel.add(getLblChooseDoctor());
 		contentPanel.add(getListDoctors());
-
+		contentPanel.add(getBtnNext());
+		contentPanel.add(getBtnCancel());
 	}
 
-	private JButton getBtnAccept() {
-		JButton btnAccept = new JButton("Accept");
-		btnAccept.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-			}
-		});
-		btnAccept.setActionCommand("Cancel");
-
-		return btnAccept;
-	}
-
-	private JButton getBtnBack() {
-		JButton btnBack = new JButton("Back");
-		btnBack.setActionCommand("OK");
-
-		getRootPane().setDefaultButton(btnBack);
-
-		return btnBack;
-	}
 
 	private JLabel getLblChooseDoctor() {
 		if (lblChooseDoctor == null) {
@@ -95,9 +80,9 @@ public class IdentificationWindow extends JDialog {
 		return lblChooseDoctor;
 	}
 
-	private JList getListDoctors() {
+	private JList<Doctor> getListDoctors() {
 		if (listDoctors == null) {
-			listDoctors = new JList(doctors);
+			listDoctors = new JList<Doctor>(doctors);
 			listDoctors.setBounds(10, 59, 414, 158);
 
 			listDoctors.addListSelectionListener(new ListSelectionListener() {
@@ -114,8 +99,44 @@ public class IdentificationWindow extends JDialog {
 		return listDoctors;
 	}
 
-	public Doctor getSelectedDoctor() {
-		return this.selectedDoctor;
+	
+	public boolean isDoctorSelected() {
+		if (selectedDoctor == null)
+			return false;
+		return true;
+		
 	}
-
+	
+	public Doctor getSelectedDoctor() {
+		if (isDoctorSelected())
+			return selectedDoctor;
+		return null;
+	}
+	
+	
+	private JButton getBtnNext() {
+		if (btnNext == null) {
+			btnNext = new JButton("Next");
+			btnNext.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (selectedDoctor != null)
+						dispose();
+				}
+			});
+			btnNext.setBounds(335, 228, 89, 23);
+		}
+		return btnNext;
+	}
+	private JButton getBtnCancel() {
+		if (btnCancel == null) {
+			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
+			btnCancel.setBounds(239, 228, 89, 23);
+		}
+		return btnCancel;
+	}
 }

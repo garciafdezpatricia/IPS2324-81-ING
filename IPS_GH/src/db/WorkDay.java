@@ -1,14 +1,16 @@
 package db;
 
-import java.sql.Date;
+import java.math.BigInteger;
 
 public class WorkDay {
-	private int id;
+	private BigInteger id;
 	private String weekday;
 	private String startHour;
 	private String endHour;
-	private int workperiodid;
-	public WorkDay(int id, String weekday, String startHour, String endHour, int workperiodid) {
+	private BigInteger workperiodid;
+	
+	
+	public WorkDay(BigInteger id, String weekday, String startHour, String endHour, BigInteger workperiodid) {
 		super();
 		this.id = id;
 		this.weekday = weekday;
@@ -16,10 +18,10 @@ public class WorkDay {
 		this.endHour = endHour;
 		this.workperiodid = workperiodid;
 	}
-	public int getId() {
+	public BigInteger getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(BigInteger id) {
 		this.id = id;
 	}
 	public String getWeekday() {
@@ -40,10 +42,10 @@ public class WorkDay {
 	public void setEndHour(String endHour) {
 		this.endHour = endHour;
 	}
-	public int getWorkperiodid() {
+	public BigInteger getWorkperiodid() {
 		return workperiodid;
 	}
-	public void setWorkperiodid(int workperiodid) {
+	public void setWorkperiodid(BigInteger workperiodid) {
 		this.workperiodid = workperiodid;
 	}
 	@Override

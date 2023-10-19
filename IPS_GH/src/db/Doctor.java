@@ -1,13 +1,15 @@
 package db;
 
+import java.math.BigInteger;
+
 public class Doctor {
-	private int id;
+	private BigInteger id;
 	private String numColegiado;
 	private String name;
 	private String surname;
 	private String email;
 
-	public Doctor(int id, String numColegiado, String name, String surname, String email) {
+	public Doctor(BigInteger id, String numColegiado, String name, String surname, String email) {
 		super();
 		this.id = id;
 		this.numColegiado = numColegiado;
@@ -17,11 +19,11 @@ public class Doctor {
 	}
 
 	
-	public int getId() {
+	public BigInteger getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(BigInteger id) {
 		this.id = id;
 	}
 
