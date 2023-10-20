@@ -53,6 +53,8 @@ import com.toedter.calendar.JDateChooser;
 import db.Doctor;
 import db.Patient;
 import util.ConnectionFactory;
+import java.awt.event.InputMethodListener;
+import java.awt.event.InputMethodEvent;
 
 public class MedicalRecepcionistView extends JFrame {
 
@@ -961,32 +963,35 @@ public class MedicalRecepcionistView extends JFrame {
 	private JTextField getTextFieldFrom() {
 		if (textFieldFrom == null) {
 			textFieldFrom = new JTextField();
-			
+			textFieldFrom.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (validarFormatoHora(textFieldFrom.getText())) {
+			            System.out.println("La hora es válida.");
+			            
+			        } else {
+			        	JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+								"The format of the 'from' hour is not correct.", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
+			        	getTextFieldFrom().setText("00:00");
+			        	btnFinish.setEnabled(false);
+			        }
+				}
+			});
 			textFieldFrom.setEnabled(false);
 			textFieldFrom.setEditable(false);
 			textFieldFrom.setColumns(10);
-			SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm:ss");
 			
-//			textFieldFrom.addFocusListener(new FocusAdapter() {
-//				@Override
-//				public void focusLost(FocusEvent e) {
-//					try {
-//						if (sdf3.parse(textFieldFrom.getText() + ":00").after(sdf3.parse(textFieldTo.getText()+ ":00"))) {
-//							JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
-//									"The end hour of the appointment must be later than the start one.", "Warning",
-//									JOptionPane.INFORMATION_MESSAGE);
-//							btnFinish.setEnabled(false);
-//
-//						}
-//					} catch (HeadlessException | ParseException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-//				}
-//			});
 		}
 		return textFieldFrom;
 	}
+	
+	// Valida el formato de hora HH:mm
+    public static boolean validarFormatoHora(String hora) {
+        if (hora == null) return false;
+        return hora.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]");
+    }
+    
 	private JTextField getTextFieldTo() {
 		if (textFieldTo == null) {
 			textFieldTo = new JTextField();
@@ -999,12 +1004,27 @@ public class MedicalRecepcionistView extends JFrame {
 				@Override
 				public void focusLost(FocusEvent e) {
 					try {
-						if (sdf3.parse(textFieldFrom.getText()+ ":00").after(sdf3.parse(textFieldTo.getText()+ ":00"))) {
-							JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
-									"The end hour of the appointment must be later than the start one.", "Warning",
+						if (validarFormatoHora(textFieldFrom.getText())) {
+				            System.out.println("La hora es válida.");
+				            if (sdf3.parse(textFieldFrom.getText()+ ":00").after(sdf3.parse(textFieldTo.getText()+ ":00"))) {
+								JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+										"The end hour of the appointment must be later than the start one.", "Warning",
+										JOptionPane.INFORMATION_MESSAGE);
+								btnFinish.setEnabled(false);
+								getTextFieldTo().setText(getTextFieldFrom().getText());
+								getTextField().requestFocus();
+							}
+				            
+				        } else {
+				        	JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+									"The format of the 'to' hour is not correct.", "Warning",
 									JOptionPane.INFORMATION_MESSAGE);
-							btnFinish.setEnabled(false);
-						}
+							getTextField().requestFocus();
+							getTextField().setText("00:00");
+				        	btnFinish.setEnabled(false);
+				        }
+						
+						
 					} catch (HeadlessException | ParseException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
