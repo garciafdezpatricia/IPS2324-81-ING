@@ -22,6 +22,7 @@ import db.Office;
 import db.Patient;
 import db.WorkDay;
 import db.WorkPeriod;
+import gui.doctor.DoctorAppointmentView;
 
 public class ConnectionFactory {
 
@@ -281,7 +282,7 @@ public class ConnectionFactory {
 								&& sdf3.parse(utilDate + " " + hourFrom + ":00")
 										.after(sdf3.parse(utilDate + " " + workday.get(i).getStartHour() + ":00"))
 								&& sdf3.parse(utilDate + " " + hourTo + ":00")
-										.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour()+ ":00"))) {
+										.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour() + ":00"))) {
 
 							return true;
 						}
@@ -321,16 +322,16 @@ public class ConnectionFactory {
 
 			// Procesar los resultados
 			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
-				int patientId = resultSet.getInt("patientid");
-				int doctorId = resultSet.getInt("doctorid");
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				BigInteger patientId = resultSet.getBigDecimal("patientid").toBigInteger();
+				BigInteger doctorId = resultSet.getBigDecimal("doctorid").toBigInteger();
 				String startdate = resultSet.getString("startdate");
 				String endate = resultSet.getString("enddate");
 				int urgency = resultSet.getInt("urgency");
 				int attended = resultSet.getInt("attended");
 				String checkedin = resultSet.getString("checkedin");
 				String checkedout = resultSet.getString("checkedout");
-				int officeid = resultSet.getInt("officeid");
+				BigInteger officeid = resultSet.getBigDecimal("officeid").toBigInteger();
 				String information = resultSet.getString("information");
 
 				apps.addElement(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
@@ -495,8 +496,7 @@ public class ConnectionFactory {
 			Connection connection = ConnectionFactory.getOracleConnection();
 
 			// Consulta SQL con parámetros
-			String insertQuery = "INSERT INTO WorkPeriod (startday, finalday, fk_doctorid) "
-					+ "VALUES (?, ?, ?)";
+			String insertQuery = "INSERT INTO WorkPeriod (startday, finalday, fk_doctorid) " + "VALUES (?, ?, ?)";
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
@@ -506,7 +506,6 @@ public class ConnectionFactory {
 			preparedStatement.setDate(1, startDate);
 			preparedStatement.setDate(2, endDate);
 			preparedStatement.setBigDecimal(3, aux2);
-			
 
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
@@ -546,20 +545,17 @@ public class ConnectionFactory {
 			preparedStatement2.setBigDecimal(1, b);
 
 			ResultSet resultSet = preparedStatement2.executeQuery();
-			BigDecimal wpid  = null;
-			
+			BigDecimal wpid = null;
+
 			while (resultSet.next()) {
-				 wpid = resultSet.getBigDecimal("id");
-				
+				wpid = resultSet.getBigDecimal("id");
 
 			}
 
-			
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
 			// Establecer valores para los parámetros
-			
 
 			BigDecimal aux2 = new BigDecimal(workperiod_id);
 
@@ -583,5 +579,129 @@ public class ConnectionFactory {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@SuppressWarnings("unused")
+	public static String getFreeHours(List<Doctor> doctors, Date day) throws Exception {
+		String res = "";
+		Connection connection = ConnectionFactory.getOracleConnection();
+		if (doctors.size() == 1) {
+			// hay que comprobar que la fecha que se pasa como parámetro esté dentro de ese
+			// workperiod
+			String query = "SELECT id from workperiod where fk_doctorid = ? and ? >= startday and ? <= finalday ";
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+			BigDecimal b = new BigDecimal(doctors.get(0).getId());
+			preparedStatement.setBigDecimal(1, b);
+			preparedStatement.setDate(2, day);
+			preparedStatement.setDate(3, day);
+
+			ResultSet resultSet = preparedStatement.executeQuery();
+			BigDecimal wpid = null;
+
+			while (resultSet.next()) {
+				wpid = resultSet.getBigDecimal("id");
+			}
+
+			if (wpid == null) {
+				System.out.println("No hay free hours porque ese dia no esta dentro de su workperiod");
+			}
+			// si si que está dentro del workperiod
+			else {
+				System.out.println("El dia si esta dentro de su workperiod");
+				String query2 = "SELECT * from workday where workperiodid = ? and weekday = ?";
+
+				PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(day);
+				int diaSemana = calendar.get(Calendar.DAY_OF_WEEK);
+
+				preparedStatement2.setBigDecimal(1, wpid);
+				preparedStatement2.setString(2, obtenerNombreDia(diaSemana));
+
+				ResultSet resultSet2 = preparedStatement2.executeQuery();
+
+				// me tiene que devolver un workday del dia de la semana adecuado
+				// TODO: NO SE ESTÁ CONTEMPLANDO QUE HAYA SIDO MODIFICADO EL DÍA
+				WorkDay workday = null;
+				BigDecimal id = null;
+				String weekday = null;
+				String startHour = null;
+				String endHour = null;
+				while (resultSet2.next()) {
+					id = resultSet2.getBigDecimal("id");
+					weekday = resultSet2.getString("weekday");
+					startHour = resultSet2.getString("starthour");
+					endHour = resultSet2.getString("endhour");
+
+				}
+				workday = new WorkDay(id.toBigInteger(), weekday, startHour, endHour, wpid.toBigInteger());
+
+				if (workday == null) {
+					System.out.println("workday null");
+				} else {
+					// ahora falta filtrar en el caso de que tenga citas
+
+					String s = "The doctors works from " + startHour + " to " + endHour;
+					res = s;
+
+					// APPOINTMENT?
+					String query3 = "SELECT * FROM APPOINTMENT WHERE DOCTORID = ?";
+
+					PreparedStatement preparedStatement3 = connection.prepareStatement(query3);
+
+					preparedStatement3.setBigDecimal(1, new BigDecimal(doctors.get(0).getId()));
+
+					ResultSet resultSet3 = preparedStatement3.executeQuery();
+
+					List<Appointment> apps = new ArrayList<>();
+					while (resultSet3.next()) {
+						apps.add(new Appointment(resultSet3.getBigDecimal("id").toBigInteger(),
+								resultSet3.getBigDecimal("patientid").toBigInteger(),
+								resultSet3.getBigDecimal("doctorid").toBigInteger(), resultSet3.getString("startdate"),
+								resultSet3.getString("enddate"), resultSet3.getInt("urgency"),
+								resultSet3.getInt("attended"), resultSet3.getString("checkedin"),
+								resultSet3.getString("checkedout"), resultSet3.getBigDecimal("officeid").toBigInteger(),
+								resultSet3.getString("information")));
+
+					}
+
+					// filtrarlos por las que sean en el día, hay que pasar el string a date
+					List<Appointment> appsThatDay = new ArrayList<>();
+					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+					for (Appointment a : apps) {
+						System.out.println("a.getStartdate" + a.getStartdate());
+						System.out.println("day" + dateFormat.parse(day + " 00:00:00"));
+
+						System.out.println("a.getend" + a.getEnddate());
+
+						if (dateFormat.parse(a.getStartdate()).after(dateFormat.parse(day + " 00:00:00"))
+								&& dateFormat.parse(a.getEnddate()).before(dateFormat.parse(day + " 24:00:00"))) {
+
+							appsThatDay.add(a);
+						}
+					}
+
+					// si hay citas ese dia
+					if (!appsThatDay.isEmpty()) {
+						for (Appointment a : appsThatDay) {
+							res += "\n The doctor has appointment from:\n\t "
+									+ dateFormat.parse(a.getStartdate()).getHours() + ":"
+									+ dateFormat.parse(a.getStartdate()).getMinutes() + " to\n\t "
+									+ dateFormat.parse(a.getEnddate()).getHours() + ":"
+									+ dateFormat.parse(a.getEnddate()).getMinutes() + "\n";
+						}
+					} else {
+						System.out.println("no tiene más citas");
+					}
+				}
+
+			}
+		}
+		//todo: por si escogen mas de un medico
+		return res;
+
 	}
 }

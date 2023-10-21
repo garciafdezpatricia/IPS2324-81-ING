@@ -1,14 +1,16 @@
 package db;
 
+import java.math.BigInteger;
+
 public class Appointment {
-	private int id;
-	private int patientid;
-	private int doctorid, officeId;;
+	private BigInteger id;
+	private BigInteger patientid;
+	private BigInteger doctorid, officeId;;
 	private String startdate, enddate, information, checkedin, checkedout;
 	private int urgency, attended;
 
-	public Appointment(int id, int patientid, int doctorid, String startdate, String enddate, int urgency, int attended,
-			String checkedin, String checkedout, int officeId, String information) {
+	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate, int urgency, int attended,
+			String checkedin, String checkedout, BigInteger officeId, String information) {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -23,27 +25,27 @@ public class Appointment {
 		this.information = information;
 	}
 
-	public int getId() {
+	public BigInteger getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(BigInteger id) {
 		this.id = id;
 	}
 
-	public int getPatientid() {
+	public BigInteger getPatientid() {
 		return patientid;
 	}
 
-	public void setPatientid(int patientid) {
+	public void setPatientid(BigInteger patientid) {
 		this.patientid = patientid;
 	}
 
-	public int getDoctorid() {
+	public BigInteger getDoctorid() {
 		return doctorid;
 	}
 
-	public void setDoctorid(int doctorid) {
+	public void setDoctorid(BigInteger doctorid) {
 		this.doctorid = doctorid;
 	}
 
@@ -96,11 +98,11 @@ public class Appointment {
 	}
 
 	
-	public int getOfficeId() {
+	public BigInteger getOfficeId() {
 		return officeId;
 	}
 
-	public void setOfficeId(int officeId) {
+	public void setOfficeId(BigInteger officeId) {
 		this.officeId = officeId;
 	}
 
