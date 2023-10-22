@@ -1,6 +1,7 @@
 package gui.medicalRecepcionist;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -36,6 +37,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -140,16 +144,29 @@ public class MedicalRecepcionistView extends JFrame {
 	 * @throws Exception
 	 */
 	public MedicalRecepcionistView() throws Exception {
-				
+
 		setTitle("Reservation of appointment");
-		setIconImage(Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		doctors = ConnectionFactory.getDoctors();
 		doctorsReset = ConnectionFactory.getDoctors();
 
 		patients = ConnectionFactory.getPatients();
 		patientsReset = ConnectionFactory.getPatients();
 
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 906, 553);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -337,21 +354,21 @@ public class MedicalRecepcionistView extends JFrame {
 			}
 			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
-				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-						+ comboBoxFrom.getSelectedItem().toString() + ":00",
-				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-						+ comboBoxTo.getSelectedItem().toString() + ":00",
-						1, 
-						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+								+ comboBoxFrom.getSelectedItem().toString() + ":00",
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+								+ comboBoxTo.getSelectedItem().toString() + ":00",
+						1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 
 			} else {
-				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(), new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-						+ comboBoxFrom.getSelectedItem().toString() + ":00",
-				new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-						+ comboBoxTo.getSelectedItem().toString() + ":00",
-						0, 
-						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()), 
+				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+								+ comboBoxFrom.getSelectedItem().toString() + ":00",
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
+								+ comboBoxTo.getSelectedItem().toString() + ":00",
+						0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 			}
 		} else {
@@ -461,7 +478,7 @@ public class MedicalRecepcionistView extends JFrame {
 						patientChoosed = true;
 
 						checkFinishBtnEnabled();
-						
+
 						newContactInfo = p.getContactInfo();
 					} else {
 						getTxtContactInfo().setText("");
@@ -948,9 +965,9 @@ public class MedicalRecepcionistView extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					String newCInfo = getTxtContactInfo().getText();
 					Patient p = (Patient) getList_patients().getSelectedValue();
-					
+
 					newContactInfo = newCInfo;
-					
+
 					p.setContactInfo(newCInfo);
 					btnSave.setEnabled(false);
 				}
