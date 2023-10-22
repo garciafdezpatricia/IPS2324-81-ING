@@ -18,6 +18,8 @@ import javax.swing.event.ListSelectionListener;
 
 import db.Doctor;
 import util.ConnectionFactory;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
 
 public class IdentificationWindow extends JDialog {
 
@@ -28,9 +30,14 @@ public class IdentificationWindow extends JDialog {
 	private DefaultListModel<Doctor> doctors = new DefaultListModel<>();
 
 	private Doctor selectedDoctor;
-	private JButton btnNext;
+	private JButton btnDone;
 	private JButton btnCancel;
-
+	private JTextField txtValue;
+	private JComboBox<String> comboBoxFilter;
+	private JLabel lblSelectTheFilter;
+	private JLabel lblIntroduceValue;
+	private JButton btnReset;
+	private JButton btnApply;
 
 	/**
 	 * Launch the application.
@@ -55,27 +62,31 @@ public class IdentificationWindow extends JDialog {
 		try {
 			doctors = ConnectionFactory.getDoctors();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 765, 467);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(null);
 		contentPanel.add(getLblChooseDoctor());
 		contentPanel.add(getListDoctors());
-		contentPanel.add(getBtnNext());
+		contentPanel.add(getBtnDone());
 		contentPanel.add(getBtnCancel());
+		contentPanel.add(getComboBoxFilter());
+		contentPanel.add(getLblSelectTheFilter());
+		contentPanel.add(getbLblIntroduceValue());
+		contentPanel.add(getTxtValue());
+		contentPanel.add(getBtnReset());
+		contentPanel.add(getBtnApply());
 	}
-
 
 	private JLabel getLblChooseDoctor() {
 		if (lblChooseDoctor == null) {
 			lblChooseDoctor = new JLabel("Select the doctor to assign a work period");
-			lblChooseDoctor.setFont(new Font("Tahoma", Font.PLAIN, 12));
-			lblChooseDoctor.setBounds(90, 30, 238, 26);
+			lblChooseDoctor.setFont(new Font("Tahoma", Font.PLAIN, 16));
+			lblChooseDoctor.setBounds(211, 20, 302, 26);
 		}
 		return lblChooseDoctor;
 	}
@@ -83,7 +94,7 @@ public class IdentificationWindow extends JDialog {
 	private JList<Doctor> getListDoctors() {
 		if (listDoctors == null) {
 			listDoctors = new JList<Doctor>(doctors);
-			listDoctors.setBounds(10, 59, 414, 158);
+			listDoctors.setBounds(351, 59, 371, 276);
 
 			listDoctors.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
@@ -99,44 +110,101 @@ public class IdentificationWindow extends JDialog {
 		return listDoctors;
 	}
 
-	
 	public boolean isDoctorSelected() {
 		if (selectedDoctor == null)
 			return false;
 		return true;
-		
+
 	}
-	
+
 	public Doctor getSelectedDoctor() {
 		if (isDoctorSelected())
 			return selectedDoctor;
 		return null;
 	}
-	
-	
-	private JButton getBtnNext() {
-		if (btnNext == null) {
-			btnNext = new JButton("Next");
-			btnNext.addActionListener(new ActionListener() {
+
+	private JButton getBtnDone() {
+		if (btnDone == null) {
+			btnDone = new JButton("Done");
+			btnDone.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			btnDone.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (selectedDoctor != null)
 						dispose();
 				}
 			});
-			btnNext.setBounds(335, 228, 89, 23);
+			btnDone.setBounds(633, 374, 89, 23);
 		}
-		return btnNext;
+		return btnDone;
 	}
+
 	private JButton getBtnCancel() {
 		if (btnCancel == null) {
 			btnCancel = new JButton("Cancel");
+			btnCancel.setFont(new Font("Tahoma", Font.PLAIN, 12));
 			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					dispose();
 				}
 			});
-			btnCancel.setBounds(239, 228, 89, 23);
+			btnCancel.setBounds(514, 374, 89, 23);
 		}
 		return btnCancel;
+	}
+
+	private JComboBox<String> getComboBoxFilter() {
+		if (comboBoxFilter == null) {
+			comboBoxFilter = new JComboBox<String>();
+			comboBoxFilter.setBounds(25, 96, 296, 26);
+		}
+		return comboBoxFilter;
+	}
+
+	private JLabel getLblSelectTheFilter() {
+		if (lblSelectTheFilter == null) {
+			lblSelectTheFilter = new JLabel("Select the type of filtering:");
+			lblSelectTheFilter.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			lblSelectTheFilter.setBounds(25, 60, 179, 26);
+
+		}
+
+		return lblSelectTheFilter;
+	}
+
+	private JLabel getbLblIntroduceValue() {
+		if (lblIntroduceValue == null) {
+			lblIntroduceValue = new JLabel("Introduce the value used to filter:");
+			lblIntroduceValue.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			lblIntroduceValue.setBounds(25, 140, 302, 26);
+		}
+		return lblIntroduceValue;
+	}
+
+	private JTextField getTxtValue() {
+		if (txtValue == null) {
+			txtValue = new JTextField();
+			txtValue.setBounds(25, 176, 296, 31);
+			contentPanel.add(txtValue);
+			txtValue.setColumns(10);
+		}
+		return txtValue;
+	}
+
+	private JButton getBtnReset() {
+		if (btnReset == null) {
+			btnReset = new JButton("Reset");
+			btnReset.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			btnReset.setBounds(140, 228, 89, 23);
+		}
+		return btnReset;
+	}
+
+	private JButton getBtnApply() {
+		if (btnApply == null) {
+			btnApply = new JButton("Apply");
+			btnApply.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			btnApply.setBounds(25, 228, 89, 23);
+		}
+		return btnApply;
 	}
 }
