@@ -417,15 +417,6 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 	}
 
-//	private JPanel getPanel_5() {
-//		if (panel_doctor_filter == null) {
-//			panel_doctor_filter = new JPanel();
-//			panel_doctor_filter.setLayout(new BorderLayout(0, 0));
-//			
-//		}
-//		return panel_doctor_filter;
-//	}
-
 	private JPanel getPanel_patient_filter() {
 		if (panel_patient_filter == null) {
 			panel_patient_filter = new JPanel();

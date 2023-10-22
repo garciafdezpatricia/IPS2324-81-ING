@@ -700,7 +700,138 @@ public class ConnectionFactory {
 
 			}
 		}
-		//todo: por si escogen mas de un medico
+		if (doctors.size() > 1) {
+			// hay que comprobar que la fecha que se pasa como parámetro esté dentro de ese
+			// workperiod
+			String query = "SELECT id from workperiod where fk_doctorid = ? and ? >= startday and ? <= finalday ";
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+			List<BigDecimal> ids = new ArrayList<>();
+			for (int i = 0; i < doctors.size(); i++) {
+				BigDecimal b = new BigDecimal(doctors.get(i).getId());
+				preparedStatement.setBigDecimal(1, b);
+				preparedStatement.setDate(2, day);
+				preparedStatement.setDate(3, day);
+
+				ResultSet resultSet = preparedStatement.executeQuery();
+				while (resultSet.next()) {
+					ids.add(resultSet.getBigDecimal("id"));
+				}
+
+				if (ids.size() < doctors.size()) {
+					System.out.println("No hay free hours porque ese dia uno de los médicos no trabaja (workperiod)");
+				}
+				// si si que está dentro del workperiod
+				else {
+					System.out.println("El dia si esta dentro del workperiod de todos los doctores");
+					String query2 = "SELECT * from workday where workperiodid = ? and weekday = ?";
+
+					PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(day);
+					int diaSemana = calendar.get(Calendar.DAY_OF_WEEK);
+
+					List<WorkDay> workdays = new ArrayList<>();
+
+					for (int j = 0; j < ids.size(); j++) {
+						preparedStatement2.setBigDecimal(1, ids.get(j));
+						preparedStatement2.setString(2, obtenerNombreDia(diaSemana));
+
+						ResultSet resultSet2 = preparedStatement2.executeQuery();
+						
+						// me tiene que devolver un workday del dia de la semana adecuado
+						// TODO: NO SE ESTÁ CONTEMPLANDO QUE HAYA SIDO MODIFICADO EL DÍA
+						while (resultSet2.next()) {
+							workdays.add(new WorkDay(resultSet2.getBigDecimal("id").toBigInteger(),
+									resultSet2.getString("weekday"), resultSet2.getString("starthour"),
+									resultSet2.getString("endhour"), ids.get(j).toBigInteger()));
+
+						}
+
+					}
+					SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+
+					if (workdays.size() != ids.size()) {
+						System.out.println("la lista de workdays no coincide con la de doctores");
+					} else {
+						// ahora falta filtrar en el caso de que tenga citas
+
+						String horaMasTardeDeEntrada = workdays.get(0).getStartHour();
+						String horaMasProntoDeSalida = workdays.get(0).getEndHour();
+						
+						for(int j = 0; j< workdays.size();j++) {
+							if(dateFormat.parse(workdays.get(j).getStartHour()).after(dateFormat.parse(horaMasTardeDeEntrada))) {
+								horaMasTardeDeEntrada = workdays.get(j).getStartHour();
+							}
+							if(dateFormat.parse(workdays.get(j).getEndHour()).before(dateFormat.parse(horaMasProntoDeSalida))) {
+								horaMasProntoDeSalida = workdays.get(j).getEndHour();
+							}
+								
+						}
+						String s = "The doctors work from " + horaMasTardeDeEntrada + " to " + horaMasProntoDeSalida;
+						res = s;
+
+						// APPOINTMENT?
+						String query3 = "SELECT * FROM APPOINTMENT WHERE DOCTORID = ?";
+
+						PreparedStatement preparedStatement3 = connection.prepareStatement(query3);
+
+						preparedStatement3.setBigDecimal(1, ids.get(i));
+
+						ResultSet resultSet3 = preparedStatement3.executeQuery();
+
+						List<Appointment> apps = new ArrayList<>();
+						while (resultSet3.next()) {
+							apps.add(new Appointment(resultSet3.getBigDecimal("id").toBigInteger(),
+									resultSet3.getBigDecimal("patientid").toBigInteger(),
+									resultSet3.getBigDecimal("doctorid").toBigInteger(),
+									resultSet3.getString("startdate"), resultSet3.getString("enddate"),
+									resultSet3.getInt("urgency"), resultSet3.getInt("attended"),
+									resultSet3.getString("checkedin"), resultSet3.getString("checkedout"),
+									resultSet3.getBigDecimal("officeid").toBigInteger(),
+									resultSet3.getString("information")));
+
+						}
+
+						// filtrarlos por las que sean en el día, hay que pasar el string a date
+						List<Appointment> appsThatDay = new ArrayList<>();
+						SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+						for (Appointment a : apps) {
+							System.out.println("a.getStartdate" + a.getStartdate());
+							System.out.println("day" + dateFormat2.parse(day + " 00:00:00"));
+
+							System.out.println("a.getend" + a.getEnddate());
+
+							if (dateFormat2.parse(a.getStartdate()).after(dateFormat2.parse(day + " 00:00:00"))
+									&& dateFormat2.parse(a.getEnddate()).before(dateFormat2.parse(day + " 24:00:00"))) {
+
+								appsThatDay.add(a);
+							}
+						}
+
+						// si hay citas ese dia
+						if (!appsThatDay.isEmpty()) {
+							for (Appointment a : appsThatDay) {
+								res += "\n A doctor has appointment from:\n\t "
+										+ dateFormat2.parse(a.getStartdate()).getHours() + ":"
+										+ dateFormat2.parse(a.getStartdate()).getMinutes() + " to\n\t "
+										+ dateFormat2.parse(a.getEnddate()).getHours() + ":"
+										+ dateFormat2.parse(a.getEnddate()).getMinutes() + "\n";
+							}
+						} else {
+							System.out.println("no tiene más citas");
+						}
+					}
+
+				}
+
+			}
+
+		}
+
+		// todo: por si escogen mas de un medico
 		return res;
 
 	}
