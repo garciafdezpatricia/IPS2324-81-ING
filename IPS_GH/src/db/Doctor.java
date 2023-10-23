@@ -9,8 +9,18 @@ public class Doctor {
 	private String surname;
 	private String email;
 	private String personal_id;
+	private String specialization;
 
-	public Doctor(BigInteger id, String numColegiado, String name, String surname, String email, String personal_id) {
+	public String getSpecialization() {
+		return specialization;
+	}
+
+	public void setSpecialization(String specialization) {
+		this.specialization = specialization;
+	}
+
+	public Doctor(BigInteger id, String numColegiado, String name, String surname, String email, String personal_id,
+			String specialization) {
 		super();
 		this.id = id;
 		this.numColegiado = numColegiado;
@@ -18,6 +28,7 @@ public class Doctor {
 		this.surname = surname;
 		this.email = email;
 		this.personal_id = personal_id;
+		this.specialization = specialization;
 	}
 
 	public BigInteger getId() {

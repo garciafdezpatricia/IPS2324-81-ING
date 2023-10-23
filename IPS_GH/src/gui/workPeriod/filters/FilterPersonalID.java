@@ -17,7 +17,7 @@ public class FilterPersonalID implements Filter {
 	@Override
 	public DefaultListModel<Doctor> filter() {
 		for (int i = 0; i < doctors.getSize(); i++) {
-			if (value.equals(doctors.get(i).getId())) {
+			if (value.equals(String.valueOf(doctors.get(i).getId()))) {
 				filtered.addElement(doctors.get(i));
 			}
 		}
