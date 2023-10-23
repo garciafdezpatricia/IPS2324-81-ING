@@ -58,8 +58,10 @@ public class ConnectionFactory {
 				String name = resultSet.getString("name");
 				String surname = resultSet.getString("surname");
 				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
 				// Procesa otros campos según la estructura de tu tabla
-				doctors.addElement(new Doctor(aux, numcolegiado, name, surname, email));
+				doctors.addElement(new Doctor(aux, numcolegiado, name, surname, email, personal_id, specialization));
 			}
 
 			// Cerrar la conexión
