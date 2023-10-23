@@ -59,8 +59,10 @@ public class ConnectionFactory {
 				String name = resultSet.getString("name");
 				String surname = resultSet.getString("surname");
 				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
 				// Procesa otros campos según la estructura de tu tabla
-				doctors.addElement(new Doctor(aux, numcolegiado, name, surname, email));
+				doctors.addElement(new Doctor(aux, numcolegiado, name, surname, email, personal_id, specialization));
 			}
 
 			// Cerrar la conexión
@@ -72,8 +74,8 @@ public class ConnectionFactory {
 		}
 
 		return doctors;
+	
 	}
-
 	public static DefaultListModel<Patient> getPatients() throws Exception {
 		DefaultListModel<Patient> patients = new DefaultListModel<>();
 
@@ -739,7 +741,7 @@ public class ConnectionFactory {
 						preparedStatement2.setString(2, obtenerNombreDia(diaSemana));
 
 						ResultSet resultSet2 = preparedStatement2.executeQuery();
-						
+
 						// me tiene que devolver un workday del dia de la semana adecuado
 						// TODO: NO SE ESTÁ CONTEMPLANDO QUE HAYA SIDO MODIFICADO EL DÍA
 						while (resultSet2.next()) {
@@ -759,15 +761,17 @@ public class ConnectionFactory {
 
 						String horaMasTardeDeEntrada = workdays.get(0).getStartHour();
 						String horaMasProntoDeSalida = workdays.get(0).getEndHour();
-						
-						for(int j = 0; j< workdays.size();j++) {
-							if(dateFormat.parse(workdays.get(j).getStartHour()).after(dateFormat.parse(horaMasTardeDeEntrada))) {
+
+						for (int j = 0; j < workdays.size(); j++) {
+							if (dateFormat.parse(workdays.get(j).getStartHour())
+									.after(dateFormat.parse(horaMasTardeDeEntrada))) {
 								horaMasTardeDeEntrada = workdays.get(j).getStartHour();
 							}
-							if(dateFormat.parse(workdays.get(j).getEndHour()).before(dateFormat.parse(horaMasProntoDeSalida))) {
+							if (dateFormat.parse(workdays.get(j).getEndHour())
+									.before(dateFormat.parse(horaMasProntoDeSalida))) {
 								horaMasProntoDeSalida = workdays.get(j).getEndHour();
 							}
-								
+
 						}
 						String s = "The doctors work from " + horaMasTardeDeEntrada + " to " + horaMasProntoDeSalida;
 						res = s;

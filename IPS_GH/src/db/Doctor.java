@@ -8,17 +8,29 @@ public class Doctor {
 	private String name;
 	private String surname;
 	private String email;
+	private String personal_id;
+	private String specialization;
 
-	public Doctor(BigInteger id, String numColegiado, String name, String surname, String email) {
+	public String getSpecialization() {
+		return specialization;
+	}
+
+	public void setSpecialization(String specialization) {
+		this.specialization = specialization;
+	}
+
+	public Doctor(BigInteger id, String numColegiado, String name, String surname, String email, String personal_id,
+			String specialization) {
 		super();
 		this.id = id;
 		this.numColegiado = numColegiado;
 		this.name = name;
 		this.surname = surname;
 		this.email = email;
+		this.personal_id = personal_id;
+		this.specialization = specialization;
 	}
 
-	
 	public BigInteger getId() {
 		return id;
 	}
@@ -43,7 +55,6 @@ public class Doctor {
 		this.name = name;
 	}
 
-	
 	public String getSurname() {
 		return surname;
 	}
@@ -60,9 +71,17 @@ public class Doctor {
 		this.email = email;
 	}
 
+	public String getPersonal_id() {
+		return personal_id;
+	}
+
+	public void setPersonal_id(String personal_id) {
+		this.personal_id = personal_id;
+	}
+
 	@Override
 	public String toString() {
 		return "Dr. " + getName() + " " + getSurname();
 	}
-	
+
 }
