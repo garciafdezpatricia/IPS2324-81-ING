@@ -8,7 +8,7 @@ public class AppointmentBLDto {
 	public String startDate;
 	public String endDate;
 	public boolean urgency;
-	public boolean attended;
+	public int attended;
 	public String checkIn;
 	public String checkOut;
 	public String information;

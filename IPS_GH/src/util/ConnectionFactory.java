@@ -122,7 +122,7 @@ public class ConnectionFactory {
 			con = getOracleConnection();
 			ps = con.prepareStatement(
 					"UPDATE APPOINTMENT SET " + "attended = ?, checkedin = ?, checkedout = ? " + "WHERE id = ?");
-			ps.setInt(1, appointment.attended ? 1 : 0);
+			ps.setInt(1, appointment.attended);
 			ps.setString(2, appointment.checkIn);
 			ps.setString(3, appointment.checkOut);
 			ps.setInt(4, appointment.id);
@@ -167,7 +167,7 @@ public class ConnectionFactory {
 				apmnt.endDate = rs.getString(5);
 
 				apmnt.urgency = rs.getInt(6) == 0 ? false : true;
-				apmnt.attended = rs.getInt(7) == 0 ? false : true;
+				apmnt.attended = rs.getInt(7);
 				apmnt.checkIn = rs.getString(8);
 				apmnt.checkOut = rs.getString(9);
 				apmnt.officeid = rs.getInt(10);
@@ -583,4 +583,5 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
+	
 }
