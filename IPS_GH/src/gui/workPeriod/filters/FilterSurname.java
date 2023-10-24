@@ -4,13 +4,13 @@ import javax.swing.DefaultListModel;
 
 import db.Doctor;
 
-public class FilterPersonalID implements Filter {
+public class FilterSurname  implements Filter {
 
 	private DefaultListModel<Doctor> doctors;
 	private String value;
 	private DefaultListModel<Doctor> filtered;
 	
-	public FilterPersonalID(DefaultListModel<Doctor> doctors, String value) {
+	public FilterSurname(DefaultListModel<Doctor> doctors, String value) {
 		this.filtered = new DefaultListModel<Doctor>();
 		this.doctors = doctors;
 		this.value = value;
@@ -18,10 +18,11 @@ public class FilterPersonalID implements Filter {
 	@Override
 	public DefaultListModel<Doctor> filter() {
 		for (int i = 0; i < doctors.getSize(); i++) {
-			if (value.equals(String.valueOf(doctors.get(i).getId()))) {
+			if (value.toLowerCase().equals(doctors.get(i).getSurname().toLowerCase())) {
 				filtered.addElement(doctors.get(i));
 			}
 		}
 		return filtered;
 	}
+
 }

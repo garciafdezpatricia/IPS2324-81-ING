@@ -6,6 +6,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -17,6 +18,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import db.Doctor;
+import gui.workPeriod.filters.Filter;
+import gui.workPeriod.filters.FilterMedicalLicenseID;
+import gui.workPeriod.filters.FilterName;
+import gui.workPeriod.filters.FilterPersonalID;
+import gui.workPeriod.filters.FilterSpecialization;
+import gui.workPeriod.filters.FilterSurname;
 import util.ConnectionFactory;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
@@ -61,7 +68,8 @@ public class IdentificationWindowView extends JDialog {
 	 */
 	public IdentificationWindowView() {
 		selectedDoctor = null;
-		setIconImage(Toolkit.getDefaultToolkit().getImage(IdentificationWindowView.class.getResource("/img/descarga.jpg")));
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(IdentificationWindowView.class.getResource("/img/descarga.jpg")));
 		setTitle("Doctor selection");
 		try {
 			doctors = ConnectionFactory.getDoctors();
@@ -160,8 +168,18 @@ public class IdentificationWindowView extends JDialog {
 		if (comboBoxFilter == null) {
 			comboBoxFilter = new JComboBox<String>();
 			comboBoxFilter.setBounds(25, 96, 296, 26);
+
+			comboBoxFilter.setModel(new DefaultComboBoxModel<>(getFilters()));
+
 		}
 		return comboBoxFilter;
+	}
+
+	private String[] getFilters() {
+		String[] f = { "Filtering by name", "Filtering by surname", "Filtering by personal ID",
+				"Filtering by medical license ID", "Filtering by specialization" };
+
+		return f;
 	}
 
 	private JLabel getLblSelectTheFilter() {
@@ -199,6 +217,11 @@ public class IdentificationWindowView extends JDialog {
 			btnReset = new JButton("Reset");
 			btnReset.setFont(new Font("Tahoma", Font.PLAIN, 12));
 			btnReset.setBounds(140, 228, 89, 23);
+			btnReset.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					getListDoctors().setModel(doctors);
+				}
+			});
 		}
 		return btnReset;
 	}
@@ -206,9 +229,42 @@ public class IdentificationWindowView extends JDialog {
 	private JButton getBtnApply() {
 		if (btnApply == null) {
 			btnApply = new JButton("Apply");
+			btnApply.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					Filter f = applyFilter((String) getComboBoxFilter().getSelectedItem(), getTxtValue().getText());
+					getListDoctors().setModel(f.filter());
+				}
+			});
 			btnApply.setFont(new Font("Tahoma", Font.PLAIN, 12));
 			btnApply.setBounds(25, 228, 89, 23);
 		}
 		return btnApply;
+	}
+
+	/**
+	 * String[] f = { "Filtering by name", "Filtering by surname", "Filtering by
+	 * personal ID", "Filtering by medical license ID", "Filtering by
+	 * specialization" };
+	 * 
+	 * @param filter
+	 * @param value
+	 * @return
+	 */
+
+	private Filter applyFilter(String filter, String value) {
+		if (filter.equals("Filtering by name"))
+			return new FilterName(doctors, value);
+		else if (filter.equals("Filtering by surname"))
+			return new FilterSurname(doctors, value);
+		else if (filter.equals("Filtering by personal ID"))
+			return new FilterPersonalID(doctors, value);
+		else if (filter.equals("Filtering by personal ID"))
+			return new FilterPersonalID(doctors, value);
+		else if (filter.equals("Filtering by medical license ID"))
+			return new FilterMedicalLicenseID(doctors, value);
+		else if (filter.equals("Filtering by specialization"))
+			return new FilterSpecialization(doctors, value);
+
+		return null;
 	}
 }

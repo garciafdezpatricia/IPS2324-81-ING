@@ -11,13 +11,14 @@ public class FilterSpecialization implements Filter {
 	private DefaultListModel<Doctor> filtered;
 	
 	public FilterSpecialization(DefaultListModel<Doctor> doctors, String value) {
+		this.filtered = new DefaultListModel<Doctor>();
 		this.doctors = doctors;
 		this.value = value;
 	}
 	@Override
 	public DefaultListModel<Doctor> filter() {
 		for (int i = 0; i < doctors.getSize(); i++) {
-			if (value.equals(doctors.get(i).getSpecialization())) {
+			if (value.toLowerCase().equals(doctors.get(i).getSpecialization().toLowerCase())) {
 				filtered.addElement(doctors.get(i));
 			}
 		}
