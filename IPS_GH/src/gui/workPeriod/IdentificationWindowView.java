@@ -21,8 +21,12 @@ import util.ConnectionFactory;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
-public class IdentificationWindow extends JDialog {
+public class IdentificationWindowView extends JDialog {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
 	private JLabel lblChooseDoctor;
 	private JList<Doctor> listDoctors;
@@ -44,7 +48,7 @@ public class IdentificationWindow extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			IdentificationWindow dialog = new IdentificationWindow();
+			IdentificationWindowView dialog = new IdentificationWindowView();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -55,9 +59,9 @@ public class IdentificationWindow extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public IdentificationWindow() {
+	public IdentificationWindowView() {
 		selectedDoctor = null;
-		setIconImage(Toolkit.getDefaultToolkit().getImage(IdentificationWindow.class.getResource("/img/descarga.jpg")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(IdentificationWindowView.class.getResource("/img/descarga.jpg")));
 		setTitle("Doctor selection");
 		try {
 			doctors = ConnectionFactory.getDoctors();

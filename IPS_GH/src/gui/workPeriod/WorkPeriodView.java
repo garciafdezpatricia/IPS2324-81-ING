@@ -68,7 +68,7 @@ public class WorkPeriodView extends JFrame {
 	private JLabel lblClockOutTime;
 	private JLabel lblClockInTime;
 	private JLabel lblEmpty;
-	private IdentificationWindow iw;
+	private IdentificationWindowView iw;
 	private JButton btnDoctor;
 
 	private WorkPeriod wp;
@@ -95,7 +95,7 @@ public class WorkPeriodView extends JFrame {
 	 * Create the frame.
 	 */
 	public WorkPeriodView() {
-		iw = new IdentificationWindow();
+		iw = new IdentificationWindowView();
 
 		setIconImage(Toolkit.getDefaultToolkit().getImage(WorkPeriodView.class.getResource("/img/descarga.jpg")));
 		setTitle("Work period");
@@ -679,7 +679,7 @@ public class WorkPeriodView extends JFrame {
 			btnDoctor = new JButton("Choose doctor");
 			btnDoctor.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					iw = new IdentificationWindow();
+					iw = new IdentificationWindowView();
 					iw.setVisible(true);
 					iw.setLocationRelativeTo(null);
 				}
