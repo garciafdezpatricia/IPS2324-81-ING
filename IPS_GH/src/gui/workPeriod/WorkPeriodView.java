@@ -621,7 +621,7 @@ public class WorkPeriodView extends JFrame {
 
 	private JLabel getLblFirstDay() {
 		if (lblFirstDay == null) {
-			lblFirstDay = new JLabel("First day of work period (dd/mm/yyyy)");
+			lblFirstDay = new JLabel("First day of work period (dd-mm-yyyy)");
 			lblFirstDay.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		}
 		return lblFirstDay;
@@ -637,7 +637,7 @@ public class WorkPeriodView extends JFrame {
 
 	private JLabel getLblLastDay() {
 		if (lblLastDay == null) {
-			lblLastDay = new JLabel("Last day of work period (dd/mm/yyyy)");
+			lblLastDay = new JLabel("Last day of work period (dd-mm-yyyy)");
 			lblLastDay.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		}
 		return lblLastDay;

@@ -19,6 +19,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 
+import gui.workPeriod.EditWorkPeriodView;
 import gui.workPeriod.WorkPeriodView;
 
 public class MenuMedicalRecepcionist extends JFrame {
@@ -31,6 +32,7 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JPanel panelBack;
 	private JButton btnCancel;
 	private JButton btnAssignWorkPeriod;
+	private JButton btnEditWp;
 
 	/**
 	 * Launch the application.
@@ -91,9 +93,10 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JPanel getPanelButtons() {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
-			panelButtons.setLayout(new GridLayout(0, 2, 0, 0));
+			panelButtons.setLayout(new GridLayout(0, 3, 0, 0));
 			panelButtons.add(getBtnCreateApp());
 			panelButtons.add(getBtnAssignWorkPeriod());
+			panelButtons.add(getBtnEditWp());
 		}
 		return panelButtons;
 	}
@@ -164,4 +167,28 @@ public class MenuMedicalRecepcionist extends JFrame {
 		}
 		return btnAssignWorkPeriod;
 	}
+	private JButton getBtnEditWp() {
+		if (btnEditWp == null) {
+			btnEditWp = new JButton("Edit workperiod");
+			btnEditWp.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					EditWorkPeriodView editWp;
+					try {
+						editWp = new EditWorkPeriodView();
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
+		}
+		return btnEditWp;
+	}
+	
+	
+	
+	
 }

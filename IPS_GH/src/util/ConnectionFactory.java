@@ -283,7 +283,7 @@ public class ConnectionFactory {
 								&& sdf3.parse(utilDate + " " + hourFrom + ":00")
 										.after(sdf3.parse(utilDate + " " + workday.get(i).getStartHour() + ":00"))
 								&& sdf3.parse(utilDate + " " + hourTo + ":00")
-										.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour()+ ":00"))) {
+										.before(sdf3.parse(utilDate + " " + workday.get(i).getEndHour() + ":00"))) {
 
 							return true;
 						}
@@ -497,8 +497,7 @@ public class ConnectionFactory {
 			Connection connection = ConnectionFactory.getOracleConnection();
 
 			// Consulta SQL con parámetros
-			String insertQuery = "INSERT INTO WorkPeriod (startday, finalday, fk_doctorid) "
-					+ "VALUES (?, ?, ?)";
+			String insertQuery = "INSERT INTO WorkPeriod (startday, finalday, fk_doctorid) " + "VALUES (?, ?, ?)";
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
@@ -508,7 +507,6 @@ public class ConnectionFactory {
 			preparedStatement.setDate(1, startDate);
 			preparedStatement.setDate(2, endDate);
 			preparedStatement.setBigDecimal(3, aux2);
-			
 
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
@@ -548,20 +546,17 @@ public class ConnectionFactory {
 			preparedStatement2.setBigDecimal(1, b);
 
 			ResultSet resultSet = preparedStatement2.executeQuery();
-			BigDecimal wpid  = null;
-			
+			BigDecimal wpid = null;
+
 			while (resultSet.next()) {
-				 wpid = resultSet.getBigDecimal("id");
-				
+				wpid = resultSet.getBigDecimal("id");
 
 			}
 
-			
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
 			// Establecer valores para los parámetros
-			
 
 			BigDecimal aux2 = new BigDecimal(workperiod_id);
 
@@ -586,4 +581,116 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
+
+	public static BigInteger doctorFromName(String name) throws Exception {
+		for (int i = 0; i < getOffices().size(); i++) {
+			if (getDoctors().get(i).getName().equals(name))
+				return getDoctors().get(i).getId();
+		}
+		return new BigInteger("1234567890123456789012345678901234567890");
+	}
+
+	public static BigInteger doctorFromSurname(String surname) throws Exception {
+		for (int i = 0; i < getOffices().size(); i++) {
+			if (getDoctors().get(i).getSurname().equals(surname))
+				return getDoctors().get(i).getId();
+		}
+		return new BigInteger("1234567890123456789012345678901234567890");
+	}
+
+	public static BigInteger doctorFromPersonalID(String personalID) throws Exception {
+		for (int i = 0; i < getOffices().size(); i++) {
+			if (getDoctors().get(i).getPersonal_id().equals(personalID))
+				return getDoctors().get(i).getId();
+		}
+		return new BigInteger("1234567890123456789012345678901234567890");
+	}
+	
+	public static BigInteger doctorFromMedicalLicenseID(String medLicID) throws Exception {
+		for (int i = 0; i < getOffices().size(); i++) {
+			if (getDoctors().get(i).getNumColegiado().equals(medLicID))
+				return getDoctors().get(i).getId();
+		}
+		return new BigInteger("1234567890123456789012345678901234567890");
+	}
+	
+
+	
+	
+	
+	
+//	public static List<AppointmentBLDto> getWorkPeriodByDoctorId(int doctorId) {
+//		Connection con = null;
+//		PreparedStatement ps = null;
+//		ResultSet rs = null;
+//		try {
+//			con = getOracleConnection();
+//			ps = con.prepareStatement("SELECT * FROM WORKPERIOD WHERE doctorid = ?");
+//			ps.setInt(1, doctorId);
+//			rs = ps.executeQuery();
+//			WorkPeriod wp = null;
+//
+//			while (rs.next()) {
+//				wp = new AppointmentBLDto();
+//				wp.id = rs.getInt(1);
+//				wp.patientid = rs.getInt(2);
+//				wp.doctorid = rs.getInt(3);
+//				wp.startDate = rs.getString(4);
+//				wp.endDate = rs.getString(5);
+//
+//				wp.urgency = rs.getInt(6) == 0 ? false : true;
+//				wp.attended = rs.getInt(7) == 0 ? false : true;
+//				wp.checkIn = rs.getString(8);
+//				wp.checkOut = rs.getString(9);
+//				wp.officeid = rs.getInt(10);
+//				wp.information = rs.getString(11);
+//				wp.patientName = rs.getString(15);
+//				wp.patientSurname = rs.getString(16);
+//				wp.officeCode = rs.getString(19);
+//
+//				appointments.add(wp);
+//
+//			}
+//			return appointments;
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			throw new RuntimeException();
+//		} finally {
+//			try {
+//				if (con != null)
+//					con.close();
+//				if (ps != null)
+//					ps.close();
+//				if (rs != null)
+//					rs.close();
+//			} catch (SQLException e) {
+//				throw new RuntimeException();
+//			}
+//		}
+//	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
 }
