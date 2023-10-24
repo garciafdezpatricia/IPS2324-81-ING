@@ -11,6 +11,7 @@ public class FilterName implements Filter {
 	private DefaultListModel<Doctor> filtered;
 	
 	public FilterName(DefaultListModel<Doctor> doctors, String value) {
+		this.filtered = new DefaultListModel<Doctor>();
 		this.doctors = doctors;
 		this.value = value;
 	}

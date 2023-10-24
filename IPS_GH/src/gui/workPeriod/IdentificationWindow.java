@@ -6,20 +6,27 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import db.Doctor;
+import gui.workPeriod.filters.Filter;
+import gui.workPeriod.filters.FilterMedicalLicenseID;
+import gui.workPeriod.filters.FilterName;
+import gui.workPeriod.filters.FilterPersonalID;
+import gui.workPeriod.filters.FilterSpecialization;
+import gui.workPeriod.filters.FilterSurname;
 import util.ConnectionFactory;
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
 
 public class IdentificationWindow extends JDialog {
 
@@ -104,7 +111,6 @@ public class IdentificationWindow extends JDialog {
 						selectedDoctor = d;
 					}
 				}
-
 			});
 		}
 		return listDoctors;
@@ -156,8 +162,18 @@ public class IdentificationWindow extends JDialog {
 		if (comboBoxFilter == null) {
 			comboBoxFilter = new JComboBox<String>();
 			comboBoxFilter.setBounds(25, 96, 296, 26);
+
+			comboBoxFilter.setModel(new DefaultComboBoxModel<>(getFilters()));
+
 		}
 		return comboBoxFilter;
+	}
+
+	private String[] getFilters() {
+		String[] f = { "Filtering by name", "Filtering by surname", "Filtering by personal ID",
+				"Filtering by medical license ID", "Filtering by specialization" };
+
+		return f;
 	}
 
 	private JLabel getLblSelectTheFilter() {
@@ -202,9 +218,42 @@ public class IdentificationWindow extends JDialog {
 	private JButton getBtnApply() {
 		if (btnApply == null) {
 			btnApply = new JButton("Apply");
+			btnApply.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					Filter f = applyFilter((String) getComboBoxFilter().getSelectedItem(), getTxtValue().getText());
+					getListDoctors().setModel(f.filter());
+				}
+			});
 			btnApply.setFont(new Font("Tahoma", Font.PLAIN, 12));
 			btnApply.setBounds(25, 228, 89, 23);
 		}
 		return btnApply;
+	}
+
+	/**
+	 * String[] f = { "Filtering by name", "Filtering by surname", "Filtering by
+	 * personal ID", "Filtering by medical license ID", "Filtering by
+	 * specialization" };
+	 * 
+	 * @param filter
+	 * @param value
+	 * @return
+	 */
+
+	private Filter applyFilter(String filter, String value) {
+		if (filter.equals("Filtering by name"))
+			return new FilterName(doctors, value);
+		else if (filter.equals("Filtering by surname"))
+			return new FilterSurname(doctors, value);
+		else if (filter.equals("Filtering by personal ID"))
+			return new FilterPersonalID(doctors, value);
+		else if (filter.equals("Filtering by personal ID"))
+			return new FilterPersonalID(doctors, value);
+		else if (filter.equals("Filtering by medical license ID"))
+			return new FilterMedicalLicenseID(doctors, value);
+		else if (filter.equals("Filtering by specialization"))
+			return new FilterSpecialization(doctors, value);
+
+		return null;
 	}
 }

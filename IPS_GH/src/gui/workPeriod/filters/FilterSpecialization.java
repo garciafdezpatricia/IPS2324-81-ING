@@ -11,6 +11,7 @@ public class FilterSpecialization implements Filter {
 	private DefaultListModel<Doctor> filtered;
 	
 	public FilterSpecialization(DefaultListModel<Doctor> doctors, String value) {
+		this.filtered = new DefaultListModel<Doctor>();
 		this.doctors = doctors;
 		this.value = value;
 	}
