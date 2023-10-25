@@ -10,6 +10,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import creator.CausesCreator;
+import db.Diagnosis;
+import db.ICDChapter;
+import db.ICDSubchapter;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
 
@@ -21,6 +24,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +74,12 @@ public class DoctorAppointmentView extends JFrame {
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private CausesCreator causesCreator;
 	private Map<String, List<String>> causes;
-
 	private DefaultListModel<String> finalCauses = new DefaultListModel<String>();
 	private DefaultListModel<String> finalPrescription = new DefaultListModel<String>();
 	private String[] vaccines = new String[] {"Covid-19 vaccine", "Tetanos vaccine", "Spanish flu vaccine", "Viruela vaccine", "Other..."};
-	
+	private List<Diagnosis> diagnosis;
+	private List<ICDChapter> chapters;
+	private List<ICDSubchapter> subchapters = new ArrayList<ICDSubchapter>();
 	private AppointmentBLDto appointment;
 	private JTabbedPane tabbedPane;
 	private JPanel appointmentOptionsPanel;
@@ -526,25 +531,33 @@ public class DoctorAppointmentView extends JFrame {
 			tree.addTreeSelectionListener(new TreeSelectionListener() {
 				public void valueChanged(TreeSelectionEvent e) {
 	                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-	                System.out.println(selectedNode);
 	                if (selectedNode != null && selectedNode.isLeaf()) {
 	                    // Verificar si el nodo seleccionado debe expandirse según los datos de la base de datos
-	                    boolean shouldExpand = consultaBaseDeDatosParaExpansion(selectedNode);
+	                    boolean isChapter = selectedNode.getLevel() ==1;
+	                	//boolean shouldExpand = consultaBaseDeDatosParaExpansion(selectedNode);
 
-	                    if (shouldExpand) {
-	                        // Agregar subnodos al nodo seleccionado (simulación)
-	                        DefaultMutableTreeNode subNode1 = new DefaultMutableTreeNode("Subnode 1");
-	                        DefaultMutableTreeNode subNode2 = new DefaultMutableTreeNode("Subnode 2");
-	                        selectedNode.add(subNode1);
-	                        selectedNode.add(subNode2);
-
-	                        // Notificar al modelo del árbol que la estructura ha cambiado
-	                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-	                        model.nodeStructureChanged(selectedNode);
-
-	                        // Expandir el nodo seleccionado
-	                        tree.expandPath(new TreePath(selectedNode.getPath()));
-	                    }
+	                	if (isChapter) {
+	                		String from = "", to = "";
+	                		for (ICDChapter chapter : chapters) {
+	                			if (chapter.description.equals(selectedNode.getUserObject())) {
+	                				from = chapter.from;
+	                				to = chapter.to;
+	                				break;
+	                			}
+	                		}
+	                		List<ICDSubchapter> newsubchapters = ConnectionFactory.getSubchapters(from, to);
+	                		subchapters.addAll(newsubchapters);
+	                		for (ICDSubchapter item : newsubchapters) {
+	                			DefaultMutableTreeNode subnode = new 
+	                					DefaultMutableTreeNode(item.description);
+	                			selectedNode.add(subnode);
+	                			// Notificar al modelo del árbol que la estructura ha cambiado
+		                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+		                        model.nodeStructureChanged(selectedNode);
+		                        // Expandir el nodo seleccionado
+		                        tree.expandPath(new TreePath(selectedNode.getPath()));
+	                		}
+	                	}
 	                }
 				}
 			});
@@ -561,24 +574,21 @@ public class DoctorAppointmentView extends JFrame {
 	}
 	
 	private void loadTreeData() {
-	    DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root"); // Nodo raíz
+	    DefaultMutableTreeNode root = new DefaultMutableTreeNode("ICD10 Diagnosis"); // Nodo raíz
 	    DefaultTreeModel model = new DefaultTreeModel(root);
 	    tree.setModel(model);
 	    
-	    // Simula la carga de datos desde tu fuente de datos (base de datos, archivos, etc.)
-	    // En este ejemplo, creamos nodos de ejemplo manualmente
-	    DefaultMutableTreeNode nodeA = new DefaultMutableTreeNode("Node A");
-	    DefaultMutableTreeNode nodeB = new DefaultMutableTreeNode("Node B");
-	    DefaultMutableTreeNode nodeC = new DefaultMutableTreeNode("Node C");
-
-	    root.add(nodeA);
-	    root.add(nodeB);
-	    root.add(nodeC);
-	    // Continúa agregando nodos según tu estructura de datos real
+	    chapters = ConnectionFactory.getChapters();
+	    
+	    for (ICDChapter item : chapters) {
+	    	DefaultMutableTreeNode node = new DefaultMutableTreeNode(item.description);
+	    	root.add(node);
+	    }
     }
 
     private boolean consultaBaseDeDatosParaExpansion(DefaultMutableTreeNode node) {
-        return true;
+        // TODO
+        return false;
     }
 	private JLabel getLblMedication() {
 		if (lblMedication == null) {
