@@ -597,6 +597,16 @@ public class ConnectionFactory {
 		}
 		return new BigInteger("1234567890123456789012345678901234567890");
 	}
+	
+	public static BigInteger doctorFromNameAndSurname(String ns) throws Exception {
+		for (int i = 0; i < getOffices().size(); i++) {
+			String a = getDoctors().get(i).getName() + " " + getDoctors().get(i).getSurname();
+			if (a.equals(ns))
+				return getDoctors().get(i).getId();
+		}
+		return new BigInteger("1234567890123456789012345678901234567890");
+	}
+	
 
 	public static BigInteger doctorFromPersonalID(String personalID) throws Exception {
 		for (int i = 0; i < getOffices().size(); i++) {
@@ -605,7 +615,7 @@ public class ConnectionFactory {
 		}
 		return new BigInteger("1234567890123456789012345678901234567890");
 	}
-	
+
 	public static BigInteger doctorFromMedicalLicenseID(String medLicID) throws Exception {
 		for (int i = 0; i < getOffices().size(); i++) {
 			if (getDoctors().get(i).getNumColegiado().equals(medLicID))
@@ -613,84 +623,112 @@ public class ConnectionFactory {
 		}
 		return new BigInteger("1234567890123456789012345678901234567890");
 	}
-	
 
+	public static List<WorkPeriod> getWorkPeriodByDoctorId(BigInteger doctorId) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		List<WorkPeriod> workperiods = new ArrayList<WorkPeriod>();
+		
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM WORKPERIOD WHERE fk_doctorid = ?");
+			
+			BigDecimal a = new BigDecimal(doctorId);
+			
+			System.out.println(a);
+			ps.setBigDecimal(1, a);
+			
+			rs = ps.executeQuery();
+			
+			WorkPeriod wp = null;
+
+			while (rs.next()) {
+				// BigInteger id, Date startDate, Date endDate, BigInteger id_doctor
+				BigDecimal aux = rs.getBigDecimal(1);
+				
+				BigInteger id = aux.toBigInteger();
+				Date startDate = rs.getDate(2);
+				Date endDate = rs.getDate(3);	
+						
+				System.out.println("id=" + id + " startdate=" + startDate + " enddate=" + endDate);
+						
+				
+				wp = new WorkPeriod(id, startDate, endDate, doctorId);
+			
+				workperiods.add(wp);
+
+			}
+			return workperiods;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+	}
 	
 	
 	
-	
-//	public static List<AppointmentBLDto> getWorkPeriodByDoctorId(int doctorId) {
-//		Connection con = null;
-//		PreparedStatement ps = null;
-//		ResultSet rs = null;
-//		try {
-//			con = getOracleConnection();
-//			ps = con.prepareStatement("SELECT * FROM WORKPERIOD WHERE doctorid = ?");
-//			ps.setInt(1, doctorId);
-//			rs = ps.executeQuery();
-//			WorkPeriod wp = null;
-//
-//			while (rs.next()) {
-//				wp = new AppointmentBLDto();
-//				wp.id = rs.getInt(1);
-//				wp.patientid = rs.getInt(2);
-//				wp.doctorid = rs.getInt(3);
-//				wp.startDate = rs.getString(4);
-//				wp.endDate = rs.getString(5);
-//
-//				wp.urgency = rs.getInt(6) == 0 ? false : true;
-//				wp.attended = rs.getInt(7) == 0 ? false : true;
-//				wp.checkIn = rs.getString(8);
-//				wp.checkOut = rs.getString(9);
-//				wp.officeid = rs.getInt(10);
-//				wp.information = rs.getString(11);
-//				wp.patientName = rs.getString(15);
-//				wp.patientSurname = rs.getString(16);
-//				wp.officeCode = rs.getString(19);
-//
-//				appointments.add(wp);
-//
-//			}
-//			return appointments;
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			throw new RuntimeException();
-//		} finally {
-//			try {
-//				if (con != null)
-//					con.close();
-//				if (ps != null)
-//					ps.close();
-//				if (rs != null)
-//					rs.close();
-//			} catch (SQLException e) {
-//				throw new RuntimeException();
-//			}
-//		}
-//	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	public static List<WorkDay> getWorkDayByWPId(BigInteger wpID) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		List<WorkDay> workdays = new ArrayList<WorkDay>();
+		
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM WORKDAY WHERE workperiodid = ?");
+			BigDecimal a = new BigDecimal(wpID);
+			ps.setBigDecimal(1, a);
+			rs = ps.executeQuery();
+			WorkDay wd = null;
+
+			while (rs.next()) {
+				// BigInteger id, String weekday, String startHour, String endHour, BigInteger workperiodid
+				BigDecimal aux = rs.getBigDecimal(1);
+				
+				BigInteger id = aux.toBigInteger();
+				String weekday = rs.getString(2);
+				String startHour = rs.getString(3);
+				String endHour = rs.getString(4);	
+						
+						
+				
+				wd = new WorkDay(id, weekday, startHour, endHour, wpID);
+			
+				workdays.add(wd);
+
+			}
+			return workdays;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+	}
 
 }

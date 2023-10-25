@@ -116,7 +116,6 @@ public class IdentificationWindowView extends JDialog {
 						selectedDoctor = d;
 					}
 				}
-
 			});
 		}
 		return listDoctors;
