@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -67,13 +68,12 @@ public class DoctorAppointmentView extends JFrame {
 	private JButton btnExit;
 	private JButton btnSave;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
-	private JList causesList;
-
 	private CausesCreator causesCreator;
 	private Map<String, List<String>> causes;
 
 	private DefaultListModel<String> finalCauses = new DefaultListModel<String>();
-
+	private DefaultListModel<String> finalPrescription = new DefaultListModel<String>();
+	private String[] vaccines = new String[] {"Covid-19 vaccine", "Tetanos vaccine", "Spanish flu vaccine", "Viruela vaccine", "Other..."};
 	
 	private AppointmentBLDto appointment;
 	private JTabbedPane tabbedPane;
@@ -99,42 +99,43 @@ public class DoctorAppointmentView extends JFrame {
 	private JRadioButton rdbtnYes;
 	private JRadioButton rdbtnNo;
 	private JRadioButton rdbtnDontAnswer;
-	private JTextArea textArea;
+	private JTextArea txtAreaOtherCauses;
 	private JPanel pnDiagnosis;
 	private JPanel pnPrescription;
 	private JTree tree;
 	private JScrollPane scrollPane;
 	private JLabel lblMedication;
-	private JComboBox comboBox;
-	private JButton btnNewButton;
-	private JLabel lblNewLabel;
-	private JLabel lblIntervalh;
-	private JLabel lblDurationdays;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
+	private JComboBox comboBoxMedication;
+	private JButton btnAddMedication;
+	private JLabel lblQuantity;
+	private JLabel lblInterval;
+	private JLabel lblDurationday;
+	private JTextField txtQuantity;
+	private JTextField txtInterval;
+	private JTextField txtDuration;
 	private JLabel lblComments;
-	private JTextArea textArea_1;
+	private JTextArea txtAreaComments;
 	private JScrollPane scrollPane_2;
 	private JLabel lblVaccines;
-	private JComboBox comboBox_1;
-	private JButton btnNewButton_2;
+	private JComboBox comboBoxVaccines;
+	private JButton btnAddVaccine;
 	private JSeparator separator;
 	private JSeparator separator_1;
-	private JLabel lblNewLabel_1;
-	private JTextArea textArea_2;
+	private JLabel lblOther;
+	private JTextArea txtAreaOther;
 	private JScrollPane scrollPane_3;
-	private JLabel lblNewLabel_2;
-	private JList list_1;
+	private JLabel lblPrescriptionState;
+	private JList listPrescription;
 	private JScrollPane scrollPane_4;
-	private JButton btnNewButton_2_1;
-	private JButton btnNewButton_2_2;
-	private JButton btnNewButton_2_3;
+	private JButton btnAddOther;
+	private JButton btnRemove;
+	private JButton btnClearAll;
 	private JScrollPane scrollPane_5;
-	private JList list_2;
-	private JScrollPane scrollPane_6;
-	private JList list_3;
+	private JList listCauses;
+	private JList listSelectedCauses;
 	private JScrollPane scrollPane_7;
+	private JList causesList;
+	private JScrollPane scrollPane_6;
 	/**
 	 * Launch the application.
 	 */
@@ -234,7 +235,6 @@ public class DoctorAppointmentView extends JFrame {
 						appointment.attended = 0;
 					else if (rdbtnDontAnswer.isSelected())
 						appointment.attended = 2;
-					
 					appointment.checkIn = txtCheckinTime.getText();
 					appointment.checkOut = txtCheckoutTime.getText();
 					//TODO: add causes to DB
@@ -245,20 +245,6 @@ public class DoctorAppointmentView extends JFrame {
 		return btnSave;
 	}
 
-	private JList getCausesList() {
-		DefaultListModel<String> model = new DefaultListModel();
-		this.causesCreator = new CausesCreator();
-		this.causes = causesCreator.getListsOfCauses();
-
-		for (List<String> list : this.causes.values())
-			for (String item : list) {
-				model.addElement(item);
-			}
-		if (causesList == null) {
-			causesList = new JList<>(model);
-		}
-		return causesList;
-	}
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -280,8 +266,8 @@ public class DoctorAppointmentView extends JFrame {
 			appointmentOptionsPanel.add(getLblSelectedCauses_1());
 			appointmentOptionsPanel.add(getBtnRemoveCause_1());
 			appointmentOptionsPanel.add(getScrollPane_5());
-			appointmentOptionsPanel.add(getScrollPane_6());
 			appointmentOptionsPanel.add(getScrollPane_7());
+			appointmentOptionsPanel.add(getScrollPane_6());
 		}
 		return appointmentOptionsPanel;
 	}
@@ -296,6 +282,18 @@ public class DoctorAppointmentView extends JFrame {
 		if (btnAddCause == null) {
 			btnAddCause = new JButton(">>");
 			btnAddCause.setBounds(302, 76, 49, 23);
+			btnAddCause.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					List<String> causesSelected = getCausesList().getSelectedValuesList();
+					System.out.println(causesSelected.get(0));
+					for (String cause : causesSelected) {
+						System.out.println(cause);
+						if (!finalCauses.contains(cause)) {
+							finalCauses.addElement(cause);
+						}
+					}
+				}
+			});
 		}
 		return btnAddCause;
 	}
@@ -318,6 +316,7 @@ public class DoctorAppointmentView extends JFrame {
 			btnAddCustomCause = new JButton("Add");
 			btnAddCustomCause.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					finalCauses.addElement(getTxtAreaOtherCauses().getText());
 				}
 			});
 			btnAddCustomCause.setBounds(344, 283, 51, 23);
@@ -334,6 +333,14 @@ public class DoctorAppointmentView extends JFrame {
 	private JButton getBtnRemoveCause_1() {
 		if (btnRemoveCause == null) {
 			btnRemoveCause = new JButton("<<");
+			btnRemoveCause.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					List<String> selectedItems = getListSelectedCauses().getSelectedValuesList();
+					for (String item : selectedItems) {
+						finalCauses.removeElement(item);
+					}
+				}
+			});
 			btnRemoveCause.setBounds(302, 129, 49, 23);
 		}
 		return btnRemoveCause;
@@ -413,12 +420,30 @@ public class DoctorAppointmentView extends JFrame {
 	private JButton getBtnCheckInTime() {
 		if (btnCheckInTime == null) {
 			btnCheckInTime = new JButton("Auto-fill in time");
+			btnCheckInTime.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					Date currentDate = new Date();
+					SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+					String currentTime = dateFormat.format(currentDate);
+					// Update the text field with the current time
+					getTextField_2().setText(currentTime);
+				}
+			});
 		}
 		return btnCheckInTime;
 	}
 	private JButton getBtnCheckOutTime() {
 		if (btnCheckOutTime == null) {
 			btnCheckOutTime = new JButton("Auto-fill out time");
+			btnCheckOutTime.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					Date currentDate = new Date();
+					SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+					String currentTime = dateFormat.format(currentDate);
+					// Update the text field with the current time
+					getTextField_1_1().setText(currentTime);
+				}
+			});
 		}
 		return btnCheckOutTime;
 	}
@@ -450,11 +475,11 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return rdbtnDontAnswer;
 	}
-	private JTextArea getTextArea() {
-		if (textArea == null) {
-			textArea = new JTextArea();
+	private JTextArea getTxtAreaOtherCauses() {
+		if (txtAreaOtherCauses == null) {
+			txtAreaOtherCauses = new JTextArea();
 		}
-		return textArea;
+		return txtAreaOtherCauses;
 	}
 	private JPanel getPnDiagnosis() {
 		if (pnDiagnosis == null) {
@@ -469,28 +494,28 @@ public class DoctorAppointmentView extends JFrame {
 			pnPrescription = new JPanel();
 			pnPrescription.setLayout(null);
 			pnPrescription.add(getLblMedication());
-			pnPrescription.add(getComboBox());
-			pnPrescription.add(getBtnNewButton());
-			pnPrescription.add(getLblNewLabel());
-			pnPrescription.add(getLblIntervalh());
-			pnPrescription.add(getLblDurationdays());
-			pnPrescription.add(getTextField());
-			pnPrescription.add(getTextField_1());
+			pnPrescription.add(getComboBoxMedication());
+			pnPrescription.add(getBtnAddMedication());
+			pnPrescription.add(getLblQuantity());
+			pnPrescription.add(getLblInterval());
+			pnPrescription.add(getLblDurationday());
+			pnPrescription.add(getTxtQuantity());
+			pnPrescription.add(getTxtInterval());
 			pnPrescription.add(getTextField_2_1());
 			pnPrescription.add(getLblComments());
 			pnPrescription.add(getScrollPane_2());
 			pnPrescription.add(getLblVaccines());
-			pnPrescription.add(getComboBox_1());
-			pnPrescription.add(getBtnNewButton_2());
+			pnPrescription.add(getComboBoxVaccines());
+			pnPrescription.add(getBtnAddVaccine());
 			pnPrescription.add(getSeparator());
 			pnPrescription.add(getSeparator_1());
-			pnPrescription.add(getLblNewLabel_1());
+			pnPrescription.add(getLblOther());
 			pnPrescription.add(getScrollPane_3());
-			pnPrescription.add(getLblNewLabel_2());
+			pnPrescription.add(getLblPrescriptionState());
 			pnPrescription.add(getScrollPane_4());
-			pnPrescription.add(getBtnNewButton_2_1());
-			pnPrescription.add(getBtnNewButton_2_2());
-			pnPrescription.add(getBtnNewButton_2_3());
+			pnPrescription.add(getBtnAddOther());
+			pnPrescription.add(getBtnRemove());
+			pnPrescription.add(getBtnClearAll());
 		}
 		return pnPrescription;
 	}
@@ -563,64 +588,81 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblMedication;
 	}
-	private JComboBox getComboBox() {
-		if (comboBox == null) {
-			comboBox = new JComboBox();
-			comboBox.setBounds(23, 51, 110, 22);
+	private JComboBox getComboBoxMedication() {
+		if (comboBoxMedication == null) {
+			comboBoxMedication = new JComboBox();
+			comboBoxMedication.setBounds(23, 51, 94, 22);
+			var data = new String[] {"Algidol", "Ibuprofeno", "Antibiotics", "Thrombocid", "Other..."};
+			comboBoxMedication.setModel(new DefaultComboBoxModel(data));
+			comboBoxMedication.setSelectedIndex(0);
 		}
-		return comboBox;
+		return comboBoxMedication;
 	}
-	private JButton getBtnNewButton() {
-		if (btnNewButton == null) {
-			btnNewButton = new JButton("Add");
-			btnNewButton.setBounds(143, 51, 62, 23);
+	private JButton getBtnAddMedication() {
+		if (btnAddMedication == null) {
+			btnAddMedication = new JButton("Add");
+			btnAddMedication.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String selMed = (String) getComboBoxMedication().getModel().
+							getElementAt(getComboBoxMedication().getSelectedIndex());
+					String quantity = getTxtQuantity().getText();
+					String interval = getTxtInterval().getText();
+					String duration = getTextField_2_1().getText();
+					String comments = getTxtAreaComments().getText();
+					String medication = "Medication: " + selMed + ". Quantity: " + quantity +
+							". Interval: " + interval + ". Duration: " + duration + ". Comments: "
+							+ comments;
+					finalPrescription.addElement(medication);
+				}
+			});
+			btnAddMedication.setBounds(143, 51, 62, 23);
 		}
-		return btnNewButton;
+		return btnAddMedication;
 	}
-	private JLabel getLblNewLabel() {
-		if (lblNewLabel == null) {
-			lblNewLabel = new JLabel("Quantity:");
-			lblNewLabel.setBounds(23, 101, 62, 14);
+	private JLabel getLblQuantity() {
+		if (lblQuantity == null) {
+			lblQuantity = new JLabel("Quantity:");
+			lblQuantity.setBounds(23, 101, 62, 14);
 		}
-		return lblNewLabel;
+		return lblQuantity;
 	}
-	private JLabel getLblIntervalh() {
-		if (lblIntervalh == null) {
-			lblIntervalh = new JLabel("Interval:");
-			lblIntervalh.setBounds(23, 137, 80, 14);
+	private JLabel getLblInterval() {
+		if (lblInterval == null) {
+			lblInterval = new JLabel("Interval:");
+			lblInterval.setBounds(23, 137, 80, 14);
 		}
-		return lblIntervalh;
+		return lblInterval;
 	}
-	private JLabel getLblDurationdays() {
-		if (lblDurationdays == null) {
-			lblDurationdays = new JLabel("Duration:");
-			lblDurationdays.setBounds(23, 177, 62, 14);
+	private JLabel getLblDurationday() {
+		if (lblDurationday == null) {
+			lblDurationday = new JLabel("Duration:");
+			lblDurationday.setBounds(23, 177, 62, 14);
 		}
-		return lblDurationdays;
+		return lblDurationday;
 	}
-	private JTextField getTextField() {
-		if (textField == null) {
-			textField = new JTextField();
-			textField.setBounds(95, 98, 62, 20);
-			textField.setColumns(10);
+	private JTextField getTxtQuantity() {
+		if (txtQuantity == null) {
+			txtQuantity = new JTextField();
+			txtQuantity.setBounds(82, 84, 62, 28);
+			txtQuantity.setColumns(10);
 		}
-		return textField;
+		return txtQuantity;
 	}
-	private JTextField getTextField_1() {
-		if (textField_1 == null) {
-			textField_1 = new JTextField();
-			textField_1.setColumns(10);
-			textField_1.setBounds(95, 134, 62, 20);
+	private JTextField getTxtInterval() {
+		if (txtInterval == null) {
+			txtInterval = new JTextField();
+			txtInterval.setColumns(10);
+			txtInterval.setBounds(82, 123, 62, 28);
 		}
-		return textField_1;
+		return txtInterval;
 	}
 	private JTextField getTextField_2_1() {
-		if (textField_2 == null) {
-			textField_2 = new JTextField();
-			textField_2.setColumns(10);
-			textField_2.setBounds(95, 174, 62, 20);
+		if (txtDuration == null) {
+			txtDuration = new JTextField();
+			txtDuration.setColumns(10);
+			txtDuration.setBounds(82, 162, 62, 28);
 		}
-		return textField_2;
+		return txtDuration;
 	}
 	private JLabel getLblComments() {
 		if (lblComments == null) {
@@ -629,17 +671,17 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblComments;
 	}
-	private JTextArea getTextArea_1() {
-		if (textArea_1 == null) {
-			textArea_1 = new JTextArea();
+	private JTextArea getTxtAreaComments() {
+		if (txtAreaComments == null) {
+			txtAreaComments = new JTextArea();
 		}
-		return textArea_1;
+		return txtAreaComments;
 	}
 	private JScrollPane getScrollPane_2() {
 		if (scrollPane_2 == null) {
 			scrollPane_2 = new JScrollPane();
-			scrollPane_2.setBounds(23, 258, 192, 82);
-			scrollPane_2.setViewportView(getTextArea_1());
+			scrollPane_2.setBounds(23, 258, 182, 82);
+			scrollPane_2.setViewportView(getTxtAreaComments());
 		}
 		return scrollPane_2;
 	}
@@ -647,29 +689,35 @@ public class DoctorAppointmentView extends JFrame {
 		if (lblVaccines == null) {
 			lblVaccines = new JLabel("Vaccines:");
 			lblVaccines.setFont(new Font("Tahoma", Font.BOLD, 12));
-			lblVaccines.setBounds(258, 25, 110, 14);
+			lblVaccines.setBounds(232, 26, 110, 14);
 		}
 		return lblVaccines;
 	}
-	private JComboBox getComboBox_1() {
-		if (comboBox_1 == null) {
-			comboBox_1 = new JComboBox();
-			comboBox_1.setBounds(257, 50, 111, 22);
+	private JComboBox getComboBoxVaccines() {
+		if (comboBoxVaccines == null) {
+			comboBoxVaccines = new JComboBox(vaccines);
+			comboBoxVaccines.setBounds(231, 51, 117, 22);
 		}
-		return comboBox_1;
+		return comboBoxVaccines;
 	}
-	private JButton getBtnNewButton_2() {
-		if (btnNewButton_2 == null) {
-			btnNewButton_2 = new JButton("Add");
-			btnNewButton_2.setBounds(378, 50, 51, 23);
+	private JButton getBtnAddVaccine() {
+		if (btnAddVaccine == null) {
+			btnAddVaccine = new JButton("Add");
+			btnAddVaccine.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String selVacc = vaccines[getComboBoxVaccines().getSelectedIndex()];
+					finalPrescription.addElement(selVacc);
+				}
+			});
+			btnAddVaccine.setBounds(358, 51, 51, 23);
 		}
-		return btnNewButton_2;
+		return btnAddVaccine;
 	}
 	private JSeparator getSeparator() {
 		if (separator == null) {
 			separator = new JSeparator();
 			separator.setOrientation(SwingConstants.VERTICAL);
-			separator.setBounds(235, 26, 12, 314);
+			separator.setBounds(215, 26, 12, 314);
 		}
 		return separator;
 	}
@@ -677,109 +725,138 @@ public class DoctorAppointmentView extends JFrame {
 		if (separator_1 == null) {
 			separator_1 = new JSeparator();
 			separator_1.setOrientation(SwingConstants.VERTICAL);
-			separator_1.setBounds(440, 26, 12, 314);
+			separator_1.setBounds(419, 26, 12, 314);
 		}
 		return separator_1;
 	}
-	private JLabel getLblNewLabel_1() {
-		if (lblNewLabel_1 == null) {
-			lblNewLabel_1 = new JLabel("Other:");
-			lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 12));
-			lblNewLabel_1.setBounds(252, 206, 62, 14);
+	private JLabel getLblOther() {
+		if (lblOther == null) {
+			lblOther = new JLabel("Other:");
+			lblOther.setFont(new Font("Tahoma", Font.BOLD, 12));
+			lblOther.setBounds(226, 207, 62, 14);
 		}
-		return lblNewLabel_1;
+		return lblOther;
 	}
-	private JTextArea getTextArea_2() {
-		if (textArea_2 == null) {
-			textArea_2 = new JTextArea();
+	private JTextArea getTxtAreaOther() {
+		if (txtAreaOther == null) {
+			txtAreaOther = new JTextArea();
 		}
-		return textArea_2;
+		return txtAreaOther;
 	}
 	private JScrollPane getScrollPane_3() {
 		if (scrollPane_3 == null) {
 			scrollPane_3 = new JScrollPane();
-			scrollPane_3.setBounds(252, 230, 177, 110);
-			scrollPane_3.setViewportView(getTextArea_2());
+			scrollPane_3.setBounds(232, 230, 177, 110);
+			scrollPane_3.setViewportView(getTxtAreaOther());
 		}
 		return scrollPane_3;
 	}
-	private JLabel getLblNewLabel_2() {
-		if (lblNewLabel_2 == null) {
-			lblNewLabel_2 = new JLabel("Prescription state:");
-			lblNewLabel_2.setFont(new Font("Tahoma", Font.BOLD, 11));
-			lblNewLabel_2.setBounds(450, 28, 171, 14);
+	private JLabel getLblPrescriptionState() {
+		if (lblPrescriptionState == null) {
+			lblPrescriptionState = new JLabel("Prescription state:");
+			lblPrescriptionState.setFont(new Font("Tahoma", Font.BOLD, 11));
+			lblPrescriptionState.setBounds(432, 27, 171, 14);
 		}
-		return lblNewLabel_2;
+		return lblPrescriptionState;
 	}
-	private JList getList_1() {
-		if (list_1 == null) {
-			list_1 = new JList();
+	private JList getListPrescription() {
+		if (listPrescription == null) {
+			listPrescription = new JList(finalPrescription);
 		}
-		return list_1;
+		return listPrescription;
 	}
 	private JScrollPane getScrollPane_4() {
 		if (scrollPane_4 == null) {
 			scrollPane_4 = new JScrollPane();
-			scrollPane_4.setBounds(450, 53, 184, 253);
-			scrollPane_4.setViewportView(getList_1());
+			scrollPane_4.setBounds(432, 53, 202, 253);
+			scrollPane_4.setViewportView(getListPrescription());
 		}
 		return scrollPane_4;
 	}
-	private JButton getBtnNewButton_2_1() {
-		if (btnNewButton_2_1 == null) {
-			btnNewButton_2_1 = new JButton("Add");
-			btnNewButton_2_1.setBounds(378, 202, 51, 23);
+	private JButton getBtnAddOther() {
+		if (btnAddOther == null) {
+			btnAddOther = new JButton("Add");
+			btnAddOther.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					finalPrescription.addElement(getTxtAreaOther().getText());
+				}
+			});
+			btnAddOther.setBounds(358, 204, 51, 23);
 		}
-		return btnNewButton_2_1;
+		return btnAddOther;
 	}
-	private JButton getBtnNewButton_2_2() {
-		if (btnNewButton_2_2 == null) {
-			btnNewButton_2_2 = new JButton("Remove");
-			btnNewButton_2_2.setBounds(462, 317, 80, 23);
+	private JButton getBtnRemove() {
+		if (btnRemove == null) {
+			btnRemove = new JButton("Remove");
+			btnRemove.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					List<String> selItems = getListPrescription().getSelectedValuesList(); 
+					for (String item : selItems) {
+						if (finalPrescription.contains(item))
+							finalPrescription.removeElement(item);
+					}
+				}
+			});
+			btnRemove.setBounds(442, 317, 80, 23);
 		}
-		return btnNewButton_2_2;
+		return btnRemove;
 	}
-	private JButton getBtnNewButton_2_3() {
-		if (btnNewButton_2_3 == null) {
-			btnNewButton_2_3 = new JButton("Clear all");
-			btnNewButton_2_3.setBounds(552, 317, 80, 23);
+	private JButton getBtnClearAll() {
+		if (btnClearAll == null) {
+			btnClearAll = new JButton("Clear all");
+			btnClearAll.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					finalPrescription.clear();
+				}
+			});
+			btnClearAll.setBounds(547, 317, 80, 23);
 		}
-		return btnNewButton_2_3;
+		return btnClearAll;
 	}
 	private JScrollPane getScrollPane_5() {
 		if (scrollPane_5 == null) {
 			scrollPane_5 = new JScrollPane();
 			scrollPane_5.setBounds(61, 240, 271, 66);
-			scrollPane_5.setViewportView(getTextArea());
+			scrollPane_5.setViewportView(getTxtAreaOtherCauses());
 		}
 		return scrollPane_5;
 	}
-	private JList getList_2() {
-		if (list_2 == null) {
-			list_2 = new JList();
+
+	private JList getListSelectedCauses() {
+		if (listSelectedCauses == null) {
+			listSelectedCauses = new JList(finalCauses);
 		}
-		return list_2;
-	}
-	private JScrollPane getScrollPane_6() {
-		if (scrollPane_6 == null) {
-			scrollPane_6 = new JScrollPane();
-			scrollPane_6.setBounds(63, 66, 214, 130);
-			scrollPane_6.setViewportView(getList_2());
-		}
-		return scrollPane_6;
-	}
-	private JList getList_3() {
-		if (list_3 == null) {
-			list_3 = new JList();
-		}
-		return list_3;
+		return listSelectedCauses;
 	}
 	private JScrollPane getScrollPane_7() {
 		if (scrollPane_7 == null) {
 			scrollPane_7 = new JScrollPane();
 			scrollPane_7.setBounds(381, 66, 216, 128);
-			scrollPane_7.setViewportView(getList_3());
+			scrollPane_7.setViewportView(getListSelectedCauses());
 		}
 		return scrollPane_7;
+	}
+	private JList getCausesList() {
+		DefaultListModel<String> model = new DefaultListModel();
+		this.causesCreator = new CausesCreator();
+		this.causes = causesCreator.getListsOfCauses();
+
+		for (List<String> list : this.causes.values())
+			for (String item : list) {
+				model.addElement(item);
+		}	
+
+		if (causesList == null) {
+			causesList = new JList(model);
+		}
+		return causesList;
+	}
+	private JScrollPane getScrollPane_6() {
+		if (scrollPane_6 == null) {
+			scrollPane_6 = new JScrollPane();
+			scrollPane_6.setBounds(63, 66, 200, 128);
+			scrollPane_6.setViewportView(getCausesList());
+		}
+		return scrollPane_6;
 	}
 }
