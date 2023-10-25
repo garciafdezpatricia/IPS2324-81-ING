@@ -74,8 +74,9 @@ public class ConnectionFactory {
 		}
 
 		return doctors;
-	
+
 	}
+
 	public static DefaultListModel<Patient> getPatients() throws Exception {
 		DefaultListModel<Patient> patients = new DefaultListModel<>();
 
@@ -837,6 +838,150 @@ public class ConnectionFactory {
 
 		// todo: por si escogen mas de un medico
 		return res;
+
+	}
+
+	public static DefaultListModel<Appointment> getAppointments() throws Exception {
+		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM APPOINTMENT";
+			ResultSet resultSet = statement.executeQuery(sql);
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigDecimal id = resultSet.getBigDecimal("id");
+				BigDecimal patientid = resultSet.getBigDecimal("patientid");
+				BigDecimal doctorid = resultSet.getBigDecimal("doctorid");
+
+				String startDate = resultSet.getString("startdate");
+				String enddate = resultSet.getString("enddate");
+
+				int urgency = resultSet.getInt("urgency");
+				int attended = resultSet.getInt("attended");
+
+				String checkedin = resultSet.getString("checkedin");
+				String checkedout = resultSet.getString("checkedout");
+				BigDecimal officeid = resultSet.getBigDecimal("officeid");
+				String information = resultSet.getString("information");
+
+				// Procesa otros campos según la estructura de tu tabla
+				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
+						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
+						officeid.toBigInteger(), information));
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+
+	}
+	
+	public static String getPatient(BigInteger id) throws Exception {
+
+		String name = "";
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT firstname FROM patient where id = ?";
+			
+			PreparedStatement statement = connection.prepareStatement(sql);
+			
+			statement.setBigDecimal(1, new BigDecimal(id));
+			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+
+				name = resultSet.getString("firstname");
+
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return name;
+
+	}
+	
+	public static String getDoctor(BigInteger id) throws Exception {
+
+		String name = "";
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT name FROM doctor where id = ?";
+			
+			PreparedStatement statement = connection.prepareStatement(sql);
+			
+			statement.setBigDecimal(1, new BigDecimal(id));
+			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+
+				name = resultSet.getString("name");
+
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return name;
+
+	}
+
+	public static void RemoveAppointment(Appointment appointment) {
+		
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Ejecutar una consulta SQL
+			String sql = "DELETE FROM appointment WHERE id = ?";
+			
+			PreparedStatement statement = connection.prepareStatement(sql);
+			
+			statement.setBigDecimal(1, new BigDecimal(appointment.getId()));
+			ResultSet resultSet = statement.executeQuery();
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 }

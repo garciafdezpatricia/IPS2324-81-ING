@@ -1,21 +1,32 @@
 package gui.medicalRecepcionist;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import javax.swing.JButton;
 import java.awt.Color;
-import javax.swing.border.TitledBorder;
-import javax.swing.JScrollPane;
-import javax.swing.JList;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+
+import db.Appointment;
+import db.Doctor;
+import util.ConnectionFactory;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class EditAndCancelView extends JFrame {
 
@@ -52,6 +63,10 @@ public class EditAndCancelView extends JFrame {
 	private JPanel panelButtonsReset;
 	private JButton btnFilter;
 	private JButton btnResetFilters;
+	private DefaultListModel<Appointment> appointments = new DefaultListModel<>();
+	private DefaultListModel<Appointment> appointmentsBonitos = new DefaultListModel<>();
+
+	private DefaultListModel<Appointment> appointmentsReset = new DefaultListModel<>();
 
 	/**
 	 * Launch the application.
@@ -80,10 +95,29 @@ public class EditAndCancelView extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
+//		try {
+//			appointments = ConnectionFactory.getAppointments();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getPanelButtons(), BorderLayout.SOUTH);
 		contentPane.add(getPanelNorth(), BorderLayout.CENTER);
+
 	}
 
 	private JPanel getPanelButtons() {
@@ -107,6 +141,15 @@ public class EditAndCancelView extends JFrame {
 	private JButton getBtnRemove() {
 		if (btnRemove == null) {
 			btnRemove = new JButton("Remove");
+			btnRemove.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					for (int i = 0; i < getListAppointments().getSelectedValuesList().size(); i++) {
+						ConnectionFactory.RemoveAppointment((Appointment)(getListAppointments().getSelectedValuesList().get(i)));
+						JOptionPane.showMessageDialog(EditAndCancelView.this,
+								"The appointment has been removed.", "Information", JOptionPane.INFORMATION_MESSAGE);
+					}
+				}
+			});
 		}
 		return btnRemove;
 	}
@@ -156,7 +199,12 @@ public class EditAndCancelView extends JFrame {
 
 	private JList getListAppointments() {
 		if (listAppointments == null) {
-			listAppointments = new JList();
+			try {
+				listAppointments = new JList(ConnectionFactory.getAppointments());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return listAppointments;
 	}
