@@ -9,7 +9,11 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -17,6 +21,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -66,9 +71,9 @@ public class EditWorkPeriodView extends JFrame {
 	private JLabel lblEditTheWorkperiod;
 	private JPanel panel_center_south;
 	private JLabel lblNewFirstDay;
-	private JTextField textField_25;
+	private JTextField txtNewFirstDay;
 	private JLabel lblNewLastDay;
-	private JTextField textField_26;
+	private JTextField txtNewLastDay;
 	private JPanel panel_south;
 	private JButton btnSaveChange;
 	private JButton btnAddJustification;
@@ -96,6 +101,8 @@ public class EditWorkPeriodView extends JFrame {
 	private JLabel lblShowLastDay;
 	
 	private JustificationView jv;
+	private WorkPeriod wp;
+	private BigInteger wpID;
 
 	/**
 	 * Launch the application.
@@ -124,8 +131,6 @@ public class EditWorkPeriodView extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(EditWorkPeriodView.class.getResource("/img/descarga.jpg")));
 		setTitle("Editing workperiod...");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -481,9 +486,9 @@ public class EditWorkPeriodView extends JFrame {
 			panel_center_south.add(getLblSecondDay());
 			panel_center_south.add(getLblShowLastDay());
 			panel_center_south.add(getLblNewFirstDay_1());
-			panel_center_south.add(getTextField_25());
+			panel_center_south.add(getTxtNewFirstDay());
 			panel_center_south.add(getLblNewLastDay_1());
-			panel_center_south.add(getTextField_26());
+			panel_center_south.add(getTxtNewLastDay());
 		}
 		return panel_center_south;
 	}
@@ -496,12 +501,12 @@ public class EditWorkPeriodView extends JFrame {
 		return lblNewFirstDay;
 	}
 
-	private JTextField getTextField_25() {
-		if (textField_25 == null) {
-			textField_25 = new JTextField();
-			textField_25.setColumns(10);
+	private JTextField getTxtNewFirstDay() {
+		if (txtNewFirstDay == null) {
+			txtNewFirstDay = new JTextField();
+			txtNewFirstDay.setColumns(10);
 		}
-		return textField_25;
+		return txtNewFirstDay;
 	}
 
 	private JLabel getLblNewLastDay_1() {
@@ -512,12 +517,12 @@ public class EditWorkPeriodView extends JFrame {
 		return lblNewLastDay;
 	}
 
-	private JTextField getTextField_26() {
-		if (textField_26 == null) {
-			textField_26 = new JTextField();
-			textField_26.setColumns(10);
+	private JTextField getTxtNewLastDay() {
+		if (txtNewLastDay == null) {
+			txtNewLastDay = new JTextField();
+			txtNewLastDay.setColumns(10);
 		}
-		return textField_26;
+		return txtNewLastDay;
 	}
 
 	private JPanel getPanel_south() {
@@ -537,6 +542,18 @@ public class EditWorkPeriodView extends JFrame {
 	private JButton getBtnSaveChange() {
 		if (btnSaveChange == null) {
 			btnSaveChange = new JButton("Save change");
+			btnSaveChange.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					createWorkPeriod();
+					List<WorkDay> wds = createWorkDays();
+
+					// save to database
+					saveToDB(wds);
+					
+					ConnectionFactory.updateWorkPeriod(wpID, wp.getStartDate(), wp.getEndDate(), wp.getId_doctor());
+
+				}
+			});
 			btnSaveChange.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		}
 		return btnSaveChange;
@@ -756,9 +773,10 @@ public class EditWorkPeriodView extends JFrame {
 		if (workperiods.size() > 0) {
 			if (workperiods.size() > 1) {
 				getBtnOtherWPs().setEnabled(true);
+				// TODO: no se sabe si se puede tener más de un workperiod a la vez
 			}
 			else {
-				BigInteger wpID = workperiods.get(0).getId();
+				wpID = workperiods.get(0).getId();
 				List<WorkDay> workdays = ConnectionFactory.getWorkDayByWPId(wpID);
 
 				setTimetable(workdays);
@@ -824,5 +842,221 @@ public class EditWorkPeriodView extends JFrame {
 			lblShowLastDay.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		}
 		return lblShowLastDay;
+	}
+	
+	private WorkPeriod createWorkPeriod() {
+		BigInteger id = generateID();
+		
+		// startDate
+		String startDate = getTxtNewFirstDay().getText();
+		String endDate = getTxtNewLastDay().getText();
+
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		java.util.Date start = null;
+		java.util.Date end = null;
+		java.sql.Date startSQL = null;
+		java.sql.Date endSQL = null;
+
+		try {
+			start = format.parse(startDate + " 00:00:00");
+			System.out.println("  start: " + start);
+			end = format.parse(endDate + " 00:00:00");
+			System.out.println("  end: " + end);
+
+			startSQL = new java.sql.Date(start.getTime());
+			System.out.println("  startsql: " + startSQL);
+
+			endSQL = new java.sql.Date(end.getTime());
+			System.out.println("  endsql: " + endSQL);
+
+		} catch (ParseException e) {
+			JOptionPane.showMessageDialog(null, "The format of the date is not correct.");
+		}
+		
+		if (startSQL != null && endSQL != null) {
+			wp = new WorkPeriod(id, startSQL, endSQL, selectedDocID);
+		}
+		return wp;
+	}
+	
+	public static BigInteger generateID() {
+		Random random = new Random();
+		int number = 0;
+		int c = random.nextInt(29);
+		StringBuilder sb = new StringBuilder("1"); // Starting at 1
+
+		for (int i = 1; i < c; i++) {
+			number = random.nextInt(9) + 1;
+			sb.append(number);
+		}
+
+		return new BigInteger(sb.toString());
+	}
+	
+	
+	private void saveToDB(List<WorkDay> wds) {
+		try {
+			System.out.println("HOLA " + wp.getStartDate());
+			System.out.println("HOLA " +wp.getEndDate());
+			
+			System.out.println(wp.toString());
+
+			ConnectionFactory.createWorkPeriod(wp.getId(), wp.getStartDate(), wp.getEndDate(), wp.getId_doctor());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		for (WorkDay wd : wds) {
+			ConnectionFactory.createWorkDay(wd.getId(), wd.getWeekday(), wd.getStartHour(), wd.getEndHour(),
+					wd.getWorkperiodid(),  wp.getId_doctor());
+		}
+	}
+	
+	/**
+	 * public WorkDay(int id, String weekday, String startHour, String endHour, int
+	 * workperiodid)
+	 */
+	private List<WorkDay> createWorkDays() {
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		List<WorkDay> aux = new ArrayList<WorkDay>();
+
+		BigInteger id = generateID();
+		BigInteger workperiodid = wp.getId();
+
+		// monday
+		String startHour = getTxtMondayIn().getText();
+		String endHour = getTxtMondayOut().getText();
+		try {
+			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "Monday: clock-out time and clock-in time must be defined.");
+			}
+			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+				JOptionPane.showMessageDialog(null, "Monday: clock-out time must be later than clock-in time.");
+			} else {
+				WorkDay monday = new WorkDay(id, "Monday", startHour, endHour, workperiodid);
+
+				aux.add(monday);
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// tuesday
+		startHour = getTxtTuesdayIn().getText();
+		endHour = getTxtTuesdayOut().getText();
+		try {
+			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "Tuesday: clock-out time and clock-in time must be defined.");
+			}
+			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+				JOptionPane.showMessageDialog(null, "Tuesday: clock-out time must be later than clock-in time.");
+			} else {
+				WorkDay tuesday = new WorkDay(id, "Tuesday", startHour, endHour, workperiodid);
+
+				aux.add(tuesday);
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// wednesday
+		startHour = getTxtWednesdayIn().getText();
+		endHour = getTxtWednesdayOut().getText();
+		try {
+			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "Wednesday: clock-out time and clock-in time must be defined.");
+			}
+			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+				JOptionPane.showMessageDialog(null, "Wednesday: clock-out time must be later than clock-in time.");
+			} else {
+				WorkDay wednesday = new WorkDay(id, "Wednesday", startHour, endHour, workperiodid);
+
+				aux.add(wednesday);
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// thursday
+		startHour = getTxtThursdayIn().getText();
+		endHour = getTxtThursdayOut().getText();
+		try {
+			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "Thursday: clock-out time and clock-in time must be defined.");
+			}
+			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+				JOptionPane.showMessageDialog(null, "Thursday: clock-out time must be later than clock-in time.");
+			} else {
+				WorkDay thursday = new WorkDay(id, "Thursday", startHour, endHour, workperiodid);
+
+				aux.add(thursday);
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// friday
+		startHour = getTxtFridayIn().getText();
+		endHour = getTxtFridayOut().getText();
+		try {
+			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "Friday: clock-out time and clock-in time must be defined.");
+			}
+			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+				JOptionPane.showMessageDialog(null, "Friday: clock-out time must be later than clock-in time.");
+			} else {
+				WorkDay friday = new WorkDay(id, "Friday", startHour, endHour, workperiodid);
+
+				aux.add(friday);
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// saturday
+		startHour = getTxtSaturdayIn().getText();
+		endHour = getTxtSaturdayOut().getText();
+		try {
+			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "Saturday: clock-out time and clock-in time must be defined.");
+			}
+			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+				JOptionPane.showMessageDialog(null, "Saturday: clock-out time must be later than clock-in time.");
+			} else {
+				WorkDay saturday = new WorkDay(id, "Saturday", startHour, endHour, workperiodid);
+
+				aux.add(saturday);
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// sunday
+		startHour = getTxtSundayIn().getText();
+		endHour = getTxtSundayOut().getText();
+		try {
+			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "Sunday: clock-out time and clock-in time must be defined.");
+			}
+			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+				JOptionPane.showMessageDialog(null, "Sunday: clock-out time must be later than clock-in time.");
+			} else {
+				WorkDay sunday = new WorkDay(id, "Sunday", startHour, endHour, workperiodid);
+
+				aux.add(sunday);
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return aux;
 	}
 }

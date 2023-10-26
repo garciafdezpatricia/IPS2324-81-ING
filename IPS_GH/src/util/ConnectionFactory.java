@@ -501,7 +501,7 @@ public class ConnectionFactory {
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
-//			// Establecer valores para los parámetros
+			// Establecer valores para los parámetros
 			BigDecimal aux2 = new BigDecimal(id_doctor);
 
 			preparedStatement.setDate(1, startDate);
@@ -558,8 +558,6 @@ public class ConnectionFactory {
 
 			// Establecer valores para los parámetros
 
-			BigDecimal aux2 = new BigDecimal(workperiod_id);
-
 			preparedStatement.setString(1, weekday);
 			preparedStatement.setString(2, startHour);
 			preparedStatement.setString(3, endHour);
@@ -597,7 +595,7 @@ public class ConnectionFactory {
 		}
 		return new BigInteger("1234567890123456789012345678901234567890");
 	}
-	
+
 	public static BigInteger doctorFromNameAndSurname(String ns) throws Exception {
 		for (int i = 0; i < getOffices().size(); i++) {
 			String a = getDoctors().get(i).getName() + " " + getDoctors().get(i).getSurname();
@@ -606,7 +604,6 @@ public class ConnectionFactory {
 		}
 		return new BigInteger("1234567890123456789012345678901234567890");
 	}
-	
 
 	public static BigInteger doctorFromPersonalID(String personalID) throws Exception {
 		for (int i = 0; i < getOffices().size(); i++) {
@@ -628,35 +625,34 @@ public class ConnectionFactory {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		
+
 		List<WorkPeriod> workperiods = new ArrayList<WorkPeriod>();
-		
+
 		try {
 			con = getOracleConnection();
 			ps = con.prepareStatement("SELECT * FROM WORKPERIOD WHERE fk_doctorid = ?");
-			
+
 			BigDecimal a = new BigDecimal(doctorId);
-			
+
 			System.out.println(a);
 			ps.setBigDecimal(1, a);
-			
+
 			rs = ps.executeQuery();
-			
+
 			WorkPeriod wp = null;
 
 			while (rs.next()) {
 				// BigInteger id, Date startDate, Date endDate, BigInteger id_doctor
 				BigDecimal aux = rs.getBigDecimal(1);
-				
+
 				BigInteger id = aux.toBigInteger();
 				Date startDate = rs.getDate(2);
-				Date endDate = rs.getDate(3);	
-						
+				Date endDate = rs.getDate(3);
+
 				System.out.println("id=" + id + " startdate=" + startDate + " enddate=" + endDate);
-						
-				
+
 				wp = new WorkPeriod(id, startDate, endDate, doctorId);
-			
+
 				workperiods.add(wp);
 
 			}
@@ -678,16 +674,14 @@ public class ConnectionFactory {
 			}
 		}
 	}
-	
-	
-	
+
 	public static List<WorkDay> getWorkDayByWPId(BigInteger wpID) {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		
+
 		List<WorkDay> workdays = new ArrayList<WorkDay>();
-		
+
 		try {
 			con = getOracleConnection();
 			ps = con.prepareStatement("SELECT * FROM WORKDAY WHERE workperiodid = ?");
@@ -697,18 +691,17 @@ public class ConnectionFactory {
 			WorkDay wd = null;
 
 			while (rs.next()) {
-				// BigInteger id, String weekday, String startHour, String endHour, BigInteger workperiodid
+				// BigInteger id, String weekday, String startHour, String endHour, BigInteger
+				// workperiodid
 				BigDecimal aux = rs.getBigDecimal(1);
-				
+
 				BigInteger id = aux.toBigInteger();
 				String weekday = rs.getString(2);
 				String startHour = rs.getString(3);
-				String endHour = rs.getString(4);	
-						
-						
-				
+				String endHour = rs.getString(4);
+
 				wd = new WorkDay(id, weekday, startHour, endHour, wpID);
-			
+
 				workdays.add(wd);
 
 			}
@@ -728,6 +721,69 @@ public class ConnectionFactory {
 			} catch (SQLException e) {
 				throw new RuntimeException();
 			}
+		}
+	}
+
+	public static void updateWorkPeriod(BigInteger wpID, Date startDate, Date endDate, BigInteger id_doctor) {
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		/*
+		 * 
+		 * 
+		 * 
+		 * 
+		 * ps = con.prepareStatement(
+					"UPDATE APPOINTMENT SET " + "attended = ?, checkedin = ?, checkedout = ? " + "WHERE id = ?");
+			ps.setInt(1, appointment.attended ? 1 : 0);
+			ps.setString(2, appointment.checkIn);
+			ps.setString(3, appointment.checkOut);
+			ps.setInt(4, appointment.id);
+			ps.executeUpdate();
+		 */
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL con parámetros
+			String insertQuery = "UPDATE workperiod SET startday = ?, finalday = ?, fk_doctorid = ? WHERE id = ?;";
+			// Crear un PreparedStatement
+			ps = connection.prepareStatement(insertQuery);
+			ps.setDate(1, startDate);
+			ps.setDate(2, endDate);
+			BigDecimal a = new BigDecimal(id_doctor);
+			ps.setBigDecimal(3, a);
+			BigDecimal b = new BigDecimal(wpID);
+			ps.setBigDecimal(4, b);		
+			
+			ps.executeUpdate();
+
+			// Ejecutar la inserción
+			int filasAfectadas = ps.executeUpdate();
+
+			if (filasAfectadas > 0) {
+				System.out.println("Inserción exitosa.");
+			} else {
+				System.out.println("La inserción no se pudo realizar.");
+			}
+
+			// Cerrar la conexión y el PreparedStatement
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
 		}
 	}
 
