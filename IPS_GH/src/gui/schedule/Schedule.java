@@ -22,7 +22,6 @@ import javax.swing.border.EmptyBorder;
 import com.toedter.calendar.JCalendar;
 
 import gui.doctor.DoctorAppointmentView;
-import gui.doctor.MenuDoctor;
 import gui.medicalRecepcionist.MenuMedicalRecepcionist;
 import oracle.sql.DATE;
 import util.AppointmentBLDto;
@@ -105,7 +104,6 @@ public class Schedule extends JFrame {
 	        var apDate = apmnt.startDate.split(" ");
 			if(apDate[0].equals(format)) {
 				filtered.add(apmnt);
-			
 			}
 		}
 		this.filteredApmnts = filtered;
@@ -153,7 +151,7 @@ public class Schedule extends JFrame {
 		}
 		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
 		filterAppointments();
-		setBounds(100, 100, 498, 340);
+		setBounds(100, 100, 877, 467);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		getContentPane().setLayout(new GridLayout(1, 0, 0, 0));
 		getContentPane().add(getLeftPanel());
@@ -219,16 +217,6 @@ public class Schedule extends JFrame {
 			btnBack.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					setVisible(false);
-					MenuDoctor mr;
-					try {
-						mr = new MenuDoctor();
-						mr.setVisible(true);
-						mr.setLocationRelativeTo(null);
-
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
 				}
 			});
 		}

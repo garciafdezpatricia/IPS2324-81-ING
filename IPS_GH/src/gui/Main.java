@@ -19,8 +19,8 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 
-import gui.doctor.MenuDoctor;
 import gui.medicalRecepcionist.MenuMedicalRecepcionist;
+import gui.schedule.Schedule;
 
 public class Main extends JFrame {
 
@@ -113,11 +113,11 @@ public class Main extends JFrame {
 			btnDoctor = new JButton("Doctor");
 			btnDoctor.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					MenuDoctor mr;
+					Schedule sc;
 					try {
-						mr = new MenuDoctor();
-						mr.setVisible(true);
-						mr.setLocationRelativeTo(null);
+						sc = new Schedule();
+						sc.setVisible(true);
+						sc.setLocationRelativeTo(null);
 
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
