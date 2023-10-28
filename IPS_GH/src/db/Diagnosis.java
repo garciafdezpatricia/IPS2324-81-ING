@@ -11,5 +11,8 @@ public class Diagnosis {
 		this.description = description;
 		this.longDescription = longDesc;
 	}
+
+	public Diagnosis() {
+	}
 	
 }

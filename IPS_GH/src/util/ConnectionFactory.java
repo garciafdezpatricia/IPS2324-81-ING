@@ -38,7 +38,68 @@ public class ConnectionFactory {
 
 	}
 	
-	public static List<Diagnosis> getDiagnosis() {
+	public static Diagnosis getDiagnosis(String code) {
+		Diagnosis diagnosis = new Diagnosis();		
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM ICD10_DIAGNOSIS WHERE CODE LIKE '" + code + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String theCode = resultSet.getString("code");
+				String description = resultSet.getString("name");
+				String longDesc = resultSet.getString("description");
+				// Procesa otros campos según la estructura de tu tabla
+				diagnosis.code = theCode;
+				diagnosis.description = description;
+				diagnosis.longDescription = longDesc;
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return diagnosis;
+	}
+	
+	public static List<Diagnosis> getDiagnosis(String from, String to) {
+		List<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
+		int numDigits = from.length();
+		
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM ICD10_DIAGNOSIS WHERE CODE between '" + from.toUpperCase() 
+			+ "' AND '" + to.toUpperCase() + "' AND LENGTH(CODE)=" + numDigits + " ORDER BY CODE ASC";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String code = resultSet.getString("code");
+				String description = resultSet.getString("name");
+				String longDesc = resultSet.getString("description");
+				// Procesa otros campos según la estructura de tu tabla
+				diagnosis.add(new Diagnosis(code, description, longDesc));
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return diagnosis;
+	}
+	
+	public static List<Diagnosis> getDiagnosis(String from, int numDigits) {
 		List<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
 		
 		try {
@@ -47,7 +108,8 @@ public class ConnectionFactory {
 			// Crear una sentencia SQL
 			Statement statement = connection.createStatement();
 			// Ejecutar una consulta SQL
-			String sql = "SELECT * FROM ICD10_DIAGNOSIS ORDER BY CODE ASC";
+			String sql = "SELECT * FROM ICD10_DIAGNOSIS WHERE CODE LIKE '" + from.toUpperCase() + 
+					"%' AND LENGTH(CODE)=" + numDigits + " ORDER BY CODE ASC";
 			ResultSet resultSet = statement.executeQuery(sql);
 			// Procesar los resultados
 			while (resultSet.next()) {
