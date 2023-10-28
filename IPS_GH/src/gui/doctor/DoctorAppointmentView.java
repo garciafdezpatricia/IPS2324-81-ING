@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
@@ -58,10 +59,14 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.Toolkit;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.JComboBox;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class DoctorAppointmentView extends JFrame {
 
@@ -148,6 +153,8 @@ public class DoctorAppointmentView extends JFrame {
 	private JLabel lblFinalDiagnosis;
 	private JTextArea txtAreaDiagnosisDescription;
 	private JScrollPane scrollPane_9;
+	private JTextField txtFilterCauses;
+	private JLabel lblSearch;
 	/**
 	 * Launch the application.
 	 */
@@ -186,7 +193,7 @@ public class DoctorAppointmentView extends JFrame {
 		});
 		this.appointment = appointment;
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 668, 571);
+		setBounds(100, 100, 668, 603);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		try {
@@ -280,20 +287,23 @@ public class DoctorAppointmentView extends JFrame {
 			appointmentOptionsPanel.add(getScrollPane_5());
 			appointmentOptionsPanel.add(getScrollPane_7());
 			appointmentOptionsPanel.add(getScrollPane_6());
+			appointmentOptionsPanel.add(getTxtFilterCauses());
+			appointmentOptionsPanel.add(getLblSearch());
 		}
 		return appointmentOptionsPanel;
 	}
 	private JLabel getLblListCauses_1() {
 		if (lblListCauses == null) {
 			lblListCauses = new JLabel("Select appointment cause(s):");
-			lblListCauses.setBounds(63, 41, 192, 14);
+			lblListCauses.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			lblListCauses.setBounds(10, 15, 192, 14);
 		}
 		return lblListCauses;
 	}
 	private JButton getBtnAddCause_1() {
 		if (btnAddCause == null) {
 			btnAddCause = new JButton(">>");
-			btnAddCause.setBounds(302, 76, 49, 23);
+			btnAddCause.setBounds(302, 102, 49, 23);
 			btnAddCause.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					List<String> causesSelected = getCausesList().getSelectedValuesList();
@@ -310,7 +320,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JLabel getLblCustomCause_1() {
 		if (lblCustomCause == null) {
 			lblCustomCause = new JLabel("Other cause(s):");
-			lblCustomCause.setBounds(62, 219, 148, 14);
+			lblCustomCause.setBounds(10, 253, 148, 14);
 		}
 		return lblCustomCause;
 	}
@@ -329,7 +339,7 @@ public class DoctorAppointmentView extends JFrame {
 					finalCauses.addElement(getTxtAreaOtherCauses().getText());
 				}
 			});
-			btnAddCustomCause.setBounds(344, 283, 51, 23);
+			btnAddCustomCause.setBounds(291, 329, 51, 23);
 		}
 		return btnAddCustomCause;
 	}
@@ -351,7 +361,7 @@ public class DoctorAppointmentView extends JFrame {
 					}
 				}
 			});
-			btnRemoveCause.setBounds(302, 129, 49, 23);
+			btnRemoveCause.setBounds(302, 155, 49, 23);
 		}
 		return btnRemoveCause;
 	}
@@ -675,7 +685,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
-			scrollPane.setBounds(10, 11, 298, 206);
+			scrollPane.setBounds(10, 11, 325, 206);
 			scrollPane.setViewportView(getTree());
 		}
 		return scrollPane;
@@ -934,7 +944,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JScrollPane getScrollPane_5() {
 		if (scrollPane_5 == null) {
 			scrollPane_5 = new JScrollPane();
-			scrollPane_5.setBounds(61, 240, 271, 66);
+			scrollPane_5.setBounds(10, 270, 271, 82);
 			scrollPane_5.setViewportView(getTxtAreaOtherCauses());
 		}
 		return scrollPane_5;
@@ -949,7 +959,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JScrollPane getScrollPane_7() {
 		if (scrollPane_7 == null) {
 			scrollPane_7 = new JScrollPane();
-			scrollPane_7.setBounds(381, 66, 216, 128);
+			scrollPane_7.setBounds(381, 66, 216, 164);
 			scrollPane_7.setViewportView(getListSelectedCauses());
 		}
 		return scrollPane_7;
@@ -966,13 +976,14 @@ public class DoctorAppointmentView extends JFrame {
 
 		if (causesList == null) {
 			causesList = new JList(model);
+			causesList.setBounds(10, 66, 257, 164);
 		}
 		return causesList;
 	}
 	private JScrollPane getScrollPane_6() {
 		if (scrollPane_6 == null) {
 			scrollPane_6 = new JScrollPane();
-			scrollPane_6.setBounds(63, 66, 200, 128);
+			scrollPane_6.setBounds(10, 78, 257, 164);
 			scrollPane_6.setViewportView(getCausesList());
 		}
 		return scrollPane_6;
@@ -1006,7 +1017,7 @@ public class DoctorAppointmentView extends JFrame {
 					}
 				}
 			});
-			btnAddDiagnosis.setBounds(351, 211, 89, 23);
+			btnAddDiagnosis.setBounds(403, 186, 89, 23);
 		}
 		return btnAddDiagnosis;
 	}
@@ -1026,7 +1037,7 @@ public class DoctorAppointmentView extends JFrame {
 					}
 				}
 			});
-			btnRemoveDiagnosis.setBounds(450, 211, 89, 23);
+			btnRemoveDiagnosis.setBounds(502, 186, 89, 23);
 		}
 		return btnRemoveDiagnosis;
 	}
@@ -1052,5 +1063,54 @@ public class DoctorAppointmentView extends JFrame {
 			scrollPane_9.setViewportView(getTxtAreaDiagnosisDescription());
 		}
 		return scrollPane_9;
+	}
+	private JTextField getTxtFilterCauses() {
+		if (txtFilterCauses == null) {
+			txtFilterCauses = new JTextField();
+			txtFilterCauses.getDocument().addDocumentListener(new DocumentListener() {
+	            @Override
+	            public void insertUpdate(DocumentEvent e) {
+	                filterElements();
+	            }
+	            @Override
+	            public void removeUpdate(DocumentEvent e) {
+	                filterElements();
+	            }
+	            @Override
+	            public void changedUpdate(DocumentEvent e) {
+	                // Cambios en estilos, no se utiliza en este ejemplo
+	            }
+	        });
+			txtFilterCauses.setBounds(63, 40, 148, 31);
+			txtFilterCauses.setColumns(10);
+		}
+		return txtFilterCauses;
+	}
+	
+	private void filterElements() {
+		DefaultListModel<String> model = new DefaultListModel();
+		List<String> elements = new ArrayList<String>();
+		for (List<String> list : this.causes.values())
+			for (String item : list) {
+				elements.add(item);
+		}	
+		String searchText = getTxtFilterCauses().getText().toLowerCase();
+
+        List<String> filteredElements = elements.stream()
+                .filter(element -> element.toLowerCase().contains(searchText))
+                .collect(Collectors.toList());
+
+        for (String element : filteredElements) {
+            model.addElement(element);
+        }
+        
+        getCausesList().setModel(model);
+    }
+	private JLabel getLblSearch() {
+		if (lblSearch == null) {
+			lblSearch = new JLabel("Search:");
+			lblSearch.setBounds(10, 53, 67, 14);
+		}
+		return lblSearch;
 	}
 }
