@@ -137,6 +137,9 @@ public class MedicalRecepcionistView extends JFrame {
 	private JPanel panel_patient_center;
 	private JPanel panel_doctor_Center;
 	private JButton btnSelectDate;
+	private JLabel lblSurname;
+	private JTextField textFieldSurname;
+	private JButton btnFilterSurname;
 
 	/**
 	 * Create the frame.
@@ -429,6 +432,9 @@ public class MedicalRecepcionistView extends JFrame {
 			panel_patient_filter.add(getLblSSNumber());
 			panel_patient_filter.add(getTextFieldSSNumber());
 			panel_patient_filter.add(getBtnFilterSS());
+			panel_patient_filter.add(getLblSurname());
+			panel_patient_filter.add(getTextFieldSurname());
+			panel_patient_filter.add(getBtnFilterSurname());
 		}
 		return panel_patient_filter;
 	}
@@ -493,10 +499,13 @@ public class MedicalRecepcionistView extends JFrame {
 				public void valueChanged(ListSelectionEvent e) {
 					if (!listDoctor.getSelectedValuesList().isEmpty()) {
 						doctorChoosed = true;
+						btnSelectDate.setEnabled(true);
 
 					} else {
 						doctorChoosed = false;
 					}
+					
+					
 				}
 			});
 		}
@@ -690,18 +699,12 @@ public class MedicalRecepcionistView extends JFrame {
 						}
 					}
 
-//					List<Patient> selected = list_patients.getSelectedValuesList();
-//
 					patients.removeAllElements();
-//					list_patients.getSelectedValue();
 					for (int i = 0; i < filteredBySSNumber.size(); i++) {
 						if (!patients.contains(filteredBySSNumber.get(i))) {
 							patients.addElement(filteredBySSNumber.get(i));
 						}
 					}
-//					for (int i = 0; i < selected.size(); i++) {
-//						patients.addElement(selected.get(i));
-//					}
 				}
 			});
 		}
@@ -728,6 +731,7 @@ public class MedicalRecepcionistView extends JFrame {
 					}
 					textFieldNamePatient.setText("");
 					textFieldSSNumber.setText("");
+					textFieldSurname.setText("");
 					btnFinish.setEnabled(false);
 
 				}
@@ -791,6 +795,8 @@ public class MedicalRecepcionistView extends JFrame {
 					textRegNumber.setText("");
 					textFieldFrom.setEnabled(false);
 					textFieldTo.setEnabled(false);
+					btnFinish.setEnabled(false);
+					btnSelectDate.setEnabled(false);
 					btnFinish.setEnabled(false);
 
 				}
@@ -923,6 +929,7 @@ public class MedicalRecepcionistView extends JFrame {
 	private JButton getBtnSelectDate() {
 		if (btnSelectDate == null) {
 			btnSelectDate = new JButton("Select date");
+			btnSelectDate.setEnabled(false);
 			btnSelectDate.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					selectDate = new SelectDate(getSelectedDoctors());
@@ -933,5 +940,44 @@ public class MedicalRecepcionistView extends JFrame {
 			});
 		}
 		return btnSelectDate;
+	}
+	private JLabel getLblSurname() {
+		if (lblSurname == null) {
+			lblSurname = new JLabel("By Surname");
+			lblSurname.setFont(new Font("Tahoma", Font.BOLD, 11));
+		}
+		return lblSurname;
+	}
+	private JTextField getTextFieldSurname() {
+		if (textFieldSurname == null) {
+			textFieldSurname = new JTextField();
+			textFieldSurname.setColumns(10);
+		}
+		return textFieldSurname;
+	}
+	private JButton getBtnFilterSurname() {
+		if (btnFilterSurname == null) {
+			btnFilterSurname = new JButton("Filter");
+			btnFilterSurname.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					DefaultListModel<Patient> filteredBySurname = new DefaultListModel<>();
+					if (!getTextFieldSSNumber().getText().isBlank() && !getTextFieldSSNumber().getText().isEmpty()) {
+						for (int i = 0; i < patients.getSize(); i++) {
+							if ((patients.get(i).getSurName().contains(getTextFieldSurname().getText()))) {
+								filteredBySurname.addElement(patients.get(i));
+							}
+						}
+					}
+
+					patients.removeAllElements();
+					for (int i = 0; i < filteredBySurname.size(); i++) {
+						if (!patients.contains(filteredBySurname.get(i))) {
+							patients.addElement(filteredBySurname.get(i));
+						}
+					}
+				}
+			});
+		}
+		return btnFilterSurname;
 	}
 }
