@@ -4,6 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import com.toedter.calendar.JDateChooser;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -17,16 +23,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import com.toedter.calendar.JDateChooser;
+
 import db.Appointment;
-import db.Doctor;
+import db.Patient;
 import util.ConnectionFactory;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class EditAndCancelView extends JFrame {
 
@@ -50,16 +56,13 @@ public class EditAndCancelView extends JFrame {
 	private JCheckBox chckbxUrgent;
 	private JCheckBox chckbxNotUrgent;
 	private JPanel panelAttended;
-	private JCheckBox chckbxAttended;
-	private JCheckBox chckbxNotAttended;
+	private JCheckBox chckbxCancelled;
+	private JCheckBox chckbxNotCancelled;
 	private JPanel panelTimeSlot;
 	private JLabel lblTimeSlot;
-	private JTextField textFieldFrom;
-	private JLabel lblGuion;
-	private JTextField textFieldTo;
 	private JPanel panelOffice;
 	private JLabel lblOffice;
-	private JTextField textField;
+	private JTextField textFieldOffice;
 	private JPanel panelButtonsReset;
 	private JButton btnFilter;
 	private JButton btnResetFilters;
@@ -67,6 +70,7 @@ public class EditAndCancelView extends JFrame {
 	private DefaultListModel<Appointment> appointmentsBonitos = new DefaultListModel<>();
 
 	private DefaultListModel<Appointment> appointmentsReset = new DefaultListModel<>();
+	private JTextField textFieldDay;
 
 	/**
 	 * Launch the application.
@@ -140,13 +144,14 @@ public class EditAndCancelView extends JFrame {
 
 	private JButton getBtnRemove() {
 		if (btnRemove == null) {
-			btnRemove = new JButton("Remove");
+			btnRemove = new JButton("Cancel Appointment");
 			btnRemove.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					for (int i = 0; i < getListAppointments().getSelectedValuesList().size(); i++) {
-						ConnectionFactory.RemoveAppointment((Appointment)(getListAppointments().getSelectedValuesList().get(i)));
-						JOptionPane.showMessageDialog(EditAndCancelView.this,
-								"The appointment has been removed.", "Information", JOptionPane.INFORMATION_MESSAGE);
+						ConnectionFactory.RemoveAppointment(
+								(Appointment) (getListAppointments().getSelectedValuesList().get(i)));
+						JOptionPane.showMessageDialog(EditAndCancelView.this, "The appointment has been removed.",
+								"Information", JOptionPane.INFORMATION_MESSAGE);
 					}
 				}
 			});
@@ -287,24 +292,24 @@ public class EditAndCancelView extends JFrame {
 		if (panelAttended == null) {
 			panelAttended = new JPanel();
 			panelAttended.setLayout(new GridLayout(1, 0, 0, 0));
-			panelAttended.add(getChckbxAttended());
-			panelAttended.add(getChckbxNotAttended());
+			panelAttended.add(getChckbxCancelled());
+			panelAttended.add(getChckbxNotCancelled());
 		}
 		return panelAttended;
 	}
 
-	private JCheckBox getChckbxAttended() {
-		if (chckbxAttended == null) {
-			chckbxAttended = new JCheckBox("Attended");
+	private JCheckBox getChckbxCancelled() {
+		if (chckbxCancelled == null) {
+			chckbxCancelled = new JCheckBox("Cancelled");
 		}
-		return chckbxAttended;
+		return chckbxCancelled;
 	}
 
-	private JCheckBox getChckbxNotAttended() {
-		if (chckbxNotAttended == null) {
-			chckbxNotAttended = new JCheckBox("Not attended");
+	private JCheckBox getChckbxNotCancelled() {
+		if (chckbxNotCancelled == null) {
+			chckbxNotCancelled = new JCheckBox("Not cancelled");
 		}
-		return chckbxNotAttended;
+		return chckbxNotCancelled;
 	}
 
 	private JPanel getPanelTimeSlot() {
@@ -312,9 +317,7 @@ public class EditAndCancelView extends JFrame {
 			panelTimeSlot = new JPanel();
 			panelTimeSlot.setLayout(new GridLayout(1, 0, 0, 0));
 			panelTimeSlot.add(getLblTimeSlot());
-			panelTimeSlot.add(getTextFieldFrom());
-			panelTimeSlot.add(getLblGuion());
-			panelTimeSlot.add(getTextFieldTo());
+			panelTimeSlot.add(getTextFieldDay());
 		}
 		return panelTimeSlot;
 	}
@@ -326,36 +329,12 @@ public class EditAndCancelView extends JFrame {
 		return lblTimeSlot;
 	}
 
-	private JTextField getTextFieldFrom() {
-		if (textFieldFrom == null) {
-			textFieldFrom = new JTextField();
-			textFieldFrom.setColumns(10);
-		}
-		return textFieldFrom;
-	}
-
-	private JLabel getLblGuion() {
-		if (lblGuion == null) {
-			lblGuion = new JLabel("-");
-			lblGuion.setHorizontalAlignment(SwingConstants.CENTER);
-		}
-		return lblGuion;
-	}
-
-	private JTextField getTextFieldTo() {
-		if (textFieldTo == null) {
-			textFieldTo = new JTextField();
-			textFieldTo.setColumns(10);
-		}
-		return textFieldTo;
-	}
-
 	private JPanel getPanelOffice() {
 		if (panelOffice == null) {
 			panelOffice = new JPanel();
 			panelOffice.setLayout(new GridLayout(1, 0, 0, 0));
 			panelOffice.add(getLblOffice());
-			panelOffice.add(getTextField());
+			panelOffice.add(getTextFieldOffice());
 
 		}
 		return panelOffice;
@@ -368,12 +347,12 @@ public class EditAndCancelView extends JFrame {
 		return lblOffice;
 	}
 
-	private JTextField getTextField() {
-		if (textField == null) {
-			textField = new JTextField();
-			textField.setColumns(10);
+	private JTextField getTextFieldOffice() {
+		if (textFieldOffice == null) {
+			textFieldOffice = new JTextField();
+			textFieldOffice.setColumns(10);
 		}
-		return textField;
+		return textFieldOffice;
 	}
 
 	private JPanel getPanelButtonsReset() {
@@ -387,8 +366,910 @@ public class EditAndCancelView extends JFrame {
 	}
 
 	private JButton getBtnFilter() {
+
 		if (btnFilter == null) {
 			btnFilter = new JButton("Filter");
+
+			btnFilter.addActionListener(new ActionListener() {
+				DefaultListModel<Appointment> aux = appointments;
+
+				public void actionPerformed(ActionEvent e) {
+					// canceladas y no canceladas y no urgentes y urgentes
+					if ((!chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected() && !chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected())
+							|| (chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected()
+									&& chckbxCancelled.isSelected() && chckbxNotCancelled.isSelected())) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if ((getTextFieldDoctor().getText().equals("")
+									|| doctor.toLowerCase().equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if ((getTextFieldDoctor().getText().equals("")
+									|| doctor.toLowerCase().equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+
+					}
+					// solo urgente
+					else if (chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected() && !chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected()) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (app.getUrgency() == 1
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (app.getUrgency() == 1
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// solo no urgente
+					else if (!chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected() && !chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected()) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (app.getUrgency() == 0
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (app.getUrgency() == 0
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// urgentes y no urgentes
+					else if ((chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected() && !chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected())
+							|| (!chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected()
+									&& !chckbxCancelled.isSelected() && !chckbxNotCancelled.isSelected())) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if ((getTextFieldDoctor().getText().equals("")
+									|| doctor.toLowerCase().equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if ((getTextFieldDoctor().getText().equals("")
+									|| doctor.toLowerCase().equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// solo canceladas
+					else if (!chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected() && chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected()) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (app.getStatus().toLowerCase().equals("cancelled")
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (app.getStatus().toLowerCase().equals("cancelled")
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// solo no canceladas
+					else if (!chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected()
+							&& !chckbxCancelled.isSelected() && chckbxNotCancelled.isSelected()) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (!app.getStatus().toLowerCase().equals("cancelled")
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (!app.getStatus().toLowerCase().equals("cancelled")
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+					// canceladas y no canceladas
+					else if ((!chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected()
+							&& chckbxCancelled.isSelected() && chckbxNotCancelled.isSelected())
+							|| (!chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected()
+									&& !chckbxCancelled.isSelected() && !chckbxNotCancelled.isSelected())) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if ((getTextFieldDoctor().getText().equals("")
+									|| doctor.toLowerCase().equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if ((getTextFieldDoctor().getText().equals("")
+									|| doctor.toLowerCase().equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+					// urgentes y canceladas
+					else if (chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected() && chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected()) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (app.getStatus().toLowerCase().equals("cancelled") && app.getUrgency() == 1
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (app.getStatus().toLowerCase().equals("cancelled") && app.getUrgency() == 1
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// urgentes y no canceladas
+					else if (chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected() && chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected()) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (!app.getStatus().toLowerCase().equals("cancelled") && app.getUrgency() == 1
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (!app.getStatus().toLowerCase().equals("cancelled") && app.getUrgency() == 1
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// no urgentes y canceladas
+					else if (!chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected() && chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected()) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (app.getStatus().toLowerCase().equals("cancelled") && app.getUrgency() == 0
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (app.getStatus().toLowerCase().equals("cancelled") && app.getUrgency() == 0
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// no urgentes y no canceladas
+					else if (!chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected() && chckbxCancelled.isSelected()
+							&& !chckbxNotCancelled.isSelected()) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (!app.getStatus().toLowerCase().equals("cancelled") && app.getUrgency() == 0
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (!app.getStatus().toLowerCase().equals("cancelled") && app.getUrgency() == 0
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// urgentes y no urgentes y canceladas
+					else if ((!chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected()
+							&& chckbxCancelled.isSelected() && !chckbxNotCancelled.isSelected())
+							|| (chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected()
+									&& chckbxCancelled.isSelected() && !chckbxNotCancelled.isSelected())) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (app.getStatus().toLowerCase().equals("cancelled")
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (app.getStatus().toLowerCase().equals("cancelled")
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// urgentes y no urgentes y no canceladas
+					else if ((!chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected()
+							&& chckbxCancelled.isSelected() && !chckbxNotCancelled.isSelected())
+							|| (chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected()
+									&& chckbxCancelled.isSelected() && !chckbxNotCancelled.isSelected())) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (!app.getStatus().toLowerCase().equals("cancelled")
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (!app.getStatus().toLowerCase().equals("cancelled")
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// canceladas y no canceladas y urgentes
+					else if ((chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected() && chckbxCancelled.isSelected()
+							&& chckbxNotCancelled.isSelected())
+							|| (chckbxUrgent.isSelected() && !chckbxNotUrgent.isSelected()
+									&& !chckbxCancelled.isSelected() && !chckbxNotCancelled.isSelected())) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (app.getUrgency() == 1
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (app.getUrgency() == 1
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					// canceladas y no canceladas y no urgentes
+					else if ((!chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected() && chckbxCancelled.isSelected()
+							&& chckbxNotCancelled.isSelected())
+							|| (!chckbxUrgent.isSelected() && chckbxNotUrgent.isSelected()
+									&& !chckbxCancelled.isSelected() && !chckbxNotCancelled.isSelected())) {
+						for (int i = 0; i < getListAppointments().getModel().getSize(); i++) {
+							Appointment app = (Appointment) (getListAppointments().getModel().getElementAt(i));
+
+							String patient = "";
+							try {
+								patient = ConnectionFactory.getPatient(app.getPatientid());
+							} catch (Exception e1) {
+							}
+
+							String doctor = "";
+							try {
+								doctor = ConnectionFactory.getDoctor(app.getDoctorid());
+							} catch (Exception e1) {
+							}
+
+							String office = "";
+							try {
+								office = ConnectionFactory.getOffice(app.getOfficeId());
+							} catch (Exception e1) {
+							}
+							SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-mm-dd");
+
+							// si no se filtra por dia
+							if (app.getUrgency() == 0
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								aux.addElement(app);
+							}
+							// si se filtra por dia
+							if (app.getUrgency() == 0
+									&& (getTextFieldDoctor().getText().equals("") || doctor.toLowerCase()
+											.equals(getTextFieldDoctor().getText().toLowerCase()))
+									&& (getTextFieldPatient().getText().equals("") || patient.toLowerCase()
+											.equals(getTextFieldPatient().getText().toLowerCase()))
+									&& (!getTextFieldDay().getText().equals(""))
+									&& (getTextFieldOffice().getText().equals("") || office.toLowerCase()
+											.equals(getTextFieldOffice().getText().toLowerCase()))) {
+								try {
+									if (sdf3.parse(app.getStartdate())
+											.equals(sdf3.parse(getTextFieldDay().getText()))) {
+										aux.addElement(app);
+
+									}
+								} catch (ParseException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+							}
+						}
+					}
+
+					getListAppointments().setModel(aux);
+
+				}
+
+			});
 		}
 		return btnFilter;
 	}
@@ -396,7 +1277,25 @@ public class EditAndCancelView extends JFrame {
 	private JButton getBtnResetFilters() {
 		if (btnResetFilters == null) {
 			btnResetFilters = new JButton("Reset filters");
+			btnResetFilters.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					try {
+						getListAppointments().setModel(ConnectionFactory.getAppointments());
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
 		}
 		return btnResetFilters;
+	}
+
+	private JTextField getTextFieldDay() {
+		if (textFieldDay == null) {
+			textFieldDay = new JTextField();
+			textFieldDay.setColumns(10);
+		}
+		return textFieldDay;
 	}
 }

@@ -12,6 +12,8 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -22,7 +24,6 @@ import db.Office;
 import db.Patient;
 import db.WorkDay;
 import db.WorkPeriod;
-import gui.doctor.DoctorAppointmentView;
 
 public class ConnectionFactory {
 
@@ -336,9 +337,10 @@ public class ConnectionFactory {
 				String checkedout = resultSet.getString("checkedout");
 				BigInteger officeid = resultSet.getBigDecimal("officeid").toBigInteger();
 				String information = resultSet.getString("information");
+				String status = resultSet.getString("status");
 
 				apps.addElement(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
-						checkedin, checkedout, officeid, information));
+						checkedin, checkedout, officeid, information, status));
 
 			}
 
@@ -378,8 +380,8 @@ public class ConnectionFactory {
 			Connection connection = ConnectionFactory.getOracleConnection();
 
 			// Consulta SQL con parámetros
-			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information) "
-					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
@@ -398,6 +400,7 @@ public class ConnectionFactory {
 			preparedStatement.setInt(8, 0);
 			preparedStatement.setInt(9, officeId);
 			preparedStatement.setString(10, information);
+			preparedStatement.setString(11, "Booked");
 
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
@@ -587,6 +590,7 @@ public class ConnectionFactory {
 	@SuppressWarnings("unused")
 	public static String getFreeHours(List<Doctor> doctors, Date day) throws Exception {
 		String res = "";
+		String freeHours = "The doctor is free from ";
 		Connection connection = ConnectionFactory.getOracleConnection();
 		if (doctors.size() == 1) {
 			// hay que comprobar que la fecha que se pasa como parámetro esté dentro de ese
@@ -648,7 +652,7 @@ public class ConnectionFactory {
 
 					String s = "The doctors works from " + startHour + " to " + endHour;
 					res = s;
-
+					freeHours += startHour + " to ";
 					// APPOINTMENT?
 					String query3 = "SELECT * FROM APPOINTMENT WHERE DOCTORID = ?";
 
@@ -666,7 +670,7 @@ public class ConnectionFactory {
 								resultSet3.getString("enddate"), resultSet3.getInt("urgency"),
 								resultSet3.getInt("attended"), resultSet3.getString("checkedin"),
 								resultSet3.getString("checkedout"), resultSet3.getBigDecimal("officeid").toBigInteger(),
-								resultSet3.getString("information")));
+								resultSet3.getString("information"), resultSet3.getString("status")));
 
 					}
 
@@ -681,24 +685,50 @@ public class ConnectionFactory {
 						System.out.println("a.getend" + a.getEnddate());
 
 						if (dateFormat.parse(a.getStartdate()).after(dateFormat.parse(day + " 00:00:00"))
-								&& dateFormat.parse(a.getEnddate()).before(dateFormat.parse(day + " 24:00:00"))) {
+								&& dateFormat.parse(a.getEnddate()).before(dateFormat.parse(day + " 24:00:00"))
+								&& !a.getStatus().equals("Cancelled")) {
 
 							appsThatDay.add(a);
 						}
 					}
 
+					List<String> listOfHours = new ArrayList<>();
+
+					  // Define un comparador para ordenar por fecha
+			        Comparator<Appointment> comparadorFecha = Comparator.comparing(Appointment::getStartdate);
+
+			        // Ordena la lista usando el comparador
+			        Collections.sort(appsThatDay, comparadorFecha);
 					// si hay citas ese dia
 					if (!appsThatDay.isEmpty()) {
-						for (Appointment a : appsThatDay) {
+						for (int i = 0; i < appsThatDay.size(); i++) {
 							res += "\n The doctor has appointment from:\n\t "
-									+ dateFormat.parse(a.getStartdate()).getHours() + ":"
-									+ dateFormat.parse(a.getStartdate()).getMinutes() + " to\n\t "
-									+ dateFormat.parse(a.getEnddate()).getHours() + ":"
-									+ dateFormat.parse(a.getEnddate()).getMinutes() + "\n";
+									+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+									+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes() + " to\n\t "
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + "\n";
+
+							freeHours += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+									+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
+							if (appsThatDay.size() > 1 && i < appsThatDay.size() - 1) {
+								freeHours += " and from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
+										+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+//										+ dateFormat.parse(appsThatDay.get(i + 1).getStartdate()).getHours() + ":"
+//										+ dateFormat.parse(appsThatDay.get(i + 1).getStartdate()).getMinutes() + " "
+										;
+							} else {
+								freeHours += " and from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
+										+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+										+ endHour;
+								res += freeHours;
+							}
 						}
 					} else {
+						freeHours += endHour;
+						res += freeHours;
 						System.out.println("no tiene más citas");
 					}
+
 				}
 
 			}
@@ -795,7 +825,7 @@ public class ConnectionFactory {
 									resultSet3.getInt("urgency"), resultSet3.getInt("attended"),
 									resultSet3.getString("checkedin"), resultSet3.getString("checkedout"),
 									resultSet3.getBigDecimal("officeid").toBigInteger(),
-									resultSet3.getString("information")));
+									resultSet3.getString("information"), resultSet3.getString("status")));
 
 						}
 
@@ -810,7 +840,8 @@ public class ConnectionFactory {
 							System.out.println("a.getend" + a.getEnddate());
 
 							if (dateFormat2.parse(a.getStartdate()).after(dateFormat2.parse(day + " 00:00:00"))
-									&& dateFormat2.parse(a.getEnddate()).before(dateFormat2.parse(day + " 24:00:00"))) {
+									&& dateFormat2.parse(a.getEnddate()).before(dateFormat2.parse(day + " 24:00:00"))
+									&& !a.getStatus().equals("Cancelled")) {
 
 								appsThatDay.add(a);
 							}
@@ -871,11 +902,12 @@ public class ConnectionFactory {
 				String checkedout = resultSet.getString("checkedout");
 				BigDecimal officeid = resultSet.getBigDecimal("officeid");
 				String information = resultSet.getString("information");
+				String status = resultSet.getString("status");
 
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information));
+						officeid.toBigInteger(), information, status));
 			}
 
 			// Cerrar la conexión
@@ -889,7 +921,7 @@ public class ConnectionFactory {
 		return appointments;
 
 	}
-	
+
 	public static String getPatient(BigInteger id) throws Exception {
 
 		String name = "";
@@ -900,9 +932,9 @@ public class ConnectionFactory {
 
 			// Ejecutar una consulta SQL
 			String sql = "SELECT firstname FROM patient where id = ?";
-			
+
 			PreparedStatement statement = connection.prepareStatement(sql);
-			
+
 			statement.setBigDecimal(1, new BigDecimal(id));
 			ResultSet resultSet = statement.executeQuery();
 
@@ -924,7 +956,7 @@ public class ConnectionFactory {
 		return name;
 
 	}
-	
+
 	public static String getDoctor(BigInteger id) throws Exception {
 
 		String name = "";
@@ -935,9 +967,9 @@ public class ConnectionFactory {
 
 			// Ejecutar una consulta SQL
 			String sql = "SELECT name FROM doctor where id = ?";
-			
+
 			PreparedStatement statement = connection.prepareStatement(sql);
-			
+
 			statement.setBigDecimal(1, new BigDecimal(id));
 			ResultSet resultSet = statement.executeQuery();
 
@@ -961,19 +993,49 @@ public class ConnectionFactory {
 	}
 
 	public static void RemoveAppointment(Appointment appointment) {
-		
 
 		try {
 			// Establecer la conexión
 			Connection connection = ConnectionFactory.getOracleConnection();
 
 			// Ejecutar una consulta SQL
-			String sql = "DELETE FROM appointment WHERE id = ?";
-			
+			String sql = "UPDATE appointment SET status = 'cancelled' WHERE id = ?";
+
 			PreparedStatement statement = connection.prepareStatement(sql);
-			
+
 			statement.setBigDecimal(1, new BigDecimal(appointment.getId()));
+			statement.executeQuery();
+
+			// Cerrar la conexión
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static String getOffice(BigInteger id) {
+		String officecode = "";
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT officecode FROM office where id = ?";
+
+			PreparedStatement statement = connection.prepareStatement(sql);
+
+			statement.setBigDecimal(1, new BigDecimal(id));
 			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+
+				officecode = resultSet.getString("officecode");
+
+			}
 
 			// Cerrar la conexión
 			resultSet.close();
@@ -983,5 +1045,6 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 
+		return officecode;
 	}
 }

@@ -8,11 +8,11 @@ public class Appointment {
 	private BigInteger id;
 	private BigInteger patientid;
 	private BigInteger doctorid, officeId;;
-	private String startdate, enddate, information, checkedin, checkedout;
+	private String startdate, enddate, information, checkedin, checkedout, status;
 	private int urgency, attended;
 
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
-			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information) {
+			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information, String status) {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -25,6 +25,15 @@ public class Appointment {
 		this.checkedout = checkedout;
 		this.officeId = officeId;
 		this.information = information;
+		this.status = status;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public BigInteger getId() {
@@ -119,95 +128,47 @@ public class Appointment {
 	public String toString() {
 		if (urgency == 1) {
 			if (attended == 1) {
-//				if(checkedin == null&& checkedout==null) {
-//					try {
-//						return "[URGENT Appointment " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid) + "; Doctor: "
-//								+ ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate + "; End hour: " + enddate
-//								+  "; attended: yes;  checkedin: no;  checkedout: no";
-//					} catch (Exception e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//				if(checkedin != null && checkedout!=null) {
 				try {
-					return "[URGENT Appointment " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
+					return "[URGENT Appointment {" + getStatus() + "} " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
 							+ "; Doctor: " + ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate
 							+ "; End hour: " + enddate + "; attended: yes;  checkedin: no;  checkedout: no";
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-//				}
 			}
 			if (attended == 0) {
-//				if(checkedin == null&& checkedout==null) {
-//					try {
-//						return "[URGENT Appointment " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid) + "; Doctor: "
-//								+ ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate + "; End hour: " + enddate
-//								+  "; attended: no;  checkedin: no;  checkedout: no";
-//					} catch (Exception e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//				if(checkedin != null && checkedout!=null) {
 				try {
-					return "[URGENT Appointment " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
+					return "[URGENT Appointment {" + getStatus() + "} " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
 							+ "; Doctor: " + ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate
 							+ "; End hour: " + enddate + "; attended: no;  checkedin: no;  checkedout: no";
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-//				}
 			}
 
 		}
 		if (urgency == 0) {
 			if (attended == 1) {
-//				if(checkedin == null&& checkedout==null) {
-//					try {
-//						return "[Appointment " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid) + "; Doctor: "
-//								+ ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate + "; End hour: " + enddate
-//								+  "; attended: yes;  checkedin: no;  checkedout: no";
-//					} catch (Exception e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//				if(checkedin != null && checkedout!=null) {
 				try {
-					return "[Appointment " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
+					return "[Appointment {" + getStatus() + "} " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
 							+ "; Doctor: " + ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate
 							+ "; End hour: " + enddate + "; attended: yes;  checkedin: no;  checkedout: no";
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-//				}
 			}
 			if (attended == 0) {
-//				if(checkedin == null&& checkedout==null) {
-//					try {
-//						return "[Appointment " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid) + "; Doctor: "
-//								+ ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate + "; End hour: " + enddate
-//								+  "; attended: no;  checkedin: no;  checkedout: no";
-//					} catch (Exception e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//				if(checkedin != null && checkedout!=null) {
 				try {
-					return "[ Appointment " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
+					return "[ Appointment {" + getStatus() + "} " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
 							+ "; Doctor: " + ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate
 							+ "; End hour: " + enddate + "; attended: no;  checkedin: no;  checkedout: no";
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-//				}
 			}
 
 		}

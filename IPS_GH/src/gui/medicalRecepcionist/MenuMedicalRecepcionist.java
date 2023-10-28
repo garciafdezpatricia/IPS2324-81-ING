@@ -197,6 +197,16 @@ public class MenuMedicalRecepcionist extends JFrame {
 			btnEditAndCancel = new JButton("Edit or cancel appointment");
 			btnEditAndCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					EditAndCancelView editWp;
+					try {
+						editWp = new EditAndCancelView();
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 		}
