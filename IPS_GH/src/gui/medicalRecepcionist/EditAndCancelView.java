@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
@@ -21,6 +22,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -98,6 +100,8 @@ public class EditAndCancelView extends JFrame {
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(CreateAppointmentView.class.getResource("/img/descarga.jpg")));
 
 //		try {
 //			appointments = ConnectionFactory.getAppointments();
@@ -138,6 +142,33 @@ public class EditAndCancelView extends JFrame {
 	private JButton getBtnEdit() {
 		if (btnEdit == null) {
 			btnEdit = new JButton("Edit");
+			btnEdit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (getListAppointments().getSelectedValuesList().size() > 1) {
+						JOptionPane.showMessageDialog(EditAndCancelView.this,
+								"You can only edit one appointment each time.", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
+					}
+					Appointment app = (Appointment) getListAppointments().getSelectedValue();
+					if (app.getStatus().toLowerCase().equals("cancelled")) {
+						JOptionPane.showMessageDialog(EditAndCancelView.this, "The appointment is cancelled", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
+					} else {
+						EditAppointmentView mr;
+						try {
+							mr = new EditAppointmentView(app.getDoctorid(), app.getPatientid(), app.getOfficeId(),
+									app.getUrgency(), app.getInformation(), app.getStartdate(), app.getEnddate());
+							mr.setVisible(true);
+							mr.setLocationRelativeTo(null);
+
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+
+				}
+			});
 		}
 		return btnEdit;
 	}
@@ -205,13 +236,29 @@ public class EditAndCancelView extends JFrame {
 	private JList getListAppointments() {
 		if (listAppointments == null) {
 			try {
-				listAppointments = new JList(ConnectionFactory.getAppointments());
+				listAppointments = new JList(getFutureAppointments(ConnectionFactory.getAppointments()));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		return listAppointments;
+	}
+
+	private DefaultListModel<Appointment> getFutureAppointments(DefaultListModel<Appointment> appointments2) {
+		DefaultListModel<Appointment> res = new DefaultListModel<Appointment>();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		for (int i = 0; i < appointments2.size(); i++) {
+			try {
+				if (dateFormat.parse(appointments2.get(i).getStartdate()).before(new Date())) {
+					res.addElement(appointments2.get(i));
+				}
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return res;
 	}
 
 	private JPanel getPanelFilterByPatient() {

@@ -249,7 +249,7 @@ public class ConnectionFactory {
 
 			// Procesar los resultados
 			while (resultSet_patients.next()) {
-				int id = resultSet_patients.getInt("id");
+				BigInteger id = resultSet_patients.getBigDecimal("id").toBigInteger();
 				String contactinfo = resultSet_patients.getString("contactinfo");
 				String name = resultSet_patients.getString("firstname");
 				String surname = resultSet_patients.getString("surname");
@@ -522,7 +522,7 @@ public class ConnectionFactory {
 		return false;
 	}
 
-	public static void createAppointment(int patientID, BigInteger doctorID, String startDate, String endDate,
+	public static void createAppointment(BigInteger patientID, BigInteger doctorID, String startDate, String endDate,
 			int urgency, int officeId, String information) throws Exception {
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
@@ -543,7 +543,7 @@ public class ConnectionFactory {
 			BigDecimal doc = new BigDecimal(doctorID);
 
 			// Establecer valores para los parámetros
-			preparedStatement.setInt(1, patientID);
+			preparedStatement.setBigDecimal(1, new BigDecimal(patientID));
 			preparedStatement.setBigDecimal(2, doc);
 			preparedStatement.setString(3, startDate);
 			preparedStatement.setString(4, endDate);

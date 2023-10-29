@@ -27,6 +27,7 @@ import javax.swing.border.EmptyBorder;
 import com.toedter.calendar.JDateChooser;
 
 import db.Doctor;
+import oracle.sql.DATE;
 import util.ConnectionFactory;
 
 import javax.swing.JLabel;
@@ -40,7 +41,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javax.swing.JTextArea;
 
-public class SelectDate extends JDialog {
+public class SelectDateForEdition extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
@@ -67,12 +68,13 @@ public class SelectDate extends JDialog {
 	private Date day;
 
 	private static List<Doctor> selectedDoctors;
+	private static String startDate, endDate;
 	private JTextArea textAreaDates;
 
 	/**
 	 * Create the dialog.
 	 */
-	public SelectDate(List<Doctor> s) {
+	public SelectDateForEdition(List<Doctor> s, String startDate, String endDate) {
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(CreateAppointmentView.class.getResource("/img/descarga.jpg")));
 		try {
@@ -87,6 +89,8 @@ public class SelectDate extends JDialog {
 			e.printStackTrace();
 		}
 		selectedDoctors = s;
+		this.startDate = startDate;
+		this.endDate = endDate;
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(getPanelCenter(), BorderLayout.CENTER);
@@ -96,12 +100,40 @@ public class SelectDate extends JDialog {
 
 	}
 
+	private Date getDay(String d) {
+		SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd");
+
+		Date day = new Date();
+		try {
+			day = sdf3.parse(d);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return day;
+	}
+
+	private String getHour(String d) {
+		SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		Date day = new Date();
+		try {
+			day = sdf3.parse(d);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return day.getHours() + ":" + day.getMinutes();
+	}
+
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			SelectDate dialog = new SelectDate(selectedDoctors);
+			SelectDateForEdition dialog = new SelectDateForEdition(selectedDoctors, startDate, endDate);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			dialog.setLocationRelativeTo(null);
@@ -112,7 +144,7 @@ public class SelectDate extends JDialog {
 
 	public JDateChooser getDateChooser() {
 		if (dateChooser == null) {
-			dateChooser = new JDateChooser(new Date());
+			dateChooser = new JDateChooser(getDay(startDate));
 			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					btnNext.setEnabled(true);
@@ -224,9 +256,9 @@ public class SelectDate extends JDialog {
 					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd");
 					System.out.println(getDateChooser().getDate());
 					System.out.println(new Date());
-					if (getDateChooser().getDate().getDay() == new Date().getDay() &&
-							getDateChooser().getDate().getMonth() == new Date().getMonth() &&
-							getDateChooser().getDate().getYear() == new Date().getYear()) {
+					if (getDateChooser().getDate().getDay() == new Date().getDay()
+							&& getDateChooser().getDate().getMonth() == new Date().getMonth()
+							&& getDateChooser().getDate().getYear() == new Date().getYear()) {
 						btnPrevious.setEnabled(false);
 					}
 				}
@@ -314,6 +346,8 @@ public class SelectDate extends JDialog {
 	public JTextField getTextFieldFrom() {
 		if (textFieldFrom == null) {
 			textFieldFrom = new JTextField();
+			System.out.println(startDate);
+			textFieldFrom.setText(getHour(startDate).toString());
 			textFieldFrom.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 				}
@@ -355,6 +389,8 @@ public class SelectDate extends JDialog {
 		if (textFieldTo == null) {
 			textFieldTo = new JTextField();
 			textFieldTo.setColumns(10);
+			textFieldTo.setText(getHour(endDate).toString());
+
 			SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm:ss");
 
 			textFieldTo.addFocusListener(new FocusAdapter() {
