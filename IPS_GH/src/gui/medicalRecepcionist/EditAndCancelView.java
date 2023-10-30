@@ -156,8 +156,9 @@ public class EditAndCancelView extends JFrame {
 					} else {
 						EditAppointmentView mr;
 						try {
-							mr = new EditAppointmentView(app.getDoctorid(), app.getPatientid(), app.getOfficeId(),
-									app.getUrgency(), app.getInformation(), app.getStartdate(), app.getEnddate());
+							mr = new EditAppointmentView(app.getId(), app.getDoctorid(), app.getPatientid(),
+									app.getOfficeId(), app.getUrgency(), app.getInformation(), app.getStartdate(),
+									app.getEnddate());
 							mr.setVisible(true);
 							mr.setLocationRelativeTo(null);
 

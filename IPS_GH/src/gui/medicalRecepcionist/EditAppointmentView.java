@@ -87,14 +87,13 @@ public class EditAppointmentView extends JFrame {
 	private boolean toDateChoosed = false;
 	private SelectDateForEdition selectDate;
 
-	private static BigInteger doctorid;
+	private static BigInteger doctorid, id;
 	private static BigInteger patientid;
 	private static BigInteger officeid;
 	private static int urgency;
 	private static String information;
 	private static String startDate;
 	private static String endDate;
-
 
 	/**
 	 * Launch the application.
@@ -103,7 +102,7 @@ public class EditAppointmentView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					EditAppointmentView frame = new EditAppointmentView(doctorid, patientid, officeid, urgency,
+					EditAppointmentView frame = new EditAppointmentView(id, doctorid, patientid, officeid, urgency,
 							information, startDate, endDate);
 					frame.setVisible(true);
 					frame.setLocationRelativeTo(null); // centrar pantalla
@@ -154,8 +153,8 @@ public class EditAppointmentView extends JFrame {
 	 * 
 	 * @throws Exception
 	 */
-	public EditAppointmentView(BigInteger doctorid, BigInteger patientid, BigInteger officeid, int urgency,
-			String information, String startDate, String endDate) throws Exception {
+	public EditAppointmentView(BigInteger id, BigInteger doctorid, BigInteger patientid, BigInteger officeid,
+			int urgency, String information, String startDate, String endDate) throws Exception {
 
 		this.doctorid = doctorid;
 		this.patientid = patientid;
@@ -325,7 +324,7 @@ public class EditAppointmentView extends JFrame {
 											new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo()
 													+ ":00")) {
 										int opcion2 = JOptionPane.showConfirmDialog(EditAppointmentView.this,
-												"The doctor has another appointment at that time, do you want to reserve this appointment either?",
+												"The doctor has another appointment at that time, do you want to edit this appointment either?",
 												"Confirmation", JOptionPane.YES_NO_OPTION);
 
 										// Verificar la respuesta del usuario
@@ -360,7 +359,7 @@ public class EditAppointmentView extends JFrame {
 
 	private void areYouSureJOP() throws Exception {
 		int opcion = JOptionPane.showConfirmDialog(EditAppointmentView.this,
-				"Are you sure you want to reserve the appointment between the doctor(s) "
+				"Are you sure you want to edit the appointment " + id + " between the doctor(s) "
 						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
 						+ " on  " + selectDate.getDay().getDay() + "/" + selectDate.getDay().getMonth() + "/"
 						+ selectDate.getDay().getYear() + " at " + selectDate.getFrom() + " in the office "
@@ -379,14 +378,14 @@ public class EditAppointmentView extends JFrame {
 			}
 			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
-				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+				ConnectionFactory.updateAppointment(id, p.getId(), listDoctor.getSelectedValue().getId(),
 						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom() + ":00",
 						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo() + ":00", 1,
 						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 
 			} else {
-				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+				ConnectionFactory.updateAppointment(id, p.getId(), listDoctor.getSelectedValue().getId(),
 						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom() + ":00",
 						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo() + ":00", 0,
 						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
@@ -402,7 +401,9 @@ public class EditAppointmentView extends JFrame {
 	// TODO: poner más datos
 	private void sendEmail(String destinatario) {
 		String asunto = "Urgent appointment";
-		String mensaje = "You have a new urgent appointment with the patient " + list_patients.getSelectedValue();
+		String mensaje = "You have a new urgent appointment with the patient " + list_patients.getSelectedValue()
+				+ " at " + new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom()
+				+ ":00 the day " + selectDate.getDateChooser().getDate().getDate();
 
 		// Configurar propiedades para la conexión SMTP
 		Properties propiedades = new Properties();
@@ -482,9 +483,9 @@ public class EditAppointmentView extends JFrame {
 		if (list_patients == null) {
 			list_patients = new JList<>(patients); // Asegúrate de especificar el tipo de elemento en la JList
 			list_patients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			for(int i = 0; i < list_patients.getModel().getSize(); i++) {
+			for (int i = 0; i < list_patients.getModel().getSize(); i++) {
 				Patient p = (Patient) list_patients.getModel().getElementAt(i);
-				if(p.getId() == patientid) {
+				if (p.getId() == patientid) {
 					list_patients.setSelectedIndex(i);
 				}
 			}
@@ -515,8 +516,8 @@ public class EditAppointmentView extends JFrame {
 	public JList getListDoctor() {
 		if (listDoctor == null) {
 			listDoctor = new JList<>(doctors);
-			for(int i = 0; i < listDoctor.getModel().getSize(); i++) {
-				if(listDoctor.getModel().getElementAt(i).getId().equals(doctorid)) {
+			for (int i = 0; i < listDoctor.getModel().getSize(); i++) {
+				if (listDoctor.getModel().getElementAt(i).getId().equals(doctorid)) {
 					listDoctor.setSelectedIndex(i);
 				}
 			}
@@ -802,10 +803,9 @@ public class EditAppointmentView extends JFrame {
 	private JRadioButton getRdbtnUrgent_1() {
 		if (rdbtnUrgent == null) {
 			rdbtnUrgent = new JRadioButton("Urgent");
-			if(urgency == 1) {
+			if (urgency == 1) {
 				rdbtnUrgent.setSelected(true);
-			}
-			else
+			} else
 				rdbtnUrgent.setSelected(false);
 		}
 		return rdbtnUrgent;
@@ -923,9 +923,10 @@ public class EditAppointmentView extends JFrame {
 				String[] offices = ConnectionFactory.getOfficesCodes();
 
 				comboBoxOffices.setModel(new DefaultComboBoxModel<>(offices));
-				for(int i = 0; i < offices.length; i++) {
-					if(offices[i].equals(ConnectionFactory.getOffice(officeid))) {
-						comboBoxOffices.setSelectedIndex(i);;
+				for (int i = 0; i < offices.length; i++) {
+					if (offices[i].equals(ConnectionFactory.getOffice(officeid))) {
+						comboBoxOffices.setSelectedIndex(i);
+						;
 					}
 				}
 			} catch (Exception e) {
