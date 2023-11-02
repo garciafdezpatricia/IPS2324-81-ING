@@ -397,7 +397,6 @@ public class ConnectionFactory {
 			try {
 				if (utilDate.after(workperiod.get(0).getStartDate())
 						&& utilDate.before(workperiod.get(0).getEndDate())) {
-					System.out.println("esta en el workperiod");
 					String sql_workday = "SELECT * FROM WORKDAY WHERE WORKPERIODID = ?";
 
 					// Crear una sentencia SQL
@@ -415,7 +414,7 @@ public class ConnectionFactory {
 
 						String weekday = resultSet_workday.getString("weekday");
 						String starthour = resultSet_workday.getString("starthour");
-						System.out.println(starthour);
+//						System.out.println(starthour);
 						String endhour = resultSet_workday.getString("endhour");
 						BigInteger workperiodid = workperiod.get(0).getId();
 
@@ -558,11 +557,11 @@ public class ConnectionFactory {
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
 
-			if (filasAfectadas > 0) {
-				System.out.println("Inserción exitosa.");
-			} else {
-				System.out.println("La inserción no se pudo realizar.");
-			}
+//			if (filasAfectadas > 0) {
+//				System.out.println("Inserción exitosa.");
+//			} else {
+//				System.out.println("La inserción no se pudo realizar.");
+//			}
 
 			// Cerrar la conexión y el PreparedStatement
 			preparedStatement.close();
@@ -669,11 +668,11 @@ public class ConnectionFactory {
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
 
-			if (filasAfectadas > 0) {
-				System.out.println("Inserción exitosa.");
-			} else {
-				System.out.println("La inserción no se pudo realizar.");
-			}
+//			if (filasAfectadas > 0) {
+//				System.out.println("Inserción exitosa.");
+//			} else {
+//				System.out.println("La inserción no se pudo realizar.");
+//			}
 
 			// Cerrar la conexión y el PreparedStatement
 			preparedStatement.close();
@@ -726,11 +725,11 @@ public class ConnectionFactory {
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
 
-			if (filasAfectadas > 0) {
-				System.out.println("Inserción exitosa.");
-			} else {
-				System.out.println("La inserción no se pudo realizar.");
-			}
+//			if (filasAfectadas > 0) {
+//				System.out.println("Inserción exitosa.");
+//			} else {
+//				System.out.println("La inserción no se pudo realizar.");
+//			}
 
 			// Cerrar la conexión y el PreparedStatement
 			preparedStatement.close();
@@ -765,11 +764,11 @@ public class ConnectionFactory {
 			}
 
 			if (wpid == null) {
-				System.out.println("No hay free hours porque ese dia no esta dentro de su workperiod");
+//				System.out.println("No hay free hours porque ese dia no esta dentro de su workperiod");
 			}
 			// si si que está dentro del workperiod
 			else {
-				System.out.println("El dia si esta dentro de su workperiod");
+//				System.out.println("El dia si esta dentro de su workperiod");
 				String query2 = "SELECT * from workday where workperiodid = ? and weekday = ?";
 
 				PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
@@ -800,7 +799,7 @@ public class ConnectionFactory {
 				workday = new WorkDay(id.toBigInteger(), weekday, startHour, endHour, wpid.toBigInteger());
 
 				if (workday == null) {
-					System.out.println("workday null");
+//					System.out.println("workday null");
 				} else {
 					// ahora falta filtrar en el caso de que tenga citas
 
@@ -833,10 +832,10 @@ public class ConnectionFactory {
 					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 					for (Appointment a : apps) {
-						System.out.println("a.getStartdate" + a.getStartdate());
-						System.out.println("day" + dateFormat.parse(day + " 00:00:00"));
-
-						System.out.println("a.getend" + a.getEnddate());
+//						System.out.println("a.getStartdate" + a.getStartdate());
+//						System.out.println("day" + dateFormat.parse(day + " 00:00:00"));
+//
+//						System.out.println("a.getend" + a.getEnddate());
 
 						if (dateFormat.parse(a.getStartdate()).after(dateFormat.parse(day + " 00:00:00"))
 								&& dateFormat.parse(a.getEnddate()).before(dateFormat.parse(day + " 24:00:00"))
@@ -880,7 +879,7 @@ public class ConnectionFactory {
 					} else {
 						freeHours += endHour;
 						res += freeHours;
-						System.out.println("no tiene más citas");
+//						System.out.println("no tiene más citas");
 					}
 
 				}
@@ -909,11 +908,11 @@ public class ConnectionFactory {
 				}
 
 				if (ids.size() < doctors.size()) {
-					System.out.println("No hay free hours porque ese dia uno de los médicos no trabaja (workperiod)");
+//					System.out.println("No hay free hours porque ese dia uno de los médicos no trabaja (workperiod)");
 				}
 				// si si que está dentro del workperiod
 				else {
-					System.out.println("El dia si esta dentro del workperiod de todos los doctores");
+//					System.out.println("El dia si esta dentro del workperiod de todos los doctores");
 					String query2 = "SELECT * from workday where workperiodid = ? and weekday = ?";
 
 					PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
@@ -943,7 +942,7 @@ public class ConnectionFactory {
 					SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
 					if (workdays.size() != doctors.size()) {
-						System.out.println("la lista de workdays no coincide con la de doctores");
+//						System.out.println("la lista de workdays no coincide con la de doctores");
 					} else {
 						// ahora falta filtrar en el caso de que tenga citas
 
@@ -990,14 +989,14 @@ public class ConnectionFactory {
 						SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 						for (Appointment a : apps) {
-							System.out.println("a.getStartdate" + a.getStartdate());
-							System.out.println("day" + dateFormat2.parse(day + " 00:00:00"));
-							System.out.println("cita " + a);
-							System.out.println("a.getend" + a.getEnddate());
+//							System.out.println("a.getStartdate" + a.getStartdate());
+//							System.out.println("day" + dateFormat2.parse(day + " 00:00:00"));
+//							System.out.println("cita " + a);
+//							System.out.println("a.getend" + a.getEnddate());
 							if (dateFormat2.parse(a.getStartdate()).after(dateFormat2.parse(day + " 00:00:00"))
 									&& dateFormat2.parse(a.getEnddate()).before(dateFormat2.parse(day + " 24:00:00"))
 									&& !a.getStatus().toLowerCase().equals("cancelled")) {
-								System.out.println(a);
+//								System.out.println(a);
 								appsThatDay.add(a);
 							}
 						}
@@ -1036,7 +1035,7 @@ public class ConnectionFactory {
 						} else {
 							freeHours += horaMasProntoDeSalida;
 							res += freeHours;
-							System.out.println("no tiene más citas");
+//							System.out.println("no tiene más citas");
 						}
 
 					}
@@ -1255,9 +1254,9 @@ public class ConnectionFactory {
 			int filasAfectadas = preparedStatement.executeUpdate();
 
 			if (filasAfectadas > 0) {
-				System.out.println("Inserción exitosa.");
+//				System.out.println("Inserción exitosa.");
 			} else {
-				System.out.println("La inserción no se pudo realizar.");
+//				System.out.println("La inserción no se pudo realizar.");
 			}
 
 			// Cerrar la conexión y el PreparedStatement

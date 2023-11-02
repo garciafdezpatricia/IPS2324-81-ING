@@ -101,7 +101,7 @@ public class EditAndCancelView extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(CreateAppointmentView.class.getResource("/img/descarga.jpg")));
+				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 
 //		try {
 //			appointments = ConnectionFactory.getAppointments();
@@ -251,7 +251,7 @@ public class EditAndCancelView extends JFrame {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		for (int i = 0; i < appointments2.size(); i++) {
 			try {
-				if (dateFormat.parse(appointments2.get(i).getStartdate()).before(new Date())) {
+				if (dateFormat.parse(appointments2.get(i).getStartdate()).after(new Date())) {
 					res.addElement(appointments2.get(i));
 				}
 			} catch (ParseException e) {

@@ -74,7 +74,7 @@ public class SelectDate extends JDialog {
 	 */
 	public SelectDate(List<Doctor> s) {
 		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(CreateAppointmentView.class.getResource("/img/descarga.jpg")));
+				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {

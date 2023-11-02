@@ -51,7 +51,7 @@ import db.Doctor;
 import db.Patient;
 import util.ConnectionFactory;
 
-public class CreateAppointmentView extends JFrame {
+public class MedicalRecepcionistView extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -96,7 +96,7 @@ public class CreateAppointmentView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					CreateAppointmentView frame = new CreateAppointmentView();
+					MedicalRecepcionistView frame = new MedicalRecepcionistView();
 					frame.setVisible(true);
 					frame.setLocationRelativeTo(null); // centrar pantalla
 
@@ -146,11 +146,11 @@ public class CreateAppointmentView extends JFrame {
 	 * 
 	 * @throws Exception
 	 */
-	public CreateAppointmentView() throws Exception {
+	public MedicalRecepcionistView() throws Exception {
 
 		setTitle("Reservation of appointment");
 		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(CreateAppointmentView.class.getResource("/img/descarga.jpg")));
+				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		doctors = ConnectionFactory.getDoctors();
 		doctorsReset = ConnectionFactory.getDoctors();
 
@@ -298,7 +298,7 @@ public class CreateAppointmentView extends JFrame {
 							if (!ConnectionFactory.isWorking(new java.sql.Date(selectDate.getDay().getTime()),
 									selectDate.getFrom(), selectDate.getTo(),
 									listDoctor.getSelectedValuesList().get(i).getId())) {
-								JOptionPane.showMessageDialog(CreateAppointmentView.this,
+								JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
 										"The doctor is not working.", "Warning", JOptionPane.INFORMATION_MESSAGE);
 								System.out.println("no está trabajando");
 							} else {
@@ -310,7 +310,7 @@ public class CreateAppointmentView extends JFrame {
 													+ selectDate.getFrom() + ":00",
 											new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo()
 													+ ":00")) {
-										int opcion2 = JOptionPane.showConfirmDialog(CreateAppointmentView.this,
+										int opcion2 = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
 												"The doctor has another appointment at that time, do you want to reserve this appointment either?",
 												"Confirmation", JOptionPane.YES_NO_OPTION);
 
@@ -345,7 +345,7 @@ public class CreateAppointmentView extends JFrame {
 	}
 
 	private void areYouSureJOP() throws Exception {
-		int opcion = JOptionPane.showConfirmDialog(CreateAppointmentView.this,
+		int opcion = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
 				"Are you sure you want to reserve the appointment between the doctor(s) "
 						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
 						+ " on  " + selectDate.getDay().getDay() + "/" + selectDate.getDay().getMonth() + "/"

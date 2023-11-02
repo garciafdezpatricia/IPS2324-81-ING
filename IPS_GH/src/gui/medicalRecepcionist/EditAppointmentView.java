@@ -163,6 +163,7 @@ public class EditAppointmentView extends JFrame {
 		this.information = information;
 		this.startDate = startDate;
 		this.endDate = endDate;
+		this.id = id;
 		setTitle("Edition of appointment");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(EditAppointmentView.class.getResource("/img/descarga.jpg")));
 		doctors = ConnectionFactory.getDoctors();
@@ -857,7 +858,6 @@ public class EditAppointmentView extends JFrame {
 	private JButton getBtnEdit() {
 		if (btnEdit == null) {
 			btnEdit = new JButton("Edit");
-			btnEdit.setEnabled(false);
 			btnEdit.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					btnEdit.setEnabled(false); // by default, the edit button is disabled until a patient is selected
@@ -969,11 +969,10 @@ public class EditAppointmentView extends JFrame {
 			btnSelectDate = new JButton("Select date");
 			btnSelectDate.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					SelectDateForEdition mr;
 					try {
-						mr = new SelectDateForEdition(getSelectedDoctors(), startDate, endDate);
-						mr.setVisible(true);
-						mr.setLocationRelativeTo(null);
+						selectDate = new SelectDateForEdition(getSelectedDoctors(), startDate, endDate);
+						selectDate.setVisible(true);
+						selectDate.setLocationRelativeTo(null);
 
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block

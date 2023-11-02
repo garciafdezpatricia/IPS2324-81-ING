@@ -107,9 +107,9 @@ public class MenuMedicalRecepcionist extends JFrame {
 			btnCreateApp = new JButton("Create an appointment");
 			btnCreateApp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					CreateAppointmentView mr;
+					MedicalRecepcionistView mr;
 						try {
-							mr = new CreateAppointmentView();
+							mr = new MedicalRecepcionistView();
 							mr.setVisible(true);
 							mr.setLocationRelativeTo(null);
 
