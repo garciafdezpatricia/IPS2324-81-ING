@@ -12,7 +12,8 @@ public class Appointment {
 	private int urgency, attended;
 
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
-			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information, String status) {
+			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
+			String status) {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -127,50 +128,53 @@ public class Appointment {
 	@Override
 	public String toString() {
 		if (urgency == 1) {
-			if (attended == 1) {
+			if(getStatus().toLowerCase().equals("cancelled")) {
 				try {
-					return "[URGENT Appointment {" + getStatus() + "} " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
-							+ "; Doctor: " + ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate
-							+ "; End hour: " + enddate + "; attended: yes;  checkedin: no;  checkedout: no";
+					return " (cancelled) [URGENT] \n\tPatient: "
+							+ ConnectionFactory.getPatient(patientid) + "; \n\tDoctor: " + ConnectionFactory.getDoctor(doctorid)
+							+ "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-			}
-			if (attended == 0) {
-				try {
-					return "[URGENT Appointment {" + getStatus() + "} " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
-							+ "; Doctor: " + ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate
-							+ "; End hour: " + enddate + "; attended: no;  checkedin: no;  checkedout: no";
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 
+				}
+			}
+			else {
+				try {
+					return "[URGENT] \n\tPatient: "
+							+ ConnectionFactory.getPatient(patientid) + "; \n\tDoctor: " + ConnectionFactory.getDoctor(doctorid)
+							+ "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+
+				}
+			}
+			
 		}
 		if (urgency == 0) {
-			if (attended == 1) {
+			if(getStatus().toLowerCase().equals("cancelled")) {
 				try {
-					return "[Appointment {" + getStatus() + "} " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
-							+ "; Doctor: " + ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate
-							+ "; End hour: " + enddate + "; attended: yes;  checkedin: no;  checkedout: no";
+					return " (cancelled) \n\tPatient: "
+							+ ConnectionFactory.getPatient(patientid) + "; \n\tDoctor: " + ConnectionFactory.getDoctor(doctorid)
+							+ "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-			}
-			if (attended == 0) {
-				try {
-					return "[ Appointment {" + getStatus() + "} " + id + "] - Patient: " + ConnectionFactory.getPatient(patientid)
-							+ "; Doctor: " + ConnectionFactory.getDoctor(doctorid) + "; StartHour: " + startdate
-							+ "; End hour: " + enddate + "; attended: no;  checkedin: no;  checkedout: no";
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 
+				}
+			}
+			else {
+				try {
+					return "\n\tPatient: "
+							+ ConnectionFactory.getPatient(patientid) + "; \n\tDoctor: " + ConnectionFactory.getDoctor(doctorid)
+							+ "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+
+				}
+			}
 		}
 
 		return "Appointment";

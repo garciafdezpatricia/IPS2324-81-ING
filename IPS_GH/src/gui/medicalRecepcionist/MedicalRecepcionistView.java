@@ -504,8 +504,7 @@ public class MedicalRecepcionistView extends JFrame {
 					} else {
 						doctorChoosed = false;
 					}
-					
-					
+
 				}
 			});
 		}
@@ -660,8 +659,8 @@ public class MedicalRecepcionistView extends JFrame {
 					if (!getTextFieldNamePatient().getText().isBlank()
 							&& !getTextFieldNamePatient().getText().isEmpty()) {
 						for (int i = 0; i < patients.getSize(); i++) {
-							if (getTextFieldNamePatient().getText().toLowerCase()
-									.equals(patients.get(i).getFirstName().toLowerCase())) {
+							if (patients.get(i).getFirstName().toLowerCase()
+									.contains(getTextFieldNamePatient().getText().toLowerCase())) {
 								filteredByName.addElement(patients.get(i));
 							}
 						}
@@ -941,6 +940,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return btnSelectDate;
 	}
+
 	private JLabel getLblSurname() {
 		if (lblSurname == null) {
 			lblSurname = new JLabel("By Surname");
@@ -948,6 +948,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return lblSurname;
 	}
+
 	private JTextField getTextFieldSurname() {
 		if (textFieldSurname == null) {
 			textFieldSurname = new JTextField();
@@ -955,6 +956,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return textFieldSurname;
 	}
+
 	private JButton getBtnFilterSurname() {
 		if (btnFilterSurname == null) {
 			btnFilterSurname = new JButton("Filter");
