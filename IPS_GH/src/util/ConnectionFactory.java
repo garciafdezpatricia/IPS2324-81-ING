@@ -755,7 +755,7 @@ public class ConnectionFactory {
 			preparedStatement.setBigDecimal(4, wpid);
 
 			// Ejecutar la inserción
-//			int filasAfectadas = preparedStatement.executeUpdate();
+			int filasAfectadas = preparedStatement.executeUpdate();
 
 //			if (filasAfectadas > 0) {
 //				System.out.println("Inserción exitosa.");

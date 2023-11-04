@@ -26,6 +26,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import db.Appointment;
+import db.Doctor;
 import db.Patient;
 import gui.medicalRecepcionist.EditAndCancelView;
 import gui.medicalRecepcionist.MedicalRecepcionistView;
@@ -61,6 +62,9 @@ public class FilterPatientView extends JDialog {
 	private EditAndCancelView prev = new EditAndCancelView();
 	private static DefaultListModel<Appointment> appointments;
 	private DefaultListModel<Appointment> a2 = new DefaultListModel<>();
+	private JLabel lblDNI;
+	private JButton btnDNI;
+	private JTextField textFieldDNI;
 
 	/**
 	 * Launch the application.
@@ -121,27 +125,45 @@ public class FilterPatientView extends JDialog {
 		return panelButtons;
 	}
 
-
 	private JButton getBtnSave() {
 		if (btnSave == null) {
 			btnSave = new JButton("Save");
 			btnSave.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
-					DefaultListModel<Appointment> appointments2 = new DefaultListModel<>();
+					if (getListPatients().getSelectedValuesList().size() == 1) {
+						DefaultListModel<Appointment> appointments2 = new DefaultListModel<>();
 
-					Patient p = (Patient) getListPatients().getSelectedValue();
-					appointments.clear();
+						Patient p = (Patient) getListPatients().getSelectedValue();
+						appointments.clear();
 
-					try {
-						DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByPatientID(p.getId());
-						for (int i = 0; i < a.size(); i++) {
-							appointments.addElement(a.get(i));
+						try {
+							DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByPatientID(p.getId());
+							for (int i = 0; i < a.size(); i++) {
+								appointments.addElement(a.get(i));
 
+							}
+						} catch (Exception e1) {
+							e1.printStackTrace();
 						}
-					} catch (Exception e1) {
-						e1.printStackTrace();
+
+					} else {
+						for (int i = 0; i < getListPatients().getSelectedValuesList().size(); i++) {
+							Patient d = (Patient) getListPatients().getSelectedValuesList().get(i);
+							DefaultListModel<Appointment> a = null;
+							try {
+								a = ConnectionFactory.getAppointmentsByPatientID(d.getId());
+							} catch (Exception e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+
+							for (int j = 0; j < a.size(); j++) {
+								appointments.addElement(a.get(j));
+							}
+						}
 					}
+
 					setVisible(false);
 
 				}
@@ -215,6 +237,9 @@ public class FilterPatientView extends JDialog {
 			panelFilters.add(getLblSocialSecurityNumber());
 			panelFilters.add(getTextFieldSS());
 			panelFilters.add(getBtnSS());
+			panelFilters.add(getLblDNI());
+			panelFilters.add(getTextFieldDNI());
+			panelFilters.add(getBtnDNI());
 		}
 		return panelFilters;
 	}
@@ -319,7 +344,6 @@ public class FilterPatientView extends JDialog {
 					btnSave.setEnabled(true);
 				}
 			});
-			listPatients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		}
 		return listPatients;
 	}
@@ -363,5 +387,46 @@ public class FilterPatientView extends JDialog {
 			textFieldSS.setColumns(10);
 		}
 		return textFieldSS;
+	}
+
+	private JLabel getLblDNI() {
+		if (lblDNI == null) {
+			lblDNI = new JLabel("DNI:");
+		}
+		return lblDNI;
+	}
+
+	private JButton getBtnDNI() {
+		if (btnDNI == null) {
+			btnDNI = new JButton("Filter");
+			btnDNI.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					DefaultListModel<Patient> filteredByDNI = new DefaultListModel<>();
+					if (!getTextFieldDNI().getText().isBlank() && !getTextFieldDNI().getText().isEmpty()) {
+						for (int i = 0; i < patients.getSize(); i++) {
+							if (patients.get(i).getDni().contains(getTextFieldDNI().getText())) {
+								filteredByDNI.addElement(patients.get(i));
+							}
+						}
+					}
+
+					patients.removeAllElements();
+					for (int i = 0; i < filteredByDNI.size(); i++) {
+						if (!patients.contains(filteredByDNI.get(i))) {
+							patients.addElement(filteredByDNI.get(i));
+						}
+					}
+				}
+			});
+		}
+		return btnDNI;
+	}
+
+	private JTextField getTextFieldDNI() {
+		if (textFieldDNI == null) {
+			textFieldDNI = new JTextField();
+			textFieldDNI.setColumns(10);
+		}
+		return textFieldDNI;
 	}
 }

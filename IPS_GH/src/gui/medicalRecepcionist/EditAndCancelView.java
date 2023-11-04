@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
-import java.awt.LayoutManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,14 +13,12 @@ import java.util.Date;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -29,13 +26,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import db.Appointment;
-import db.Patient;
+import gui.medicalRecepcionist.filters.FilterDayView;
 import gui.medicalRecepcionist.filters.FilterDoctorView;
 import gui.medicalRecepcionist.filters.FilterOfficeView;
 import gui.medicalRecepcionist.filters.FilterPatientView;
-import gui.medicalRecepcionist.filters.FilterDayView;
 import util.ConnectionFactory;
-import javax.swing.JComboBox;
 
 public class EditAndCancelView extends JFrame {
 
@@ -78,9 +73,6 @@ public class EditAndCancelView extends JFrame {
 	private JButton btnOffice;
 	private JButton btnDay;
 	protected FilterDayView filterTime;
-	private JPanel panelTime;
-	private JLabel lblTime;
-	private JButton btnTimeFilter;
 	protected FilterOfficeView filterOffice;
 
 	/**
@@ -226,13 +218,12 @@ public class EditAndCancelView extends JFrame {
 			panelFilters = new JPanel();
 			panelFilters
 					.setBorder(new TitledBorder(null, "Filters", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-			panelFilters.setLayout(new GridLayout(8, 0, 0, 0));
+			panelFilters.setLayout(new GridLayout(7, 0, 0, 0));
 			panelFilters.add(getPanelFilterByPatient());
 			panelFilters.add(getPanelDoctor());
 			panelFilters.add(getPanelUrgent());
 			panelFilters.add(getPanelAttended());
 			panelFilters.add(getPanelDay());
-			panelFilters.add(getPanelTime());
 			panelFilters.add(getPanelOffice());
 			panelFilters.add(getPanelButtonsReset());
 		}
@@ -558,26 +549,5 @@ public class EditAndCancelView extends JFrame {
 			});
 		}
 		return btnDay;
-	}
-	private JPanel getPanelTime() {
-		if (panelTime == null) {
-			panelTime = new JPanel();
-			panelTime.setLayout(new GridLayout(0, 2, 0, 0));
-			panelTime.add(getLblTime());
-			panelTime.add(getBtnTimeFilter());
-		}
-		return panelTime;
-	}
-	private JLabel getLblTime() {
-		if (lblTime == null) {
-			lblTime = new JLabel("By time:");
-		}
-		return lblTime;
-	}
-	private JButton getBtnTimeFilter() {
-		if (btnTimeFilter == null) {
-			btnTimeFilter = new JButton("Filter");
-		}
-		return btnTimeFilter;
 	}
 }

@@ -85,8 +85,8 @@ public class MedicalRecepcionistView extends JFrame {
 	private boolean doctorChoosed = false;
 	private boolean patientChoosed = false;
 	private boolean officeChoosed = false;
-	private boolean fromDateChoosed = false;
-	private boolean toDateChoosed = false;
+	private boolean dateChoosed = false;
+	
 	private SelectDate selectDate;
 
 	/**
@@ -137,9 +137,15 @@ public class MedicalRecepcionistView extends JFrame {
 	private JPanel panel_patient_center;
 	private JPanel panel_doctor_Center;
 	private JButton btnSelectDate;
-	private JLabel lblSurname;
+	private JLabel lblsurname;
 	private JTextField textFieldSurname;
 	private JButton btnFilterSurname;
+	private JLabel lblSurnameDoctor;
+	private JTextField textFieldSurnameDoctor;
+	private JButton btnSurnameDoctor;
+	private JLabel lblDNI;
+	private JTextField textFieldDni;
+	private JButton btnDNI;
 
 	/**
 	 * Create the frame.
@@ -432,9 +438,12 @@ public class MedicalRecepcionistView extends JFrame {
 			panel_patient_filter.add(getLblSSNumber());
 			panel_patient_filter.add(getTextFieldSSNumber());
 			panel_patient_filter.add(getBtnFilterSS());
-			panel_patient_filter.add(getLblSurname());
+			panel_patient_filter.add(getLblsurname());
 			panel_patient_filter.add(getTextFieldSurname());
 			panel_patient_filter.add(getBtnFilterSurname());
+			panel_patient_filter.add(getLblDNI());
+			panel_patient_filter.add(getTextFieldDni());
+			panel_patient_filter.add(getBtnDNI());
 		}
 		return panel_patient_filter;
 	}
@@ -544,6 +553,9 @@ public class MedicalRecepcionistView extends JFrame {
 			panelNameAndNumber.add(getLblTypeDoctor_1());
 			panelNameAndNumber.add(getTextNameDoctor());
 			panelNameAndNumber.add(getBtnFilterName());
+			panelNameAndNumber.add(getLblSurnameDoctor());
+			panelNameAndNumber.add(getTextFieldSurnameDoctor());
+			panelNameAndNumber.add(getBtnSurnameDoctor());
 			panelNameAndNumber.add(getLblRegistrationNumber_1());
 			panelNameAndNumber.add(getTextRegNumber());
 			panelNameAndNumber.add(getBtnRegNumber());
@@ -899,7 +911,7 @@ public class MedicalRecepcionistView extends JFrame {
 	}
 
 	private void checkFinishBtnEnabled() {
-		if (doctorChoosed && patientChoosed && officeChoosed)
+		if (doctorChoosed && patientChoosed && officeChoosed && dateChoosed)
 			getBtnFinish().setEnabled(true);
 
 	}
@@ -932,7 +944,7 @@ public class MedicalRecepcionistView extends JFrame {
 			btnSelectDate.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					selectDate = new SelectDate(getSelectedDoctors());
-
+					dateChoosed = true;
 					selectDate.setVisible(true);
 
 				}
@@ -941,12 +953,12 @@ public class MedicalRecepcionistView extends JFrame {
 		return btnSelectDate;
 	}
 
-	private JLabel getLblSurname() {
-		if (lblSurname == null) {
-			lblSurname = new JLabel("By Surname");
-			lblSurname.setFont(new Font("Tahoma", Font.BOLD, 11));
+	private JLabel getLblsurname() {
+		if (lblsurname == null) {
+			lblsurname = new JLabel("By surname");
+			lblsurname.setFont(new Font("Tahoma", Font.BOLD, 11));
 		}
-		return lblSurname;
+		return lblsurname;
 	}
 
 	private JTextField getTextFieldSurname() {
@@ -963,7 +975,7 @@ public class MedicalRecepcionistView extends JFrame {
 			btnFilterSurname.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					DefaultListModel<Patient> filteredBySurname = new DefaultListModel<>();
-					if (!getTextFieldSSNumber().getText().isBlank() && !getTextFieldSSNumber().getText().isEmpty()) {
+					if (!getTextFieldSurname().getText().isBlank() && !getTextFieldSurname().getText().isEmpty()) {
 						for (int i = 0; i < patients.getSize(); i++) {
 							if ((patients.get(i).getSurName().contains(getTextFieldSurname().getText()))) {
 								filteredBySurname.addElement(patients.get(i));
@@ -981,5 +993,83 @@ public class MedicalRecepcionistView extends JFrame {
 			});
 		}
 		return btnFilterSurname;
+	}
+	private JLabel getLblSurnameDoctor() {
+		if (lblSurnameDoctor == null) {
+			lblSurnameDoctor = new JLabel("By surname:");
+			lblSurnameDoctor.setFont(new Font("Tahoma", Font.BOLD, 10));
+		}
+		return lblSurnameDoctor;
+	}
+	private JTextField getTextFieldSurnameDoctor() {
+		if (textFieldSurnameDoctor == null) {
+			textFieldSurnameDoctor = new JTextField();
+			textFieldSurnameDoctor.setColumns(10);
+		}
+		return textFieldSurnameDoctor;
+	}
+	private JButton getBtnSurnameDoctor() {
+		if (btnSurnameDoctor == null) {
+			btnSurnameDoctor = new JButton("Filter");
+			btnSurnameDoctor.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					DefaultListModel<Doctor> filteredBySurname = new DefaultListModel<>();
+					if (!getTextFieldSurnameDoctor().getText().isBlank() && !getTextFieldSurnameDoctor().getText().isEmpty()) {
+						for (int i = 0; i < patients.getSize(); i++) {
+							if ((doctors.get(i).getSurname().contains(getTextFieldSurname().getText()))) {
+								filteredBySurname.addElement(doctors.get(i));
+							}
+						}
+					}
+
+					doctors.removeAllElements();
+					for (int i = 0; i < filteredBySurname.size(); i++) {
+						if (!doctors.contains(filteredBySurname.get(i))) {
+							doctors.addElement(filteredBySurname.get(i));
+						}
+					}
+				}
+			});
+		}
+		return btnSurnameDoctor;
+	}
+	private JLabel getLblDNI() {
+		if (lblDNI == null) {
+			lblDNI = new JLabel("By DNI:");
+			lblDNI.setFont(new Font("Tahoma", Font.BOLD, 10));
+		}
+		return lblDNI;
+	}
+	private JTextField getTextFieldDni() {
+		if (textFieldDni == null) {
+			textFieldDni = new JTextField();
+			textFieldDni.setColumns(10);
+		}
+		return textFieldDni;
+	}
+	private JButton getBtnDNI() {
+		if (btnDNI == null) {
+			btnDNI = new JButton("Filter");
+			btnDNI.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					DefaultListModel<Patient> filteredByDNI = new DefaultListModel<>();
+					if (!getTextFieldDni().getText().isBlank() && !getTextFieldDni().getText().isEmpty()) {
+						for (int i = 0; i < patients.getSize(); i++) {
+							if (patients.get(i).getDni().contains(getTextFieldDni().getText())) {
+								filteredByDNI.addElement(patients.get(i));
+							}
+						}
+					}
+
+					patients.removeAllElements();
+					for (int i = 0; i < filteredByDNI.size(); i++) {
+						if (!patients.contains(filteredByDNI.get(i))) {
+							patients.addElement(filteredByDNI.get(i));
+						}
+					}
+				}
+			});
+		}
+		return btnDNI;
 	}
 }

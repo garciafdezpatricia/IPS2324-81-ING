@@ -154,21 +154,30 @@ public class FilterDoctorView extends JDialog {
 			btnSave.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
-					DefaultListModel<Appointment> appointments2 = new DefaultListModel<>();
+					if (getListDoctor().getSelectedValuesList().size() == 1) {
 
-					Doctor p = (Doctor) getListDoctor().getSelectedValue();
-					appointments.clear();
+						Doctor p = (Doctor) getListDoctor().getSelectedValue();
+						appointments.clear();
 
-					try {
-						DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByDoctorId(p.getId());
-						for (int i = 0; i < a.size(); i++) {
-							appointments.addElement(a.get(i));
+						try {
+							DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByDoctorId(p.getId());
+							for (int i = 0; i < a.size(); i++) {
+								appointments.addElement(a.get(i));
+							}
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
 						}
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+					} else {
+						for (int i = 0; i < getListDoctor().getSelectedValuesList().size(); i++) {
+							Doctor d = (Doctor) getListDoctor().getSelectedValuesList().get(i);
+							DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByDoctorId(d.getId());
+
+							for (int j = 0; j < a.size(); j++) {
+								appointments.addElement(a.get(j));
+							}
+						}
 					}
-//					dispose();
 					setVisible(false);
 
 				}
@@ -352,7 +361,6 @@ public class FilterDoctorView extends JDialog {
 					btnSave.setEnabled(true);
 				}
 			});
-			listDoctor.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		}
 		return listDoctor;
 	}

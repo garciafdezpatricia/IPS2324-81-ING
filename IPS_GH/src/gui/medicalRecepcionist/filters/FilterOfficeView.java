@@ -107,49 +107,46 @@ public class FilterOfficeView extends JDialog {
 		return panelButtons;
 	}
 
-	private void doSave(DefaultListModel<Appointment> a) {
-		DefaultListModel<Appointment> appointments2 = new DefaultListModel<>();
-//
-		Patient p = (Patient) getListOffices().getSelectedValue();
-//		prev.setPatient(p);
-//		prev.updateFilters(this);
-		if (getListOffices().getSelectedValuesList().size() == 1) {
-			for (int i = 0; i < a.getSize(); i++) {
-				if (a.get(i).getPatientid() == (p.getId())) {
-
-					appointments2.addElement(a.get(i));
-				}
-			}
-		}
-//		prev.updateModelPatients(appointments);
-//		dispose();
-//		validate();
-//		prev.validate();
-		System.out.println(appointments2);
-		appointments = appointments2;
-		System.out.println("FURRULÓ");
-	}
-
 	private JButton getBtnSave() {
 		if (btnSave == null) {
 			btnSave = new JButton("Save");
 			btnSave.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
-					DefaultListModel<Appointment> appointments2 = new DefaultListModel<>();
+					if (getListOffices().getSelectedValuesList().size() == 1) {
+						DefaultListModel<Appointment> appointments2 = new DefaultListModel<>();
 
-					Office p = (Office) getListOffices().getSelectedValue();
-					appointments.clear();
+						Office p = (Office) getListOffices().getSelectedValue();
+						appointments.clear();
 
-					try {
-						DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByOffice(p.getId());
-						for (int i = 0; i < a.size(); i++) {
-							appointments.addElement(a.get(i));
+						try {
+							DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByOffice(p.getId());
+							for (int i = 0; i < a.size(); i++) {
+								appointments.addElement(a.get(i));
+							}
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
 						}
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
 					}
+
+					else {
+						for (int i = 0; i < getListOffices().getSelectedValuesList().size(); i++) {
+							Office d = (Office) getListOffices().getSelectedValuesList().get(i);
+							DefaultListModel<Appointment> a = null;
+							try {
+								a = ConnectionFactory.getAppointmentsByOffice(d.getId());
+							} catch (Exception e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+
+							for (int j = 0; j < a.size(); j++) {
+								appointments.addElement(a.get(j));
+							}
+						}
+					}
+
 //					dispose();
 					setVisible(false);
 
