@@ -177,6 +177,11 @@ public class FilterPatientView extends JDialog {
 	private JButton getBtnCancel() {
 		if (btnCancel == null) {
 			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
 			btnCancel.setBackground(new Color(255, 0, 0));
 		}
 		return btnCancel;

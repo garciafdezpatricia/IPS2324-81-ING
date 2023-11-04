@@ -198,6 +198,11 @@ public class EditAndCancelView extends JFrame {
 	private JButton getBtnCancel() {
 		if (btnCancel == null) {
 			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
 			btnCancel.setBackground(new Color(255, 0, 0));
 		}
 		return btnCancel;
@@ -361,7 +366,6 @@ public class EditAndCancelView extends JFrame {
 		return panelButtonsReset;
 	}
 
-
 	private JButton getBtnResetFilters() {
 		if (btnResetFilters == null) {
 			btnResetFilters = new JButton("Reset filters");
@@ -435,7 +439,8 @@ public class EditAndCancelView extends JFrame {
 					for (int i = 0; i < a.getSize(); i++) {
 						Appointment app = a.getElementAt(i);
 						if (app.getUrgency() == 1) {
-							appointments.addElement(a.get(i));;
+							appointments.addElement(a.get(i));
+							;
 						}
 					}
 				}
@@ -458,7 +463,8 @@ public class EditAndCancelView extends JFrame {
 					for (int i = 0; i < a.getSize(); i++) {
 						Appointment app = a.getElementAt(i);
 						if (app.getUrgency() == 0) {
-							appointments.addElement(a.get(i));;
+							appointments.addElement(a.get(i));
+							;
 						}
 					}
 				}
@@ -466,6 +472,7 @@ public class EditAndCancelView extends JFrame {
 		}
 		return btnNotUrgent;
 	}
+
 	private JButton getBtnCancelled() {
 		if (btnCancelled == null) {
 			btnCancelled = new JButton("Cancelled");
@@ -480,7 +487,8 @@ public class EditAndCancelView extends JFrame {
 					for (int i = 0; i < a.getSize(); i++) {
 						Appointment app = a.getElementAt(i);
 						if (app.getStatus().toLowerCase().equals("cancelled")) {
-							appointments.addElement(a.get(i));;
+							appointments.addElement(a.get(i));
+							;
 						}
 					}
 				}
@@ -488,6 +496,7 @@ public class EditAndCancelView extends JFrame {
 		}
 		return btnCancelled;
 	}
+
 	private JButton getBtnNotCancelled() {
 		if (btnNotCancelled == null) {
 			btnNotCancelled = new JButton("Not Cancelled");
@@ -502,7 +511,8 @@ public class EditAndCancelView extends JFrame {
 					for (int i = 0; i < a.getSize(); i++) {
 						Appointment app = a.getElementAt(i);
 						if (!app.getStatus().toLowerCase().equals("cancelled")) {
-							appointments.addElement(a.get(i));;
+							appointments.addElement(a.get(i));
+							;
 						}
 					}
 				}
@@ -510,6 +520,7 @@ public class EditAndCancelView extends JFrame {
 		}
 		return btnNotCancelled;
 	}
+
 	private JButton getBtnOffice() {
 		if (btnOffice == null) {
 			btnOffice = new JButton("Filter");
@@ -530,6 +541,7 @@ public class EditAndCancelView extends JFrame {
 		}
 		return btnOffice;
 	}
+
 	private JButton getBtnDay() {
 		if (btnDay == null) {
 			btnDay = new JButton("Filter");
