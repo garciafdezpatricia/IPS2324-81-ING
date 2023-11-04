@@ -625,6 +625,38 @@ public class ConnectionFactory {
 		return offices;
 	}
 
+	public static DefaultListModel<Office> getOfficesDefaultList() {
+		DefaultListModel<Office> offices = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM OFFICE";
+			ResultSet resultSet_offices = statement.executeQuery(sql);
+
+			// Procesar los resultados
+			while (resultSet_offices.next()) {
+				int id = resultSet_offices.getInt("id");
+				String officeCode = resultSet_offices.getString("officeCode");
+
+				offices.addElement(new Office(id, officeCode));
+			}
+
+			// Cerrar la conexión
+			resultSet_offices.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return offices;
+	}
 	public static String[] getOfficesCodes() throws Exception {
 		String[] aux = new String[getOffices().size()];
 		for (int i = 0; i < getOffices().size(); i++) {
@@ -860,14 +892,16 @@ public class ConnectionFactory {
 							freeHours += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 									+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
 							if (appsThatDay.size() > 1 && i < appsThatDay.size() - 1) {
-								freeHours += " \n\tand from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
-										+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+								freeHours += " \n\tand from "
+										+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+										+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
 //										+ dateFormat.parse(appsThatDay.get(i + 1).getStartdate()).getHours() + ":"
 //										+ dateFormat.parse(appsThatDay.get(i + 1).getStartdate()).getMinutes() + " "
 								;
 							} else {
-								freeHours += " \n\tand from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
-										+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+								freeHours += " \n\tand from "
+										+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+										+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
 										+ endHour;
 //								res += freeHours;
 								String aux = res;
@@ -1105,6 +1139,57 @@ public class ConnectionFactory {
 
 	}
 
+	public static DefaultListModel<Appointment> getAppointmentsByOffice(int pid) {
+		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM APPOINTMENT WHERE officeid = ?";
+
+			PreparedStatement statement = connection.prepareStatement(sql);
+
+			statement.setBigDecimal(1, new BigDecimal(pid));
+			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigDecimal id = resultSet.getBigDecimal("id");
+				BigDecimal patientid = resultSet.getBigDecimal("patientid");
+				BigDecimal doctorid = resultSet.getBigDecimal("doctorid");
+
+				String startDate = resultSet.getString("startdate");
+				String enddate = resultSet.getString("enddate");
+
+				int urgency = resultSet.getInt("urgency");
+				int attended = resultSet.getInt("attended");
+
+				String checkedin = resultSet.getString("checkedin");
+				String checkedout = resultSet.getString("checkedout");
+				BigDecimal officeid = resultSet.getBigDecimal("officeid");
+				String information = resultSet.getString("information");
+				String status = resultSet.getString("status");
+
+				// Procesa otros campos según la estructura de tu tabla
+				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
+						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
+						officeid.toBigInteger(), information, status));
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+	}
 	public static DefaultListModel<Appointment> getAppointmentsByPatientID(BigInteger pid) throws Exception {
 		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
 
@@ -1209,7 +1294,6 @@ public class ConnectionFactory {
 
 		return appointments;
 	}
-
 
 	public static String getPatient(BigInteger id) throws Exception {
 
@@ -1411,5 +1495,7 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
+
+	
 
 }

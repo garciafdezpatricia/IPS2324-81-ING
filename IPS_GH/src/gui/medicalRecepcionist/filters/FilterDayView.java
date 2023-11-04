@@ -7,10 +7,12 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -39,6 +41,7 @@ import gui.medicalRecepcionist.EditAndCancelView;
 import gui.medicalRecepcionist.MedicalRecepcionistView;
 import util.ConnectionFactory;
 import javax.swing.SwingConstants;
+import java.awt.Font;
 
 public class FilterDayView extends JDialog {
 
@@ -67,6 +70,10 @@ public class FilterDayView extends JDialog {
 	private JButton btnFilter;
 	private JDateChooser dateChooserFrom;
 	private JDateChooser dateChooserTo;
+	private JPanel panelTitle;
+	private JLabel lblTitle;
+	protected boolean from = false;
+	protected boolean to = false;
 
 	/**
 	 * Launch the application.
@@ -93,6 +100,7 @@ public class FilterDayView extends JDialog {
 		a2 = this.appointments;
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+		setTitle("Filter by day/s");
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
@@ -111,6 +119,7 @@ public class FilterDayView extends JDialog {
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		getContentPane().add(getPanelButtons(), BorderLayout.SOUTH);
 		getContentPane().add(getPanelCenter(), BorderLayout.CENTER);
+		getContentPane().add(getPanelTitle(), BorderLayout.NORTH);
 		contentPanel.setLayout(new FlowLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -170,6 +179,14 @@ public class FilterDayView extends JDialog {
 	private JDateChooser getDateChooser() {
 		if (dateChooser == null) {
 			dateChooser = new JDateChooser((Date) null);
+			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					btnUnicDay.setEnabled(true);
+					btnFilter.setEnabled(false);
+					btnBefore.setEnabled(false);
+					btnAfter.setEnabled(false);
+				}
+			});
 		}
 		return dateChooser;
 	}
@@ -177,6 +194,17 @@ public class FilterDayView extends JDialog {
 	private JDateChooser getDateChooserFrom() {
 		if (dateChooserFrom == null) {
 			dateChooserFrom = new JDateChooser((Date) null);
+			dateChooserFrom.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					from = true;
+					if (from && to) {
+						btnFilter.setEnabled(true);
+					}
+					btnUnicDay.setEnabled(false);
+					btnBefore.setEnabled(false);
+					btnAfter.setEnabled(false);
+				}
+			});
 		}
 		return dateChooserFrom;
 	}
@@ -184,6 +212,16 @@ public class FilterDayView extends JDialog {
 	private JDateChooser getDateChooserTo() {
 		if (dateChooserTo == null) {
 			dateChooserTo = new JDateChooser((Date) null);
+			dateChooserTo.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					to = true;
+					if (from && to)
+						btnFilter.setEnabled(true);
+					btnUnicDay.setEnabled(false);
+					btnBefore.setEnabled(false);
+					btnAfter.setEnabled(false);
+				}
+			});
 		}
 		return dateChooserTo;
 	}
@@ -191,32 +229,50 @@ public class FilterDayView extends JDialog {
 	private JButton getBtnUnicDay_1() {
 		if (btnUnicDay == null) {
 			btnUnicDay = new JButton("Filter");
+			btnUnicDay.setEnabled(false);
 			btnUnicDay.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					DefaultListModel<Appointment> appointments2 = new DefaultListModel<>();
 
-					Date p = getDateChooser().getDate();
-					System.out.println(getDateChooser().getDate().toString());
+					SimpleDateFormat originalDateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.US);
+					SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+					originalDateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
+					String newFormattedDate = null;
+					try {
+						Date date = originalDateFormat.parse(getDateChooser().getDate().toString());
+						newFormattedDate = outputDateFormat.format(date);
+					} catch (ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
 					appointments.clear();
 
+					DefaultListModel<Appointment> x = null;
 					try {
-						DefaultListModel<Appointment> a = ConnectionFactory.getAppointments();
-				        SimpleDateFormat inputFormat = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
-						SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
-			            String formattedDate = format.format(inputFormat.parse(p.toString()));
-
-						for (int i = 0; i < a.size(); i++) {
-							if (format.parse(a.get(i).getStartdate()).equals(formattedDate))
-								System.out.println("f" + formattedDate);
-								System.out.println(a.get(i).getStartdate());
-								appointments.addElement(a.get(i));
-
-						}
+						x = ConnectionFactory.getAppointments();
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+
+					// Define el formato original
+					SimpleDateFormat originalDateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+					for (int i = 0; i < x.size(); i++) {
+						try {
+							if (outputDateFormat.format(originalDateFormat2.parse(x.get(i).getStartdate()))
+									.equals(newFormattedDate)) {
+								appointments.addElement(x.get(i));
+							}
+						} catch (ParseException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					setVisible(false);
 				}
+
 			});
 		}
 		return btnUnicDay;
@@ -232,6 +288,14 @@ public class FilterDayView extends JDialog {
 	private JDateChooser getDateChooserBefore() {
 		if (dateChooserBefore == null) {
 			dateChooserBefore = new JDateChooser((Date) null);
+			dateChooserBefore.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					btnBefore.setEnabled(true);
+					btnUnicDay.setEnabled(false);
+					btnFilter.setEnabled(false);
+					btnAfter.setEnabled(false);
+				}
+			});
 		}
 		return dateChooserBefore;
 	}
@@ -239,6 +303,44 @@ public class FilterDayView extends JDialog {
 	private JButton getBtnBefore_1() {
 		if (btnBefore == null) {
 			btnBefore = new JButton("Filter");
+			btnBefore.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					SimpleDateFormat originalDateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.US);
+					SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+					originalDateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
+					Date date = null;
+					try {
+						date = originalDateFormat.parse(getDateChooserBefore().getDate().toString());
+					} catch (ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					appointments.clear();
+
+					DefaultListModel<Appointment> x = null;
+					try {
+						x = ConnectionFactory.getAppointments();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					for (int i = 0; i < x.size(); i++) {
+						try {
+							if (outputDateFormat.parse(x.get(i).getStartdate()).before(date)) {
+								appointments.addElement(x.get(i));
+							}
+						} catch (ParseException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					setVisible(false);
+				}
+			});
+			btnBefore.setEnabled(false);
 		}
 		return btnBefore;
 	}
@@ -253,6 +355,14 @@ public class FilterDayView extends JDialog {
 	private JDateChooser getDateChooserAfter() {
 		if (dateChooserAfter == null) {
 			dateChooserAfter = new JDateChooser((Date) null);
+			dateChooserAfter.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					btnAfter.setEnabled(true);
+					btnUnicDay.setEnabled(false);
+					btnFilter.setEnabled(false);
+					btnBefore.setEnabled(false);
+				}
+			});
 		}
 		return dateChooserAfter;
 	}
@@ -260,6 +370,44 @@ public class FilterDayView extends JDialog {
 	private JButton getBtnAfter_1() {
 		if (btnAfter == null) {
 			btnAfter = new JButton("Filter");
+			btnAfter.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					SimpleDateFormat originalDateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.US);
+					SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+					originalDateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
+					Date date = null;
+					try {
+						date = originalDateFormat.parse(getDateChooserAfter().getDate().toString());
+					} catch (ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					appointments.clear();
+
+					DefaultListModel<Appointment> x = null;
+					try {
+						x = ConnectionFactory.getAppointments();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					for (int i = 0; i < x.size(); i++) {
+						try {
+							if (outputDateFormat.parse(x.get(i).getStartdate()).after(date)) {
+								appointments.addElement(x.get(i));
+							}
+						} catch (ParseException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					setVisible(false);
+				}
+			});
+			btnAfter.setEnabled(false);
 		}
 		return btnAfter;
 	}
@@ -295,7 +443,69 @@ public class FilterDayView extends JDialog {
 	private JButton getBtnFilter() {
 		if (btnFilter == null) {
 			btnFilter = new JButton("Filter");
+			btnFilter.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					SimpleDateFormat originalDateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.US);
+					SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+					originalDateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
+					Date dateFrom = null;
+					Date dateTo = null;
+
+					try {
+						dateFrom = originalDateFormat.parse(getDateChooserFrom().getDate().toString());
+						dateTo = originalDateFormat.parse(getDateChooserTo().getDate().toString());
+
+					} catch (ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					appointments.clear();
+
+					DefaultListModel<Appointment> x = null;
+					try {
+						x = ConnectionFactory.getAppointments();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					for (int i = 0; i < x.size(); i++) {
+						try {
+							if (outputDateFormat.parse(x.get(i).getStartdate()).before(dateTo)
+									&& outputDateFormat.parse(x.get(i).getStartdate()).after(dateFrom)) {
+								appointments.addElement(x.get(i));
+							}
+						} catch (ParseException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					setVisible(false);
+				}
+
+			});
+			btnFilter.setEnabled(false);
 		}
 		return btnFilter;
+	}
+
+	private JPanel getPanelTitle() {
+		if (panelTitle == null) {
+			panelTitle = new JPanel();
+			panelTitle.setLayout(new BorderLayout(0, 0));
+			panelTitle.add(getLblTitle());
+		}
+		return panelTitle;
+	}
+
+	private JLabel getLblTitle() {
+		if (lblTitle == null) {
+			lblTitle = new JLabel("Choose how do you want to filter the day");
+			lblTitle.setFont(new Font("Tahoma", Font.BOLD, 12));
+			lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		}
+		return lblTitle;
 	}
 }

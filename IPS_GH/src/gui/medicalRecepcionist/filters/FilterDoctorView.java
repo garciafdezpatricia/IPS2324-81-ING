@@ -90,6 +90,8 @@ public class FilterDoctorView extends JDialog {
 		a2 = this.appointments;
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+		setTitle("Filter by doctor/s");
+
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
@@ -161,13 +163,13 @@ public class FilterDoctorView extends JDialog {
 						DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByDoctorId(p.getId());
 						for (int i = 0; i < a.size(); i++) {
 							appointments.addElement(a.get(i));
-
 						}
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 //					dispose();
+					setVisible(false);
 
 				}
 			});

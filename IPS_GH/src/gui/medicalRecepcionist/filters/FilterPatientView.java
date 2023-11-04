@@ -7,7 +7,6 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -17,18 +16,16 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import db.Appointment;
-import db.Doctor;
 import db.Patient;
 import gui.medicalRecepcionist.EditAndCancelView;
 import gui.medicalRecepcionist.MedicalRecepcionistView;
@@ -90,6 +87,7 @@ public class FilterPatientView extends JDialog {
 		a2 = this.appointments;
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+		setTitle("Filter by patient/s");
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
@@ -123,28 +121,6 @@ public class FilterPatientView extends JDialog {
 		return panelButtons;
 	}
 
-	private void doSave(DefaultListModel<Appointment> a) {
-		DefaultListModel<Appointment> appointments2 = new DefaultListModel<>();
-//
-		Patient p = (Patient) getListPatients().getSelectedValue();
-//		prev.setPatient(p);
-//		prev.updateFilters(this);
-		if (getListPatients().getSelectedValuesList().size() == 1) {
-			for (int i = 0; i < a.getSize(); i++) {
-				if (a.get(i).getPatientid() == (p.getId())) {
-
-					appointments2.addElement(a.get(i));
-				}
-			}
-		}
-//		prev.updateModelPatients(appointments);
-//		dispose();
-//		validate();
-//		prev.validate();
-		System.out.println(appointments2);
-		appointments = appointments2;
-		System.out.println("FURRULÓ");
-	}
 
 	private JButton getBtnSave() {
 		if (btnSave == null) {
@@ -156,18 +132,17 @@ public class FilterPatientView extends JDialog {
 
 					Patient p = (Patient) getListPatients().getSelectedValue();
 					appointments.clear();
-					
+
 					try {
 						DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByPatientID(p.getId());
-						for(int i = 0; i < a.size(); i++) {
+						for (int i = 0; i < a.size(); i++) {
 							appointments.addElement(a.get(i));
 
 						}
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-//					dispose();
+					setVisible(false);
 
 				}
 			});
@@ -345,26 +320,6 @@ public class FilterPatientView extends JDialog {
 				}
 			});
 			listPatients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//			listPatients.addListSelectionListener(new ListSelectionListener() {
-//				public void valueChanged(ListSelectionEvent e) {
-//					Patient p = (Patient) getList_patients().getSelectedValue();
-//					if (p != null) {
-//						getTxtContactInfo().setText(p.getContactInfo());
-//						getBtnEdit().setEnabled(true);
-//
-//						patientChoosed = true;
-//
-//						checkFinishBtnEnabled();
-//
-//						newContactInfo = p.getContactInfo();
-//					} else {
-//						getTxtContactInfo().setText("");
-//
-//						patientChoosed = false;
-//					}
-//				}
-//
-//			});
 		}
 		return listPatients;
 	}

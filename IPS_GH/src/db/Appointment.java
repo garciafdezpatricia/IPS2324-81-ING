@@ -127,48 +127,52 @@ public class Appointment {
 
 	@Override
 	public String toString() {
+		String p = "";
+		String doctor = "";
+		try {
+			p = ConnectionFactory.getPatient(patientid);
+			doctor = ConnectionFactory.getDoctor(doctorid);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (urgency == 1) {
-			if(getStatus().toLowerCase().equals("cancelled")) {
+			if (getStatus().toLowerCase().equals("cancelled")) {
 				try {
-					return " (cancelled) [URGENT] \n\tPatient: "
-							+ ConnectionFactory.getPatient(patientid) + "; \n\tDoctor: " + ConnectionFactory.getDoctor(doctorid)
-							+ "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+					return " (cancelled) [URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: "
+							+ startdate + "; \n\tTo: " + enddate;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+
+				}
+			} else {
+				try {
+					return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
+							+ "; \n\tTo: " + enddate;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 
 				}
 			}
-			else {
-				try {
-					return "[URGENT] \n\tPatient: "
-							+ ConnectionFactory.getPatient(patientid) + "; \n\tDoctor: " + ConnectionFactory.getDoctor(doctorid)
-							+ "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 
-				}
-			}
-			
 		}
 		if (urgency == 0) {
-			if(getStatus().toLowerCase().equals("cancelled")) {
+			if (getStatus().toLowerCase().equals("cancelled")) {
 				try {
-					return " (cancelled) \n\tPatient: "
-							+ ConnectionFactory.getPatient(patientid) + "; \n\tDoctor: " + ConnectionFactory.getDoctor(doctorid)
-							+ "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+					return " (cancelled) \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
+							+ "; \n\tTo: " + enddate;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 
 				}
-			}
-			else {
+			} else {
 				try {
-					return "\n\tPatient: "
-							+ ConnectionFactory.getPatient(patientid) + "; \n\tDoctor: " + ConnectionFactory.getDoctor(doctorid)
-							+ "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+					return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
+							+ enddate;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
