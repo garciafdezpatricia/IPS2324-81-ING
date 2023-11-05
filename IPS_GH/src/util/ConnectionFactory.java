@@ -22,11 +22,11 @@ import db.Appointment;
 import db.Diagnosis;
 import db.Doctor;
 import db.ICDChapter;
+import db.ICDSubchapter;
 import db.Office;
 import db.Patient;
 import db.WorkDay;
 import db.WorkPeriod;
-import db.ICDSubchapter;
 
 public class ConnectionFactory {
 
@@ -319,21 +319,21 @@ public class ConnectionFactory {
 
 			while (rs.next()) {
 				apmnt = new AppointmentBLDto();
-				apmnt.id = rs.getInt(1);
-				apmnt.patientid = rs.getInt(2);
-				apmnt.doctorid = rs.getInt(3);
-				apmnt.startDate = rs.getString(4);
-				apmnt.endDate = rs.getString(5);
+				apmnt.id = rs.getInt("id");
+				apmnt.patientid = rs.getInt("patientid");
+				apmnt.doctorid = rs.getInt("doctorid");
+				apmnt.startDate = rs.getString("startdate");
+				apmnt.endDate = rs.getString("enddate");
 
-				apmnt.urgency = rs.getInt(6) == 0 ? false : true;
-				apmnt.attended = rs.getInt(7);
-				apmnt.checkIn = rs.getString(8);
-				apmnt.checkOut = rs.getString(9);
-				apmnt.officeid = rs.getInt(10);
-				apmnt.information = rs.getString(11);
-				apmnt.patientName = rs.getString(15);
-				apmnt.patientSurname = rs.getString(16);
-				apmnt.officeCode = rs.getString(19);
+				apmnt.urgency = rs.getInt("urgency") == 0 ? false : true;
+				apmnt.attended = rs.getInt("attended");
+				apmnt.checkIn = rs.getString("checkedin");
+				apmnt.checkOut = rs.getString("checkedout");
+				apmnt.officeid = rs.getInt("officeid");
+				apmnt.information = rs.getString("information");
+				apmnt.patientName = rs.getString("firstname");
+				apmnt.patientSurname = rs.getString("surname");
+				apmnt.officeCode = rs.getString("officecode");
 				appointments.add(apmnt);
 
 			}
