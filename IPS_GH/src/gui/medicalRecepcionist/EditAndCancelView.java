@@ -58,7 +58,6 @@ public class EditAndCancelView extends JFrame {
 	private JButton btnFilter;
 	private JButton btnResetFilters;
 	private DefaultListModel<Appointment> appointments = new DefaultListModel<>();
-	private DefaultListModel<Appointment> appointmentsBonitos = new DefaultListModel<>();
 
 	private DefaultListModel<Appointment> appointmentsReset = new DefaultListModel<>();
 	private JButton btnFilterPatient;

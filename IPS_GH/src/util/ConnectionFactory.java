@@ -447,7 +447,7 @@ public class ConnectionFactory {
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("no trabaja");
 			}
 
 			connection.close();
@@ -657,6 +657,7 @@ public class ConnectionFactory {
 
 		return offices;
 	}
+
 	public static String[] getOfficesCodes() throws Exception {
 		String[] aux = new String[getOffices().size()];
 		for (int i = 0; i < getOffices().size(); i++) {
@@ -1190,6 +1191,7 @@ public class ConnectionFactory {
 
 		return appointments;
 	}
+
 	public static DefaultListModel<Appointment> getAppointmentsByPatientID(BigInteger pid) throws Exception {
 		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
 
@@ -1243,6 +1245,62 @@ public class ConnectionFactory {
 
 	}
 
+	public static DefaultListModel<Appointment> getAppointmentsByDoctorsId(List<BigInteger> ids) {
+		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM APPOINTMENT WHERE doctorid = ?";
+
+			PreparedStatement statement = connection.prepareStatement(sql);
+
+			for(int i = 0; i< ids.size();i++) {
+				statement.setBigDecimal(1, new BigDecimal(ids.get(i)));
+				ResultSet resultSet = statement.executeQuery();
+
+				// Procesar los resultados
+				while (resultSet.next()) {
+					BigDecimal id = resultSet.getBigDecimal("id");
+					BigDecimal patientid = resultSet.getBigDecimal("patientid");
+					BigDecimal doctorid = resultSet.getBigDecimal("doctorid");
+
+					String startDate = resultSet.getString("startdate");
+					String enddate = resultSet.getString("enddate");
+
+					int urgency = resultSet.getInt("urgency");
+					int attended = resultSet.getInt("attended");
+
+					String checkedin = resultSet.getString("checkedin");
+					String checkedout = resultSet.getString("checkedout");
+					BigDecimal officeid = resultSet.getBigDecimal("officeid");
+					String information = resultSet.getString("information");
+					String status = resultSet.getString("status");
+
+					// Procesa otros campos según la estructura de tu tabla
+					appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
+							doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
+							officeid.toBigInteger(), information, status));
+				}
+				resultSet.close();
+
+			}
+			
+
+			// Cerrar la conexión
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+	}
+	
 	public static DefaultListModel<Appointment> getAppointmentsByDoctorId(BigInteger did) {
 		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
 

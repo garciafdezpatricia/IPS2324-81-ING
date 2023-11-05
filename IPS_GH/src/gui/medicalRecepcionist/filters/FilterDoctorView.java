@@ -7,6 +7,8 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -17,11 +19,9 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -168,15 +168,28 @@ public class FilterDoctorView extends JDialog {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-					} else {
+					} else { appointments.clear();
+						List<BigInteger> ids = new ArrayList<>();
+
 						for (int i = 0; i < getListDoctor().getSelectedValuesList().size(); i++) {
 							Doctor d = (Doctor) getListDoctor().getSelectedValuesList().get(i);
-							DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByDoctorId(d.getId());
-
-							for (int j = 0; j < a.size(); j++) {
-								appointments.addElement(a.get(j));
-							}
+							ids.add(d.getId());
+							
 						}
+						DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByDoctorsId(ids);
+
+						for (int j = 0; j < a.size(); j++) {
+							appointments.addElement(a.getElementAt(j));
+						}
+//						for (int i = 0; i < getListDoctor().getSelectedValuesList().size(); i++) {
+//							Doctor d = (Doctor) getListDoctor().getSelectedValuesList().get(i);
+//							DefaultListModel<Appointment> a = ConnectionFactory.getAppointmentsByDoctorId(d.getId());
+//
+//							for (int j = 0; j < a.size(); j++) {
+//								System.out.println(a.getElementAt(j));
+//								appointments.addElement(a.getElementAt(j));
+//							}
+//						}
 					}
 					setVisible(false);
 

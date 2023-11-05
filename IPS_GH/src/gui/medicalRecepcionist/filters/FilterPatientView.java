@@ -148,6 +148,7 @@ public class FilterPatientView extends JDialog {
 						}
 
 					} else {
+						appointments.clear();
 						for (int i = 0; i < getListPatients().getSelectedValuesList().size(); i++) {
 							Patient d = (Patient) getListPatients().getSelectedValuesList().get(i);
 							DefaultListModel<Appointment> a = null;

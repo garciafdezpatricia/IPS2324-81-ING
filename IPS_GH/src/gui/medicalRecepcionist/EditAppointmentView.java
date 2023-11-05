@@ -299,10 +299,10 @@ public class EditAppointmentView extends JFrame {
 	private JButton getBtnFinish() {
 		if (btnFinish == null) {
 			btnFinish = new JButton("Edit Appointment");
+			btnFinish.setEnabled(false);
 
 			btnFinish.addActionListener(new ActionListener() {
 
-				// TODO: si hay mas citas resrrvadas a esa hora para ese doctor poner un aviso
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					// si el doctor no trabaja a esa hora ese día
@@ -318,35 +318,25 @@ public class EditAppointmentView extends JFrame {
 							} else {
 								System.out.println("está trabajando");
 								// el doctor tiene otra cita a esa hora
-								try {
-									if (ConnectionFactory.hasAnAppointment(listDoctor.getSelectedValuesList().get(i),
-											new java.sql.Date(selectDate.getDay().getTime()) + " "
-													+ selectDate.getFrom() + ":00",
-											new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo()
-													+ ":00")) {
-										int opcion2 = JOptionPane.showConfirmDialog(EditAppointmentView.this,
-												"The doctor has another appointment at that time, do you want to edit this appointment either?",
-												"Confirmation", JOptionPane.YES_NO_OPTION);
-
-										// Verificar la respuesta del usuario
-										if (opcion2 == JOptionPane.YES_OPTION) {
-											// El usuario ha confirmado, realiza la acción
-											// Puedes poner aquí el código que quieras ejecutar después de la
-											// confirmación
-											areYouSureJOP();
-										} else {
-											// El usuario ha cancelado la acción
-											System.out.println("Appointment cancelled.");
-										}
-									} else {
+//								try {
+//									if (ConnectionFactory.hasAnAppointment(listDoctor.getSelectedValuesList().get(i),
+//											new java.sql.Date(selectDate.getDay().getTime()) + " "
+//													+ selectDate.getFrom() + ":00",
+//											new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo()
+//													+ ":00")) {
+////										int opcion2 = JOptionPane.showConfirmDialog(EditAppointmentView.this,
+////												"The doctor has another appointment at that time, do you want to edit this appointment either?",
+////												"Confirmation", JOptionPane.YES_NO_OPTION);
+//
+//									} else {
 										areYouSureJOP();
-									}
-								} catch (Exception e1) {
-									e1.printStackTrace();
-								}
+//								} catch (Exception e1) {
+//									e1.printStackTrace();
+//								}
 							}
 						} catch (Exception e1) {
-							e1.printStackTrace();
+							JOptionPane.showMessageDialog(EditAppointmentView.this, "The day has passed", "Warning",
+									JOptionPane.INFORMATION_MESSAGE);
 						}
 
 					}
@@ -362,8 +352,7 @@ public class EditAppointmentView extends JFrame {
 		int opcion = JOptionPane.showConfirmDialog(EditAppointmentView.this,
 				"Are you sure you want to edit the appointment " + id + " between the doctor(s) "
 						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
-						+ " on  " + selectDate.getDay().getDay() + "/" + selectDate.getDay().getMonth() + "/"
-						+ selectDate.getDay().getYear() + " at " + selectDate.getFrom() + " in the office "
+						+ " on  " +  selectDate.getDay().getDate() + " at " + selectDate.getFrom() + " in the office "
 						+ getComboBoxOffices().getSelectedItem() + "?",
 				"Confirmation", JOptionPane.YES_NO_OPTION);
 
@@ -973,6 +962,7 @@ public class EditAppointmentView extends JFrame {
 						selectDate = new SelectDateForEdition(getSelectedDoctors(), startDate, endDate);
 						selectDate.setVisible(true);
 						selectDate.setLocationRelativeTo(null);
+						btnFinish.setEnabled(true);
 
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block

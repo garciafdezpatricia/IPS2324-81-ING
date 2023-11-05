@@ -91,12 +91,16 @@ public class SelectDateForEdition extends JDialog {
 		selectedDoctors = s;
 		this.startDate = startDate;
 		this.endDate = endDate;
+
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(getPanelCenter(), BorderLayout.CENTER);
 		getContentPane().add(getPanelSur(), BorderLayout.SOUTH);
 		contentPanel.setLayout(new FlowLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setFrom(startDate);
+		setTo(endDate);
+		setDay(getDateChooser().getDate());
 
 	}
 
@@ -125,6 +129,15 @@ public class SelectDateForEdition extends JDialog {
 			e.printStackTrace();
 		}
 
+		if (day.getHours() >= 10 && day.getMinutes() >= 10) {
+			return day.getHours() + ":" + day.getMinutes();
+
+		} else if (day.getHours() < 10 && day.getMinutes() >= 10) {
+			return "0" + day.getHours() + ":" + day.getMinutes();
+		} else if (day.getHours() < 10 && day.getMinutes() < 10)
+			return "0" + day.getHours() + ":0" + day.getMinutes();
+		else if (day.getHours() >= 10 && day.getMinutes() < 10)
+			return day.getHours() + ":0" + day.getMinutes();
 		return day.getHours() + ":" + day.getMinutes();
 	}
 
@@ -348,10 +361,7 @@ public class SelectDateForEdition extends JDialog {
 			textFieldFrom = new JTextField();
 			System.out.println(startDate);
 			textFieldFrom.setText(getHour(startDate).toString());
-			textFieldFrom.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-				}
-			});
+
 			textFieldFrom.setColumns(10);
 			textFieldFrom.addFocusListener(new FocusAdapter() {
 				@Override

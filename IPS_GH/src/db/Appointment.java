@@ -138,50 +138,59 @@ public class Appointment {
 			e.printStackTrace();
 		}
 		if (urgency == 1) {
-			if (getStatus().toLowerCase().equals("cancelled")) {
-				try {
-					return " (cancelled) [URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: "
-							+ startdate + "; \n\tTo: " + enddate;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if (getStatus() != null) {
+				if (getStatus().toLowerCase().equals("cancelled")) {
+					try {
+						return " (cancelled) [URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: "
+								+ startdate + "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 
-				}
-			} else {
-				try {
-					return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
-							+ "; \n\tTo: " + enddate;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					}
+				} else {
+					try {
+						return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 
+					}
 				}
-			}
+			} else
+				return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
+						+ enddate;
 
 		}
 		if (urgency == 0) {
-			if (getStatus().toLowerCase().equals("cancelled")) {
-				try {
-					return " (cancelled) \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
-							+ "; \n\tTo: " + enddate;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if (getStatus() != null) {
+				if (getStatus().toLowerCase().equals("cancelled")) {
+					try {
+						return " (cancelled) \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 
-				}
-			} else {
-				try {
-					return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
-							+ enddate;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					}
+				} else {
+					try {
+						return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
+								+ enddate;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 
+					}
 				}
-			}
+			} else
+				return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
+						+ enddate;
 		}
 
-		return "Appointment";
+		return "";
+
 	}
 
 }
