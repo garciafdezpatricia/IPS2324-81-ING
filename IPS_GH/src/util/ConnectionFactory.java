@@ -267,6 +267,46 @@ public class ConnectionFactory {
 
 		return patients;
 	}
+	
+	public static List<Patient> getListOfPatients() throws Exception {
+		List<Patient> patients = new ArrayList<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM PATIENT";
+			ResultSet resultSet_patients = statement.executeQuery(sql);
+
+			// Procesar los resultados
+			while (resultSet_patients.next()) {
+				int id = resultSet_patients.getInt("id");
+				String contactinfo = resultSet_patients.getString("contactinfo");
+				String name = resultSet_patients.getString("firstname");
+				String surname = resultSet_patients.getString("surname");
+				String dni = resultSet_patients.getString("dni");
+				int ssnumber = resultSet_patients.getInt("ssnumber");
+
+				patients.add(new Patient(id, name, surname, dni, contactinfo, ssnumber));
+
+			}
+
+			// Cerrar la conexión
+
+			// Cerrar la conexión
+			resultSet_patients.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return patients;
+	}
 
 	public static void updateAppointment(AppointmentBLDto appointment) {
 		Connection con = null;
@@ -330,6 +370,57 @@ public class ConnectionFactory {
 				apmnt.patientName = rs.getString("firstname");
 				apmnt.patientSurname = rs.getString("surname");
 				apmnt.officeCode = rs.getString("officecode");
+				appointments.add(apmnt);
+
+			}
+			return appointments;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+	}
+	
+	public static List<AppointmentBLDto> getAppointments() {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM (APPOINTMENT JOIN PATIENT on appointment.patientid = patient.id)");
+
+			rs = ps.executeQuery();
+			List<AppointmentBLDto> appointments = new ArrayList<AppointmentBLDto>();
+			AppointmentBLDto apmnt = null;
+
+			while (rs.next()) {
+				apmnt = new AppointmentBLDto();
+				apmnt.id = rs.getInt("id");
+				apmnt.patientid = rs.getInt("patientid");
+				apmnt.doctorid = rs.getInt("doctorid");
+				apmnt.startDate = rs.getString("startdate");
+				apmnt.endDate = rs.getString("enddate");
+
+				apmnt.urgency = rs.getInt("urgency") == 0 ? false : true;
+				apmnt.attended = rs.getInt("attended");
+				apmnt.checkIn = rs.getString("checkedin");
+				apmnt.checkOut = rs.getString("checkedout");
+				apmnt.officeid = rs.getInt("officeid");
+				apmnt.information = rs.getString("information");
+				apmnt.patientName = rs.getString("firstname");
+				apmnt.patientSurname = rs.getString("surname");
+
 				appointments.add(apmnt);
 
 			}
