@@ -271,7 +271,7 @@ public class ConnectionFactory {
 
 		return patients;
 	}
-	
+
 	public static List<Patient> getListOfPatients() throws Exception {
 		List<Patient> patients = new ArrayList<>();
 
@@ -395,7 +395,7 @@ public class ConnectionFactory {
 			}
 		}
 	}
-	
+
 	public static List<AppointmentBLDto> getAppointmentsList() {
 		Connection con = null;
 		PreparedStatement ps = null;
@@ -1336,6 +1336,61 @@ public class ConnectionFactory {
 
 	}
 
+	public static List<AppointmentBLDto> getAppointmentsByPatientIDList(int pid) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement(
+					"SELECT *FROM (APPOINTMENT JOIN PATIENT on appointment.patientid = "
+					+ "patient.id ) JOIN DOCTOR ON appointment.doctorid = doctor.id WHERE patientid=?");
+			ps.setInt(1, pid);
+			rs = ps.executeQuery();
+			List<AppointmentBLDto> appointments = new ArrayList<AppointmentBLDto>();
+			AppointmentBLDto apmnt = null;
+
+			while (rs.next()) {
+				apmnt = new AppointmentBLDto();
+				apmnt.id = rs.getInt("id");
+				apmnt.patientid = rs.getInt("patientid");
+				apmnt.doctorid = rs.getInt("doctorid");
+				apmnt.startDate = rs.getString("startdate");
+				apmnt.endDate = rs.getString("enddate");
+				apmnt.doctorName = rs.getString("name");
+				apmnt.doctorSurname = rs.getString(17);
+				apmnt.urgency = rs.getInt("urgency") == 0 ? false : true;
+				apmnt.attended = rs.getInt("attended");
+				apmnt.checkIn = rs.getString("checkedin");
+				apmnt.checkOut = rs.getString("checkedout");
+				apmnt.officeid = rs.getInt("officeid");
+				apmnt.information = rs.getString("information");
+				apmnt.patientName = rs.getString("firstname");
+				apmnt.patientSurname = rs.getString("surname");
+
+				appointments.add(apmnt);
+
+			}
+			return appointments;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+
+	}
+
 	public static DefaultListModel<Appointment> getAppointmentsByDoctorsId(List<BigInteger> ids) {
 		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
 
@@ -1350,7 +1405,7 @@ public class ConnectionFactory {
 
 			PreparedStatement statement = connection.prepareStatement(sql);
 
-			for(int i = 0; i< ids.size();i++) {
+			for (int i = 0; i < ids.size(); i++) {
 				statement.setBigDecimal(1, new BigDecimal(ids.get(i)));
 				ResultSet resultSet = statement.executeQuery();
 
@@ -1380,7 +1435,6 @@ public class ConnectionFactory {
 				resultSet.close();
 
 			}
-			
 
 			// Cerrar la conexión
 			statement.close();
@@ -1391,7 +1445,7 @@ public class ConnectionFactory {
 
 		return appointments;
 	}
-	
+
 	public static DefaultListModel<Appointment> getAppointmentsByDoctorId(BigInteger did) {
 		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
 
@@ -1644,9 +1698,5 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
-
-	
-
-	
 
 }

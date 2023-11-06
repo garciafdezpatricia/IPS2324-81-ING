@@ -53,6 +53,7 @@ import creator.CausesCreator;
 import db.Diagnosis;
 import db.ICDChapter;
 import db.ICDSubchapter;
+import gui.medicalRecord.MedicalRecordView;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
 
@@ -143,6 +144,9 @@ public class DoctorAppointmentView extends JFrame {
 	private JScrollPane scrollPane_9;
 	private JTextField txtFilterCauses;
 	private JLabel lblSearch;
+	private JPanel pnMedicalRecord;
+	private JButton btnMedicalRecord;
+	private MedicalRecordView medicalRecord;
 	/**
 	 * Launch the application.
 	 */
@@ -360,6 +364,7 @@ public class DoctorAppointmentView extends JFrame {
 			flowLayout.setAlignment(FlowLayout.LEFT);
 			pnHeader.add(getLblAppointmentPatient_1());
 			pnHeader.add(getLblAppointmentDate_1());
+			pnHeader.add(getPnMedicalRecord());
 		}
 		return pnHeader;
 	}
@@ -1102,5 +1107,26 @@ public class DoctorAppointmentView extends JFrame {
 			lblSearch.setBounds(10, 53, 67, 14);
 		}
 		return lblSearch;
+	}
+	private JPanel getPnMedicalRecord() {
+		if (pnMedicalRecord == null) {
+			pnMedicalRecord = new JPanel();
+			pnMedicalRecord.add(getBtnMedicalRecord());
+		}
+		return pnMedicalRecord;
+	}
+	private JButton getBtnMedicalRecord() {
+		if (btnMedicalRecord == null) {
+			btnMedicalRecord = new JButton("Open MedicalRecord");
+			btnMedicalRecord.addActionListener(new ActionListener() {
+				
+
+				public void actionPerformed(ActionEvent e) {
+					medicalRecord = new MedicalRecordView(appointment.patientid);
+					medicalRecord.setVisible(true);
+				}
+			});
+		}
+		return btnMedicalRecord;
 	}
 }
