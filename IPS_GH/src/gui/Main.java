@@ -19,6 +19,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 
+import gui.manager.ManagerView;
 import gui.medicalRecepcionist.MenuMedicalRecepcionist;
 import gui.schedule.Schedule;
 
@@ -31,6 +32,7 @@ public class Main extends JFrame {
 	private JLabel lblDocOrRece;
 	private JButton btnDoctor;
 	private JButton btnMedicalRecepcionist;
+	private JButton btnManager;
 
 	/**
 	 * Launch the application.
@@ -94,6 +96,7 @@ public class Main extends JFrame {
 			panelCenter = new JPanel();
 			panelCenter.setLayout(new GridLayout(0, 2, 0, 0));
 			panelCenter.add(getBtnDoctor());
+			panelCenter.add(getBtnManager());
 			panelCenter.add(getBtnMedicalRecepcionist());
 		}
 		return panelCenter;
@@ -101,7 +104,7 @@ public class Main extends JFrame {
 
 	private JLabel getLblDocOrRece() {
 		if (lblDocOrRece == null) {
-			lblDocOrRece = new JLabel("Are you a doctor or a medical recepcionist?");
+			lblDocOrRece = new JLabel("Who are you?");
 			lblDocOrRece.setHorizontalAlignment(SwingConstants.CENTER);
 			lblDocOrRece.setFont(new Font("Tahoma", Font.BOLD, 17));
 		}
@@ -148,5 +151,24 @@ public class Main extends JFrame {
 			});
 		}
 		return btnMedicalRecepcionist;
+	}
+	private JButton getBtnManager() {
+		if (btnManager == null) {
+			btnManager = new JButton("Manager");
+			btnManager.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					ManagerView mv;
+					try {
+						mv = new ManagerView();
+						mv.setVisible(true);
+						mv.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+		}
+		return btnManager;
 	}
 }
