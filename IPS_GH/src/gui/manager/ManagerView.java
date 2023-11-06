@@ -43,8 +43,7 @@ public class ManagerView extends JFrame {
 	private JScrollPane spPatients;
 	private JPanel panel;
 	private JPanel newPatient;
-	private JLabel lblPatient;
-	private JLabel lblNewLabel;
+
 
 	/**
 	 * Launch the application.
@@ -68,7 +67,7 @@ public class ManagerView extends JFrame {
 	public ManagerView() {
 		try {
 			this.patients = new ArrayList<>();
-			appointments = ConnectionFactory.getAppointments();
+			appointments = ConnectionFactory.getAppointmentsList();
 		} catch (Exception e) {
 
 			e.printStackTrace();

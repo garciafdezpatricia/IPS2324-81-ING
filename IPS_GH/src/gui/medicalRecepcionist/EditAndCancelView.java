@@ -55,7 +55,6 @@ public class EditAndCancelView extends JFrame {
 	private JPanel panelOffice;
 	private JLabel lblOffice;
 	private JPanel panelButtonsReset;
-	private JButton btnFilter;
 	private JButton btnResetFilters;
 	private DefaultListModel<Appointment> appointments = new DefaultListModel<>();
 

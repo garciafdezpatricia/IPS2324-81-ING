@@ -288,7 +288,7 @@ public class ConnectionFactory {
 
 			// Procesar los resultados
 			while (resultSet_patients.next()) {
-				int id = resultSet_patients.getInt("id");
+				BigInteger id = resultSet_patients.getBigDecimal("id").toBigInteger();
 				String contactinfo = resultSet_patients.getString("contactinfo");
 				String name = resultSet_patients.getString("firstname");
 				String surname = resultSet_patients.getString("surname");
@@ -396,7 +396,7 @@ public class ConnectionFactory {
 		}
 	}
 	
-	public static List<AppointmentBLDto> getAppointments() {
+	public static List<AppointmentBLDto> getAppointmentsList() {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -1644,6 +1644,8 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
+
+	
 
 	
 
