@@ -544,7 +544,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return pnPrescription;
 	}
-	private JTree getTree() {
+	private JTree getTree() { 
 		if (tree == null) {
 			tree = new JTree();
 			loadTreeData();
@@ -704,10 +704,6 @@ public class DoctorAppointmentView extends JFrame {
 	    }
     }
 
-    private boolean consultaBaseDeDatosParaExpansion(DefaultMutableTreeNode node) {
-        // TODO
-        return false;
-    }
 	private JLabel getLblMedication() {
 		if (lblMedication == null) {
 			lblMedication = new JLabel("Medication:");
