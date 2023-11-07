@@ -31,6 +31,8 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JPanel panelBack;
 	private JButton btnCancel;
 	private JButton btnAssignWorkPeriod;
+	private JButton btnEditWp;
+	private JButton btnEditAndCancel;
 
 	/**
 	 * Launch the application.
@@ -92,8 +94,10 @@ public class MenuMedicalRecepcionist extends JFrame {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
 			panelButtons.setLayout(new GridLayout(0, 2, 0, 0));
+			panelButtons.add(getBtnEditAndCancel());
 			panelButtons.add(getBtnCreateApp());
 			panelButtons.add(getBtnAssignWorkPeriod());
+			panelButtons.add(getBtnEditWp());
 		}
 		return panelButtons;
 	}
@@ -163,5 +167,49 @@ public class MenuMedicalRecepcionist extends JFrame {
 			});
 		}
 		return btnAssignWorkPeriod;
+	}
+	private JButton getBtnEditWp() {
+		if (btnEditWp == null) {
+			btnEditWp = new JButton("Edit workperiod");
+			btnEditWp.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+//					EditWorkPeriodView editWp;
+//					try {
+//						editWp = new EditWorkPeriodView();
+//						editWp.setVisible(true);
+//						editWp.setLocationRelativeTo(null);
+//
+//					} catch (Exception e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+				}
+			});
+		}
+		return btnEditWp;
+	}
+	
+	
+	
+	
+	private JButton getBtnEditAndCancel() {
+		if (btnEditAndCancel == null) {
+			btnEditAndCancel = new JButton("Edit or cancel appointment");
+			btnEditAndCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					EditAndCancelView editWp;
+					try {
+						editWp = new EditAndCancelView();
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
+		}
+		return btnEditAndCancel;
 	}
 }

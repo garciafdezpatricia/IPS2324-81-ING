@@ -1,28 +1,18 @@
 package gui.doctor;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-
-import creator.CausesCreator;
-import db.Diagnosis;
-import db.ICDChapter;
-import db.ICDSubchapter;
-import util.AppointmentBLDto;
-import util.ConnectionFactory;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,39 +24,37 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.border.EmptyBorder;
-
-import creator.CausesCreator;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JTree;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.Toolkit;
-import javax.swing.event.TreeSelectionListener;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
-import javax.swing.JComboBox;
-import javax.swing.JSeparator;
-import javax.swing.SwingConstants;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+
+import creator.CausesCreator;
+import db.Diagnosis;
+import db.ICDChapter;
+import db.ICDSubchapter;
+import util.AppointmentBLDto;
+import util.ConnectionFactory;
 
 public class DoctorAppointmentView extends JFrame {
 
@@ -377,17 +365,19 @@ public class DoctorAppointmentView extends JFrame {
 	}
 	private JLabel getLblAppointmentPatient_1() {
 		if (lblAppointmentPatient == null) {
-			lblAppointmentPatient = new JLabel("PAQUITO MARINERO MUÑOZ");
+			//lblAppointmentPatient = new JLabel("PAQUITA SALAS");
+			lblAppointmentPatient = new JLabel(appointment.patientName.toUpperCase() + " " + appointment.patientSurname.toUpperCase());
 			lblAppointmentPatient.setFont(new Font("Tahoma", Font.PLAIN, 16));
-			//lblAppointmentPatient.setText(appointment.patientName.toUpperCase() + " " + appointment.patientSurname.toUpperCase());
+			
 		}
 		return lblAppointmentPatient;
 	}
 	private JLabel getLblAppointmentDate_1() {
 		if (lblAppointmentDate == null) {
-			lblAppointmentDate = new JLabel("10/12/2023");
+			//lblAppointmentPatient = new JLabel("2023-11-15");
+			lblAppointmentDate = new JLabel(this.appointment.startDate);
 			lblAppointmentDate.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			//lblAppointmentDate.setText(this.appointment.startDate);
+	
 		}
 		return lblAppointmentDate;
 	}

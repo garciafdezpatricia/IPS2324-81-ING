@@ -10,6 +10,7 @@ public class Office {
 		this.id = id;
 		this.officeCode = officeCode;
 	}
+	
 	public int getId() {
 		return id;
 	}
@@ -21,5 +22,10 @@ public class Office {
 	}
 	public void setOfficeCode(String officeCode) {
 		this.officeCode = officeCode;
+	}
+	
+	@Override
+	public String toString() {
+		return "Office: " + officeCode;
 	}
 }

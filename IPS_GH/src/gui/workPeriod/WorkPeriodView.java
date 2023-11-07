@@ -168,8 +168,8 @@ public class WorkPeriodView extends JFrame {
 
 	private void saveToDB(List<WorkDay> wds) {
 		try {
-			System.out.println(wp.getStartDate());
-			System.out.println(wp.getEndDate());
+			System.out.println("HOLA " + wp.getStartDate());
+			System.out.println("HOLA " +wp.getEndDate());
 			
 			System.out.println(wp.toString());
 
@@ -337,43 +337,44 @@ public class WorkPeriodView extends JFrame {
 	 */
 	private BigInteger createWorkPeriod() {
 		// ID
-		BigInteger id = generateID();
+				BigInteger id = generateID();
 
-		// startDate
-		String startDate = getTxtFirstDay().getText();
-		String endDate = getTxtLastDay().getText();
+				// startDate
+				String startDate = getTxtFirstDay().getText();
+				String endDate = getTxtLastDay().getText();
 
-		System.out.println(startDate);
-		System.out.println(getTxtFirstDay().getText());
+				//esta bien
 
-		System.out.println(endDate);
-		System.out.println(getTxtLastDay().getText());
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				java.util.Date start = null;
+				java.util.Date end = null;
+				java.sql.Date startSQL = null;
+				java.sql.Date endSQL = null;
 
-		//esta bien
+				try {
+					start = format.parse(startDate + " 00:00:00");
+					System.out.println("  start: " + start);
+					end = format.parse(endDate + " 00:00:00");
+					System.out.println("  end: " + end);
 
-		SimpleDateFormat format = new SimpleDateFormat("dd/mm/yyyy");
-		java.util.Date start = null;
-		java.util.Date end = null;
-		java.sql.Date startSQL = null;
-		java.sql.Date endSQL = null;
+					startSQL = new java.sql.Date(start.getTime());
+					System.out.println("  startsql: " + startSQL);
 
-		try {
-			start = format.parse(startDate);
-			end = format.parse(endDate);
-			startSQL = new java.sql.Date(start.getTime());
-			endSQL = new java.sql.Date(end.getTime());
-		} catch (ParseException e) {
-			JOptionPane.showMessageDialog(null, "The format of the date is not correct.");
-		}
+					endSQL = new java.sql.Date(end.getTime());
+					System.out.println("  endsql: " + endSQL);
 
-		// id_doctor
-		BigInteger id_doctor = iw.getSelectedDoctor().getId();
+				} catch (ParseException e) {
+					JOptionPane.showMessageDialog(null, "The format of the date is not correct.");
+				}
 
-		if (startSQL != null && endSQL != null) {
-			wp = new WorkPeriod(id, startSQL, endSQL, id_doctor);
-		}
+				// id_doctor
+				BigInteger id_doctor = iw.getSelectedDoctor().getId();
 
-		return id;
+				if (startSQL != null && endSQL != null) {
+					wp = new WorkPeriod(id, startSQL, endSQL, id_doctor);
+				}
+
+				return id;
 	}
 
 	public static BigInteger generateID() {

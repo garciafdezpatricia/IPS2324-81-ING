@@ -1,14 +1,19 @@
 package db;
 
+import java.math.BigInteger;
+
+import util.ConnectionFactory;
+
 public class Appointment {
-	private int id;
-	private int patientid;
-	private int doctorid, officeId;;
-	private String startdate, enddate, information, checkedin, checkedout;
+	private BigInteger id;
+	private BigInteger patientid;
+	private BigInteger doctorid, officeId;;
+	private String startdate, enddate, information, checkedin, checkedout, status;
 	private int urgency, attended;
 
-	public Appointment(int id, int patientid, int doctorid, String startdate, String enddate, int urgency, int attended,
-			String checkedin, String checkedout, int officeId, String information) {
+	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
+			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
+			String status) {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -21,29 +26,38 @@ public class Appointment {
 		this.checkedout = checkedout;
 		this.officeId = officeId;
 		this.information = information;
+		this.status = status;
 	}
 
-	public int getId() {
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public BigInteger getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(BigInteger id) {
 		this.id = id;
 	}
 
-	public int getPatientid() {
+	public BigInteger getPatientid() {
 		return patientid;
 	}
 
-	public void setPatientid(int patientid) {
+	public void setPatientid(BigInteger patientid) {
 		this.patientid = patientid;
 	}
 
-	public int getDoctorid() {
+	public BigInteger getDoctorid() {
 		return doctorid;
 	}
 
-	public void setDoctorid(int doctorid) {
+	public void setDoctorid(BigInteger doctorid) {
 		this.doctorid = doctorid;
 	}
 
@@ -95,16 +109,14 @@ public class Appointment {
 		this.checkedout = checkedout;
 	}
 
-	
-	public int getOfficeId() {
+	public BigInteger getOfficeId() {
 		return officeId;
 	}
 
-	public void setOfficeId(int officeId) {
+	public void setOfficeId(BigInteger officeId) {
 		this.officeId = officeId;
 	}
 
-	
 	public String getInformation() {
 		return information;
 	}
@@ -115,9 +127,70 @@ public class Appointment {
 
 	@Override
 	public String toString() {
-		return "Appointment [id=" + id + ", patientid=" + patientid + ", doctorid=" + doctorid + ", startdate="
-				+ startdate + ", enddate=" + enddate + ", urgency=" + urgency + ", attended=" + attended
-				+ ", checkedin=" + checkedin + ", checkedout=" + checkedout + "]";
+		String p = "";
+		String doctor = "";
+		try {
+			p = ConnectionFactory.getPatient(patientid);
+			doctor = ConnectionFactory.getDoctor(doctorid);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (urgency == 1) {
+			if (getStatus() != null) {
+				if (getStatus().toLowerCase().equals("cancelled")) {
+					try {
+						return " (cancelled) [URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: "
+								+ startdate + "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+				} else {
+					try {
+						return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+				}
+			} else
+				return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
+						+ enddate;
+
+		}
+		if (urgency == 0) {
+			if (getStatus() != null) {
+				if (getStatus().toLowerCase().equals("cancelled")) {
+					try {
+						return " (cancelled) \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+				} else {
+					try {
+						return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
+								+ enddate;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+				}
+			} else
+				return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
+						+ enddate;
+		}
+
+		return "";
+
 	}
 
 }
