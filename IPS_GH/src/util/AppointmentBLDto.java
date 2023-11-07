@@ -34,6 +34,8 @@ public class AppointmentBLDto {
 	public String officeCode;
 	public String patientName;
 	public String patientSurname;
+	public String doctorSurname;
+	public String doctorName;
 	
 	public String toString() {
 		String aux = "Info:"+ information+" - ";
