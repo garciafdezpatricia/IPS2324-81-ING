@@ -8,9 +8,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
@@ -20,10 +22,12 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 
+import db.MedicalRecord;
 import gui.doctor.DoctorAppointmentView;
 import gui.medicalRecepcionist.MenuMedicalRecepcionist;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
+import util.MedicalRecordBLDto;
 
 public class MedicalRecordView extends JFrame {
 
@@ -37,6 +41,10 @@ public class MedicalRecordView extends JFrame {
 	private JPanel pnDiagnosis;
 	private JPanel pnVaccines;
 	private List<AppointmentBLDto> appointments;
+	private List<MedicalRecordBLDto> causes;
+	private List<MedicalRecordBLDto> diagnosis;
+	private List<MedicalRecordBLDto> vaccines;
+	private List<MedicalRecordBLDto> prescription;
 	private JPanel pnPatient;
 	private JLabel lblName;
 	private JPanel pnAppointmentInfo;
@@ -46,6 +54,11 @@ public class MedicalRecordView extends JFrame {
 	private JButton btnOpen;
 	private JLabel lblDoctor_1;
 	private DoctorAppointmentView doctorView;
+	private JList lPrescriptions;
+	private JList lDiagnosis;
+	private JPanel pnCauses;
+	private JList lCauses;
+	private JList lVaccines;
 
 	/**
 	 * Launch the application.
@@ -68,6 +81,10 @@ public class MedicalRecordView extends JFrame {
 	 */
 	public MedicalRecordView(int patientId) {
 		appointments = ConnectionFactory.getAppointmentsByPatientIDList(patientId);
+		causes=MedicalRecord.getCauses(patientId);
+		prescription=MedicalRecord.getPrescription(patientId);
+		vaccines=MedicalRecord.getVaccines(patientId);
+		diagnosis=MedicalRecord.getDiagnosis(patientId);
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Medical record");
@@ -151,6 +168,7 @@ public class MedicalRecordView extends JFrame {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			tabbedPane.addTab("Appointments", null, getPnAppointments(), null);
 			tabbedPane.addTab("Prescription", null, getPnPrescription(), null);
+			tabbedPane.addTab("Causes", null, getPnCauses(), null);
 			tabbedPane.addTab("Diagnosis", null, getPnDiagnosis(), null);
 			tabbedPane.addTab("Vaccines", null, getPnVaccines(), null);
 		}
@@ -171,6 +189,8 @@ public class MedicalRecordView extends JFrame {
 	private JPanel getPnPrescription() {
 		if (pnPrescription == null) {
 			pnPrescription = new JPanel();
+			pnPrescription.setLayout(new BorderLayout(0, 0));
+			pnPrescription.add(getLPrescriptions());
 		}
 		return pnPrescription;
 	}
@@ -178,6 +198,8 @@ public class MedicalRecordView extends JFrame {
 	private JPanel getPnDiagnosis() {
 		if (pnDiagnosis == null) {
 			pnDiagnosis = new JPanel();
+			pnDiagnosis.setLayout(new BorderLayout(0, 0));
+			pnDiagnosis.add(getLDiagnosis());
 		}
 		return pnDiagnosis;
 	}
@@ -185,6 +207,8 @@ public class MedicalRecordView extends JFrame {
 	private JPanel getPnVaccines() {
 		if (pnVaccines == null) {
 			pnVaccines = new JPanel();
+			pnVaccines.setLayout(new BorderLayout(0, 0));
+			pnVaccines.add(getLVaccines());
 		}
 		return pnVaccines;
 	}
@@ -268,5 +292,49 @@ public class MedicalRecordView extends JFrame {
 			lblDoctor_1 = new JLabel("Doctor:");
 		
 		return lblDoctor_1;
+	}
+	private JList getLPrescriptions() {
+		if (lPrescriptions == null) {
+			lPrescriptions = new JList();
+			var model = new DefaultListModel<MedicalRecordBLDto>();
+			model.addAll(prescription);
+			lPrescriptions.setModel(model);
+		}
+		return lPrescriptions;
+	}
+	private JList getLDiagnosis() {
+		if (lDiagnosis == null) {
+			lDiagnosis = new JList();
+			var model = new DefaultListModel<MedicalRecordBLDto>();
+			model.addAll(diagnosis);
+			lDiagnosis.setModel(model);
+		}
+		return lDiagnosis;
+	}
+	private JPanel getPnCauses() {
+		if (pnCauses == null) {
+			pnCauses = new JPanel();
+			pnCauses.setLayout(new BorderLayout(0, 0));
+			pnCauses.add(getLCauses(), BorderLayout.NORTH);
+		}
+		return pnCauses;
+	}
+	private JList getLCauses() {
+		if (lCauses == null) {
+			lCauses = new JList();
+			var model = new DefaultListModel<MedicalRecordBLDto>();
+			model.addAll(causes);
+			lCauses.setModel(model);
+		}
+		return lCauses;
+	}
+	private JList getLVaccines() {
+		if (lVaccines == null) {
+			lVaccines = new JList();
+			var model = new DefaultListModel<MedicalRecordBLDto>();
+			model.addAll(vaccines);
+			lVaccines.setModel(model);
+		}
+		return lVaccines;
 	}
 }
