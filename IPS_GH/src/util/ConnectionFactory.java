@@ -580,45 +580,221 @@ public class ConnectionFactory {
 		}
 	}
 
-	public static BigInteger doctorFromName(String name) throws Exception {
-		for (int i = 0; i < getOffices().size(); i++) {
-			if (getDoctors().get(i).getName().equals(name))
-				return getDoctors().get(i).getId();
+	public static DefaultListModel<Doctor> doctorFromName(String name) throws Exception {
+		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
+		
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(name) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, name);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				String numColegiado = resultSet.getString("numColegiado");
+				String surname = resultSet.getString("surname");
+				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personal_id, specialization);
+
+				docs.addElement(doctor);
+				
+				// Ahora puedes trabajar con el objeto Doctor
+				System.out.println("Doctor found: " + doctor.getName());
+			} else {
+//				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		return new BigInteger("1234567890123456789012345678901234567890");
+
+		return docs;
 	}
 
-	public static BigInteger doctorFromSurname(String surname) throws Exception {
-		for (int i = 0; i < getOffices().size(); i++) {
-			if (getDoctors().get(i).getSurname().equals(surname))
-				return getDoctors().get(i).getId();
+	public static DefaultListModel<Doctor> doctorFromSurname(String surname) throws Exception {
+		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
+		
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(surname) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, surname);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				String numColegiado = resultSet.getString("numColegiado");
+				String name = resultSet.getString("name");
+				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personal_id, specialization);
+
+				docs.addElement(doctor);
+				
+				// Ahora puedes trabajar con el objeto Doctor
+				System.out.println("Doctor found: " + doctor.getName());
+			} else {
+//				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		return new BigInteger("1234567890123456789012345678901234567890");
+
+		return docs;
 	}
 
-	public static BigInteger doctorFromNameAndSurname(String ns) throws Exception {
-		for (int i = 0; i < getOffices().size(); i++) {
-			String a = getDoctors().get(i).getName() + " " + getDoctors().get(i).getSurname();
-			if (a.equals(ns))
-				return getDoctors().get(i).getId();
+	public static Doctor doctorFromNameAndSurname(String ns) throws Exception {
+		for (int i = 0; i < getDoctors().size(); i++) {
+			String a = getDoctors().get(i).getName().toLowerCase() + " " + getDoctors().get(i).getSurname().toLowerCase();
+			if (a.toLowerCase().equals(ns.toLowerCase())) {
+				System.out.println(a);
+				return getDoctors().get(i);
+			}
 		}
-		return new BigInteger("1234567890123456789012345678901234567890");
+		return null;
 	}
 
-	public static BigInteger doctorFromPersonalID(String personalID) throws Exception {
-		for (int i = 0; i < getOffices().size(); i++) {
-			if (getDoctors().get(i).getPersonal_id().equals(personalID))
-				return getDoctors().get(i).getId();
+	public static DefaultListModel<Doctor> doctorFromPersonalID(String personalID) throws Exception {
+		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(personal_id) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, personalID);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				String numColegiado = resultSet.getString("numColegiado");
+				String name = resultSet.getString("name");
+				String surname = resultSet.getString("surname");
+				String email = resultSet.getString("email");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personalID, specialization);
+				
+				docs.addElement(doctor);
+				
+				// Ahora puedes trabajar con el objeto Doctor
+				System.out.println("Doctor found: " + doctor.getName());
+			} else {
+//				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		return new BigInteger("1234567890123456789012345678901234567890");
+
+		return docs;
 	}
 
-	public static BigInteger doctorFromMedicalLicenseID(String medLicID) throws Exception {
-		for (int i = 0; i < getOffices().size(); i++) {
-			if (getDoctors().get(i).getNumColegiado().equals(medLicID))
-				return getDoctors().get(i).getId();
+	public static DefaultListModel<Doctor> doctorFromMedicalLicenseID(String medLicID) throws Exception {
+		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(personal_id) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, medLicID);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				String name = resultSet.getString("name");
+				String surname = resultSet.getString("surname");
+				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doctor = new Doctor(id, medLicID, name, surname, email, personal_id, specialization);
+
+				docs.addElement(doctor);
+				
+				// Ahora puedes trabajar con el objeto Doctor
+				System.out.println("Doctor found: " + doctor.getName());
+			} else {
+//				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		return new BigInteger("1234567890123456789012345678901234567890");
+
+		return docs;
+	}
+	
+	
+	public static boolean doctorHasWorkPeriod(BigInteger doctorId) { 
+		Connection con = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        con = getOracleConnection();
+	        ps = con.prepareStatement("SELECT 1 FROM WORKPERIOD WHERE fk_doctorid = ?");
+
+	        BigDecimal a = new BigDecimal(doctorId);
+	        ps.setBigDecimal(1, a);
+
+	        rs = ps.executeQuery();
+
+	        System.out.println("the doctor has workperiod? " +  rs.next());
+	        return rs.next(); // Retorna true si hay al menos un registro, de lo contrario, retorna false
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new RuntimeException();
+	    } finally {
+	        try {
+	            if (con != null)
+	                con.close();
+	            if (ps != null)
+	                ps.close();
+	            if (rs != null)
+	                rs.close();
+	        } catch (SQLException e) {
+	            throw new RuntimeException();
+	        }
+	    }
 	}
 
 	public static List<WorkPeriod> getWorkPeriodByDoctorId(BigInteger doctorId) {
@@ -674,6 +850,10 @@ public class ConnectionFactory {
 			}
 		}
 	}
+	
+	
+	
+	
 
 	public static List<WorkDay> getWorkDayByWPId(BigInteger wpID) {
 		Connection con = null;
@@ -736,13 +916,11 @@ public class ConnectionFactory {
 		 * 
 		 * 
 		 * 
-		 * ps = con.prepareStatement(
-					"UPDATE APPOINTMENT SET " + "attended = ?, checkedin = ?, checkedout = ? " + "WHERE id = ?");
-			ps.setInt(1, appointment.attended ? 1 : 0);
-			ps.setString(2, appointment.checkIn);
-			ps.setString(3, appointment.checkOut);
-			ps.setInt(4, appointment.id);
-			ps.executeUpdate();
+		 * ps = con.prepareStatement( "UPDATE APPOINTMENT SET " +
+		 * "attended = ?, checkedin = ?, checkedout = ? " + "WHERE id = ?");
+		 * ps.setInt(1, appointment.attended ? 1 : 0); ps.setString(2,
+		 * appointment.checkIn); ps.setString(3, appointment.checkOut); ps.setInt(4,
+		 * appointment.id); ps.executeUpdate();
 		 */
 		try {
 			// Establecer la conexión
@@ -757,8 +935,8 @@ public class ConnectionFactory {
 			BigDecimal a = new BigDecimal(id_doctor);
 			ps.setBigDecimal(3, a);
 			BigDecimal b = new BigDecimal(wpID);
-			ps.setBigDecimal(4, b);		
-			
+			ps.setBigDecimal(4, b);
+
 			ps.executeUpdate();
 
 			// Ejecutar la inserción

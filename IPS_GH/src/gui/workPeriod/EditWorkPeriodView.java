@@ -33,6 +33,12 @@ import javax.swing.border.TitledBorder;
 import db.Doctor;
 import db.WorkDay;
 import db.WorkPeriod;
+import gui.workPeriod.filters.Filter;
+import gui.workPeriod.filters.FilterMedicalLicenseID;
+import gui.workPeriod.filters.FilterName;
+import gui.workPeriod.filters.FilterPersonalID;
+import gui.workPeriod.filters.FilterSpecialization;
+import gui.workPeriod.filters.FilterSurname;
 import util.ConnectionFactory;
 
 public class EditWorkPeriodView extends JFrame {
@@ -78,8 +84,6 @@ public class EditWorkPeriodView extends JFrame {
 	private JButton btnSaveChange;
 	private JButton btnAddJustification;
 	private JLabel lblNewLabel;
-	private JLabel lblNewLabel_1;
-	private JButton btnOtherWPs;
 	private JLabel lblNewLabel_3;
 	private JPanel panel_center_north_unique_center;
 	private JLabel lblSelectFIlter;
@@ -93,13 +97,13 @@ public class EditWorkPeriodView extends JFrame {
 	private JButton btnSelect;
 
 	private DefaultListModel<Doctor> doctors = new DefaultListModel<>();
-	
+
 	private BigInteger selectedDocID;
 	private JLabel lblFirstDay;
 	private JLabel lblShowFirstDay;
 	private JLabel lblSecondDay;
 	private JLabel lblShowLastDay;
-	
+
 	private JustificationView jv;
 	private WorkPeriod wp;
 	private BigInteger wpID;
@@ -531,8 +535,6 @@ public class EditWorkPeriodView extends JFrame {
 			panel_south.setLayout(new GridLayout(2, 0, 0, 0));
 			panel_south.add(getLblNewLabel_3());
 			panel_south.add(getLblNewLabel());
-			panel_south.add(getLblNewLabel_1());
-			panel_south.add(getBtnOtherWPs());
 			panel_south.add(getBtnAddJustification());
 			panel_south.add(getBtnSaveChange());
 		}
@@ -544,19 +546,36 @@ public class EditWorkPeriodView extends JFrame {
 			btnSaveChange = new JButton("Save change");
 			btnSaveChange.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					createWorkPeriod();
-					List<WorkDay> wds = createWorkDays();
 
-					// save to database
-					saveToDB(wds);
-					
-					ConnectionFactory.updateWorkPeriod(wpID, wp.getStartDate(), wp.getEndDate(), wp.getId_doctor());
+					if (checkChanges()) {
+						createAndSave();
+					} else
+						JOptionPane.showMessageDialog(null, "There are no changes to save.");
 
 				}
 			});
 			btnSaveChange.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		}
 		return btnSaveChange;
+	}
+
+	private void createAndSave() {
+		if (!getTxtNewFirstDay().getText().isEmpty() && !getTxtNewLastDay().getText().isEmpty()) {
+			createWorkPeriod();
+
+			List<WorkDay> wds = updateWorkDays();
+			// save to database
+			saveWorkdaysToDB(wds);
+
+			System.out.println("SUCCESS!! SAVED TO DATABASE");
+
+			ConnectionFactory.updateWorkPeriod(wpID, wp.getStartDate(), wp.getEndDate(), wp.getId_doctor());
+
+			dispose();
+		} else {
+			// do nothing
+		}
+
 	}
 
 	private JButton getBtnAddJustification() {
@@ -570,7 +589,7 @@ public class EditWorkPeriodView extends JFrame {
 				}
 			});
 			btnAddJustification.setFont(new Font("Tahoma", Font.PLAIN, 12));
-			
+
 		}
 		return btnAddJustification;
 	}
@@ -581,15 +600,6 @@ public class EditWorkPeriodView extends JFrame {
 		}
 		return lblNewLabel;
 	}
-
-	private JLabel getLblNewLabel_1() {
-		if (lblNewLabel_1 == null) {
-			lblNewLabel_1 = new JLabel("");
-		}
-		return lblNewLabel_1;
-	}
-
-	
 
 	/**
 	 * String[] f = { "Filtering by name", "Filtering by surname", "Filtering by
@@ -602,17 +612,22 @@ public class EditWorkPeriodView extends JFrame {
 	 * @throws Exception
 	 */
 
-	private BigInteger applyFilter(String filter, String value) throws Exception {
-		if (filter.equals("Filtering by name"))
-			return ConnectionFactory.doctorFromName(value);
-		else if (filter.equals("Filtering by surname"))
-			return ConnectionFactory.doctorFromSurname(value);
-		else if (filter.equals("Filtering by personal ID"))
-			return ConnectionFactory.doctorFromPersonalID(value);
-		else if (filter.equals("Filtering by personal ID"))
-			return ConnectionFactory.doctorFromMedicalLicenseID(value);
+	private Filter applyFilter(String filter, String value) throws Exception {
 
-		return new BigInteger("1234567890123456789012345678901234567890");
+		if (filter.equals("Filtering by name"))
+			return new FilterName(doctors, value);
+		else if (filter.equals("Filtering by surname"))
+			return new FilterSurname(doctors, value);
+		else if (filter.equals("Filtering by personal ID"))
+			return new FilterPersonalID(doctors, value);
+		else if (filter.equals("Filtering by personal ID"))
+			return new FilterPersonalID(doctors, value);
+		else if (filter.equals("Filtering by medical license ID"))
+			return new FilterMedicalLicenseID(doctors, value);
+		else if (filter.equals("Filtering by specialization"))
+			return new FilterSpecialization(doctors, value);
+
+		return null;
 	}
 
 	private String[] getFilters() {
@@ -620,15 +635,6 @@ public class EditWorkPeriodView extends JFrame {
 				"Filtering by medical license ID", "Filtering by specialization" };
 
 		return f;
-	}
-
-	private JButton getBtnOtherWPs() {
-		if (btnOtherWPs == null) {
-			btnOtherWPs = new JButton("Show other workperiod");
-			btnOtherWPs.setEnabled(false);
-			btnOtherWPs.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		}
-		return btnOtherWPs;
 	}
 
 	private JLabel getLblNewLabel_3() {
@@ -700,10 +706,15 @@ public class EditWorkPeriodView extends JFrame {
 			btnSearch.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					try {
-						selectedDocID = applyFilter((String) getComboBoxFilter().getSelectedItem(), getTxtValue().getText());
-						// TODO
-						System.out.println("id=" + selectedDocID);
-						showSchedule(selectedDocID);
+
+						if (getTxtValue().getText().isEmpty()) {
+							getComboBoxDoctors().setModel(new DefaultComboBoxModel<>(doctorsToArray()));
+						} else {
+							Filter f = applyFilter(getComboBoxFilter().getSelectedItem().toString(),
+									getTxtValue().getText());
+
+							getComboBoxDoctors().setModel(new DefaultComboBoxModel<>(auxDoctorsToArray(f.filter())));
+						}
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -715,16 +726,25 @@ public class EditWorkPeriodView extends JFrame {
 		return btnSearch;
 	}
 
+	private String[] auxDoctorsToArray(DefaultListModel<Doctor> docs) {
+		System.out.println(docs.toString());
+		String[] aux = new String[docs.size()];
+
+		for (int i = 0; i < docs.size(); i++) {
+			aux[i] = docs.get(i).getName() + " " + docs.get(i).getSurname();
+		}
+		return aux;
+	}
+
 	private JComboBox<String> getComboBoxDoctors() {
 		if (comboBoxDoctors == null) {
 			comboBoxDoctors = new JComboBox<String>();
 			comboBoxDoctors.setModel(new DefaultComboBoxModel<>(doctorsToArray()));
-			
-			
+
 		}
 		return comboBoxDoctors;
 	}
-	
+
 	private String[] doctorsToArray() {
 		String[] aux = new String[doctors.size()];
 		for (int i = 0; i < doctors.size(); i++) {
@@ -747,45 +767,46 @@ public class EditWorkPeriodView extends JFrame {
 			btnSelect.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					try {
-						System.out.println(String.valueOf(getComboBoxFilter().getSelectedItem()));
-						selectedDocID = ConnectionFactory.doctorFromNameAndSurname(String.valueOf(getComboBoxDoctors().getSelectedItem()));
-						
-						// TODO
-						System.out.println("id=" + selectedDocID);
+						selectedDocID = ConnectionFactory
+								.doctorFromNameAndSurname(getComboBoxDoctors().getSelectedItem().toString()).getId();
+
 						showSchedule(selectedDocID);
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					// TODO llamar al metodo de connection factory
-					
 
 				}
 			});
 			btnSelect.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		}
 		return btnSelect;
+
 	}
-	
+
 	private void showSchedule(BigInteger selectedDocID) {
-		List<WorkPeriod> workperiods = ConnectionFactory.getWorkPeriodByDoctorId(selectedDocID);
+		if (ConnectionFactory.doctorHasWorkPeriod(selectedDocID)) {
+			JOptionPane.showMessageDialog(null, "The selected doctor does not have any work period.");
+		} else {
 
-		if (workperiods.size() > 0) {
-			if (workperiods.size() > 1) {
-				getBtnOtherWPs().setEnabled(true);
-				// TODO: no se sabe si se puede tener más de un workperiod a la vez
-			}
-			else {
-				wpID = workperiods.get(0).getId();
-				List<WorkDay> workdays = ConnectionFactory.getWorkDayByWPId(wpID);
+			List<WorkPeriod> workperiods = ConnectionFactory.getWorkPeriodByDoctorId(selectedDocID);
 
-				setTimetable(workdays);
-				
-				getLblShowFirstDay().setText(String.valueOf(workperiods.get(0).getStartDate()));
-				getLblShowLastDay().setText(String.valueOf(workperiods.get(0).getEndDate()));
-				
-			}
+//			if (workperiods.size() > 1) {
+//				getBtnOtherWPs().setEnabled(true);
+//				// TODO: no se sabe si se puede tener más de un workperiod a la vez
+//			} else {
+			wpID = workperiods.get(0).getId();
+			List<WorkDay> workdays = ConnectionFactory.getWorkDayByWPId(wpID);
+
+			setTimetable(workdays);
+
+			getLblShowFirstDay().setText(String.valueOf(workperiods.get(0).getStartDate()));
+			getLblShowLastDay().setText(String.valueOf(workperiods.get(0).getEndDate()));
+
+//			}
 		}
+
 	}
 
 	private void setTimetable(List<WorkDay> wds) {
@@ -815,6 +836,7 @@ public class EditWorkPeriodView extends JFrame {
 			}
 		}
 	}
+
 	private JLabel getLblFirstDay() {
 		if (lblFirstDay == null) {
 			lblFirstDay = new JLabel("First day of the workperiod:");
@@ -822,6 +844,7 @@ public class EditWorkPeriodView extends JFrame {
 		}
 		return lblFirstDay;
 	}
+
 	private JLabel getLblShowFirstDay() {
 		if (lblShowFirstDay == null) {
 			lblShowFirstDay = new JLabel("");
@@ -829,6 +852,7 @@ public class EditWorkPeriodView extends JFrame {
 		}
 		return lblShowFirstDay;
 	}
+
 	private JLabel getLblSecondDay() {
 		if (lblSecondDay == null) {
 			lblSecondDay = new JLabel("Last day of the workperiod:");
@@ -836,6 +860,7 @@ public class EditWorkPeriodView extends JFrame {
 		}
 		return lblSecondDay;
 	}
+
 	private JLabel getLblShowLastDay() {
 		if (lblShowLastDay == null) {
 			lblShowLastDay = new JLabel("");
@@ -843,10 +868,10 @@ public class EditWorkPeriodView extends JFrame {
 		}
 		return lblShowLastDay;
 	}
-	
+
 	private WorkPeriod createWorkPeriod() {
 		BigInteger id = generateID();
-		
+
 		// startDate
 		String startDate = getTxtNewFirstDay().getText();
 		String endDate = getTxtNewLastDay().getText();
@@ -872,13 +897,13 @@ public class EditWorkPeriodView extends JFrame {
 		} catch (ParseException e) {
 			JOptionPane.showMessageDialog(null, "The format of the date is not correct.");
 		}
-		
+
 		if (startSQL != null && endSQL != null) {
 			wp = new WorkPeriod(id, startSQL, endSQL, selectedDocID);
 		}
 		return wp;
 	}
-	
+
 	public static BigInteger generateID() {
 		Random random = new Random();
 		int number = 0;
@@ -892,34 +917,21 @@ public class EditWorkPeriodView extends JFrame {
 
 		return new BigInteger(sb.toString());
 	}
-	
-	
-	private void saveToDB(List<WorkDay> wds) {
-		try {
-			System.out.println("HOLA " + wp.getStartDate());
-			System.out.println("HOLA " +wp.getEndDate());
-			
-			System.out.println(wp.toString());
 
-			ConnectionFactory.createWorkPeriod(wp.getId(), wp.getStartDate(), wp.getEndDate(), wp.getId_doctor());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+	private void saveWorkdaysToDB(List<WorkDay> wds) {
 		for (WorkDay wd : wds) {
 			ConnectionFactory.createWorkDay(wd.getId(), wd.getWeekday(), wd.getStartHour(), wd.getEndHour(),
-					wd.getWorkperiodid(),  wp.getId_doctor());
+					wd.getWorkperiodid(), wp.getId_doctor());
 		}
 	}
-	
+
 	/**
 	 * public WorkDay(int id, String weekday, String startHour, String endHour, int
 	 * workperiodid)
 	 */
 	private List<WorkDay> createWorkDays() {
 		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-		List<WorkDay> aux = new ArrayList<WorkDay>();
+		List<WorkDay> workdays = new ArrayList<WorkDay>();
 
 		BigInteger id = generateID();
 		BigInteger workperiodid = wp.getId();
@@ -930,13 +942,12 @@ public class EditWorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Monday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Monday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay monday = new WorkDay(id, "Monday", startHour, endHour, workperiodid);
 
-				aux.add(monday);
+				workdays.add(monday);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -949,13 +960,12 @@ public class EditWorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Tuesday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Tuesday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay tuesday = new WorkDay(id, "Tuesday", startHour, endHour, workperiodid);
 
-				aux.add(tuesday);
+				workdays.add(tuesday);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -968,13 +978,12 @@ public class EditWorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Wednesday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Wednesday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay wednesday = new WorkDay(id, "Wednesday", startHour, endHour, workperiodid);
 
-				aux.add(wednesday);
+				workdays.add(wednesday);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -987,13 +996,12 @@ public class EditWorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Thursday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Thursday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay thursday = new WorkDay(id, "Thursday", startHour, endHour, workperiodid);
 
-				aux.add(thursday);
+				workdays.add(thursday);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -1006,13 +1014,12 @@ public class EditWorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Friday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Friday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay friday = new WorkDay(id, "Friday", startHour, endHour, workperiodid);
 
-				aux.add(friday);
+				workdays.add(friday);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -1025,13 +1032,12 @@ public class EditWorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Saturday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Saturday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay saturday = new WorkDay(id, "Saturday", startHour, endHour, workperiodid);
 
-				aux.add(saturday);
+				workdays.add(saturday);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -1044,19 +1050,104 @@ public class EditWorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Sunday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Sunday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay sunday = new WorkDay(id, "Sunday", startHour, endHour, workperiodid);
 
-				aux.add(sunday);
+				workdays.add(sunday);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		return aux;
+		return workdays;
 	}
+
+	private boolean checkChanges() {
+		List<WorkDay> wds = ConnectionFactory.getWorkDayByWPId(wpID);
+		boolean somethingChanged = false;
+		for (int i = 0; i <= 7; i++) {
+			String day = wds.get(i).getWeekday().toLowerCase();
+			String start = wds.get(i).getStartHour();
+			String end = wds.get(i).getEndHour();
+
+			if (day.equals("monday")) {
+				if (!start.equals(getTxtMondayIn().getText()) || !end.equals(getTxtMondayOut().getText()))
+					somethingChanged = true;
+			} else if (day.equals("tuesday")) {
+				if (!start.equals(getTxtTuesdayIn().getText()) || !end.equals(getTxtTuesdayOut().getText()))
+					somethingChanged = true;
+			} else if (day.equals("wednesday")) {
+				if (!start.equals(getTxtWednesdayIn().getText()) || !end.equals(getTxtWednesdayIn().getText()))
+					somethingChanged = true;
+			} else if (day.equals("thursday")) {
+				if (!start.equals(getTxtThursdayIn().getText()) || !end.equals(getTxtThursdayIn().getText()))
+					somethingChanged = true;
+			} else if (day.equals("friday")) {
+				if (!start.equals(getTxtFridayIn().getText()) || !end.equals(getTxtFridayIn().getText()))
+					somethingChanged = true;
+			} else if (day.equals("saturday")) {
+				if (!start.equals(getTxtSaturdayIn().getText()) || !end.equals(getTxtSaturdayIn().getText()))
+					somethingChanged = true;
+			} else if (day.equals("sunday")) {
+				if (!start.equals(getTxtSundayIn().getText()) || !end.equals(getTxtSundayIn().getText()))
+					somethingChanged = true;
+			}
+		}
+
+		if (!getTxtNewFirstDay().getText().isEmpty() && !getTxtNewLastDay().getText().isEmpty()) {
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+
+			try {
+				if (wp.getStartDate().compareTo(sdf.parse(getTxtNewFirstDay().getText() + ":00")) != 0
+						|| wp.getEndDate().compareTo(sdf.parse(getTxtNewLastDay().getText() + ":00")) != 0) {
+					somethingChanged = true;
+				}
+
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		System.out.println("something has changed? " + somethingChanged);
+		return somethingChanged;
+
+	}
+
+	private List<WorkDay> updateWorkDays() {
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		List<WorkDay> wds = ConnectionFactory.getWorkDayByWPId(wpID);
+
+		for (int i = 0; i <= 7; i++) {
+			String day = wds.get(i).getWeekday().toLowerCase();
+
+			if (day.equals("monday")) {
+				wds.get(i).setStartHour(getTxtMondayIn().getText());
+				wds.get(i).setEndHour(getTxtMondayOut().getText());
+			} else if (day.equals("tuesday")) {
+				wds.get(i).setStartHour(getTxtTuesdayIn().getText());
+				wds.get(i).setEndHour(getTxtTuesdayOut().getText());
+			} else if (day.equals("wednesday")) {
+				wds.get(i).setStartHour(getTxtWednesdayIn().getText());
+				wds.get(i).setEndHour(getTxtWednesdayOut().getText());
+			} else if (day.equals("thursday")) {
+				wds.get(i).setStartHour(getTxtThursdayIn().getText());
+				wds.get(i).setEndHour(getTxtThursdayOut().getText());
+			} else if (day.equals("friday")) {
+				wds.get(i).setStartHour(getTxtFridayIn().getText());
+				wds.get(i).setEndHour(getTxtFridayOut().getText());
+			} else if (day.equals("saturday")) {
+				wds.get(i).setStartHour(getTxtSaturdayIn().getText());
+				wds.get(i).setEndHour(getTxtSaturdayOut().getText());
+			} else if (day.equals("sunday")) {
+				wds.get(i).setStartHour(getTxtSundayIn().getText());
+				wds.get(i).setEndHour(getTxtSundayOut().getText());
+			}
+		}
+		return wds;
+	}
+
 }
