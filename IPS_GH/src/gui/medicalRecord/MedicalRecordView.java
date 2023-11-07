@@ -3,6 +3,7 @@ package gui.medicalRecord;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -81,6 +82,7 @@ public class MedicalRecordView extends JFrame {
 	 */
 	public MedicalRecordView(int patientId) {
 		appointments = ConnectionFactory.getAppointmentsByPatientIDList(patientId);
+	
 		causes=MedicalRecord.getCauses(patientId);
 		prescription=MedicalRecord.getPrescription(patientId);
 		vaccines=MedicalRecord.getVaccines(patientId);
@@ -152,6 +154,11 @@ public class MedicalRecordView extends JFrame {
 	private JButton getBtnBack() {
 		if (btnBack == null) {
 			btnBack = new JButton("Back");
+			btnBack.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+				}
+			});
 			btnBack.setHorizontalAlignment(SwingConstants.LEFT);
 		}
 		return btnBack;
@@ -167,6 +174,7 @@ public class MedicalRecordView extends JFrame {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			tabbedPane.addTab("Appointments", null, getPnAppointments(), null);
+			pnAppointments.setLayout(new GridLayout(0, 1, 0, 0));
 			tabbedPane.addTab("Prescription", null, getPnPrescription(), null);
 			tabbedPane.addTab("Causes", null, getPnCauses(), null);
 			tabbedPane.addTab("Diagnosis", null, getPnDiagnosis(), null);
@@ -176,13 +184,14 @@ public class MedicalRecordView extends JFrame {
 	}
 
 	private JPanel getPnAppointments() {
-		if (pnAppointments == null) {
+
 			pnAppointments = new JPanel();
-			
-			pnAppointments.setLayout(new BorderLayout(0, 0));
 			for(AppointmentBLDto appointment: appointments)
 				pnAppointments.add(getPnAppointmentInfo(appointment));
-		}
+			pnAppointments.invalidate();
+			pnAppointments.validate();
+			pnAppointments.repaint();
+	
 		return pnAppointments;
 	}
 
@@ -234,7 +243,7 @@ public class MedicalRecordView extends JFrame {
 		return lblName;
 	}
 	private JPanel getPnAppointmentInfo(AppointmentBLDto ap) {
-		if (pnAppointmentInfo == null) {
+		
 			pnAppointmentInfo = new JPanel();
 			pnAppointmentInfo.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			pnAppointmentInfo.add(getLblDoctor());
@@ -252,7 +261,7 @@ public class MedicalRecordView extends JFrame {
 			else
 				pnAppointmentInfo.add(new JLabel("no"));
 			pnAppointmentInfo.add(getBtnOpen(ap));
-		}
+		
 		return pnAppointmentInfo;
 	}
 	private JLabel getLblDate() {
