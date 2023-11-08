@@ -14,6 +14,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -41,8 +42,8 @@ import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -50,6 +51,7 @@ import javax.swing.event.ListSelectionListener;
 
 import com.toedter.calendar.JDateChooser;
 
+import db.Appointment;
 import db.Doctor;
 import db.Patient;
 import util.ConnectionFactory;
@@ -140,6 +142,8 @@ public class MedicalRecepcionistView extends JFrame {
 	private String newContactInfo = "";
 	private JTextField textFieldFrom;
 	private JTextField textFieldTo;
+	private JButton btnSeeFreeHours;
+	private JTextField txtFreeHours;
 
 	/**
 	 * Create the frame.
@@ -247,6 +251,8 @@ public class MedicalRecepcionistView extends JFrame {
 			panel_office
 					.setBorder(new TitledBorder(null, "Office ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panel_office.add(getPanel_office_north(), BorderLayout.NORTH);
+			panel_office.add(getBtnSeeFreeHours(), BorderLayout.SOUTH);
+			panel_office.add(getTxtFreeHours(), BorderLayout.CENTER);
 		}
 		return panel_office;
 	}
@@ -341,8 +347,8 @@ public class MedicalRecepcionistView extends JFrame {
 				"Are you sure you want to reserve the appointment between the doctor(s) "
 						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
 						+ " on  " + dateChooser.getDate().getDay() + "/" + dateChooser.getDate().getMonth() + "/"
-						+ dateChooser.getDate().getYear() + " at " + getTextFieldFrom().getText()
-						+ " in the office " + getComboBoxOffices().getSelectedItem() + "?",
+						+ dateChooser.getDate().getYear() + " at " + getTextFieldFrom().getText() + " in the office "
+						+ getComboBoxOffices().getSelectedItem() + "?",
 				"Confirmation", JOptionPane.YES_NO_OPTION);
 
 		// Verificar la respuesta del usuario
@@ -358,19 +364,17 @@ public class MedicalRecepcionistView extends JFrame {
 			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
 				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
-						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-								+ textFieldFrom.getText() + ":00",
-						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-								+ textFieldTo.getText() + ":00",
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " " + textFieldFrom.getText()
+								+ ":00",
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " " + textFieldTo.getText() + ":00",
 						1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 
 			} else {
 				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
-						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-								+ textFieldFrom.getText() + ":00",
-						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " "
-								+ textFieldTo.getText() + ":00",
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " " + textFieldFrom.getText()
+								+ ":00",
+						new java.sql.Date(getDateChooser_1().getDate().getTime()) + " " + textFieldTo.getText() + ":00",
 						0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 			}
@@ -939,6 +943,7 @@ public class MedicalRecepcionistView extends JFrame {
 			comboBoxOffices.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					officeChoosed = true;
+					getBtnSeeFreeHours().setEnabled(true);
 
 					checkFinishBtnEnabled();
 				}
@@ -958,15 +963,16 @@ public class MedicalRecepcionistView extends JFrame {
 			getBtnFinish().setEnabled(true);
 
 	}
+
 	private JTextField getTextFieldFrom() {
 		if (textFieldFrom == null) {
 			textFieldFrom = new JTextField();
-			
+
 			textFieldFrom.setEnabled(false);
 			textFieldFrom.setEditable(false);
 			textFieldFrom.setColumns(10);
 			SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm:ss");
-			
+
 //			textFieldFrom.addFocusListener(new FocusAdapter() {
 //				@Override
 //				public void focusLost(FocusEvent e) {
@@ -987,6 +993,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return textFieldFrom;
 	}
+
 	private JTextField getTextFieldTo() {
 		if (textFieldTo == null) {
 			textFieldTo = new JTextField();
@@ -999,7 +1006,8 @@ public class MedicalRecepcionistView extends JFrame {
 				@Override
 				public void focusLost(FocusEvent e) {
 					try {
-						if (sdf3.parse(textFieldFrom.getText()+ ":00").after(sdf3.parse(textFieldTo.getText()+ ":00"))) {
+						if (sdf3.parse(textFieldFrom.getText() + ":00")
+								.after(sdf3.parse(textFieldTo.getText() + ":00"))) {
 							JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
 									"The end hour of the appointment must be later than the start one.", "Warning",
 									JOptionPane.INFORMATION_MESSAGE);
@@ -1015,4 +1023,98 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return textFieldTo;
 	}
+
+	private JButton getBtnSeeFreeHours() {
+		if (btnSeeFreeHours == null) {
+			btnSeeFreeHours = new JButton("See free hours");
+			btnSeeFreeHours.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					showFreeHours();
+				}
+			});
+			btnSeeFreeHours.setEnabled(false);
+		}
+		return btnSeeFreeHours;
+	}
+
+	private JTextField getTxtFreeHours() {
+		if (txtFreeHours == null) {
+			txtFreeHours = new JTextField();
+			txtFreeHours.setEditable(false);
+			txtFreeHours.setColumns(10);
+
+		}
+		return txtFreeHours;
+	}
+
+	private void showFreeHours() {
+		String officeId = getComboBoxOffices().getSelectedItem().toString();
+
+		List<Appointment> apps = ConnectionFactory.getAppointmentsFromOffice(officeId);
+
+		List<Date> freeHours = new ArrayList<Date>();
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date startTime;
+		Date endTime;
+
+		// supongamos que el rango de horas en las que se dan citas en una office es de
+		// 9 de la mañana a 2 del mediodía
+		try {
+			startTime = sdf.parse("yyyy-MM-dd 09:00:00");
+			endTime = sdf.parse("yyyy-MM-dd 14:00:00");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+
+		Date currentTime = new Date(startTime.getTime());
+
+		while (currentTime.before(endTime)) {
+			boolean isHourFree = true;
+
+			// checkear si alguna cita se superpone con la hora actual
+			for (Appointment appointment : apps) {
+				Date appointmentStartTime;
+				Date appointmentEndTime;
+
+				try {
+					appointmentStartTime = sdf.parse(appointment.getStartdate());
+					appointmentEndTime = sdf.parse(appointment.getEnddate());
+				} catch (Exception e) {
+					e.printStackTrace();
+					return;
+				}
+
+				// si la hora actual coincide que es la hora a la que empieza algún appointment
+				// o cuadra en el medio de uno, isHourFree = false
+				if (currentTime.equals(appointmentStartTime)
+						|| (currentTime.after(appointmentStartTime) && currentTime.before(appointmentEndTime))) {
+					isHourFree = false;
+					break;
+				}
+			}
+
+			// hora actual libre? añadir
+			if (isHourFree) {
+				freeHours.add(currentTime);
+			}
+
+			// checkear en intervalos de 30 minutos
+			currentTime.setTime(currentTime.getTime() + 30 * 60 * 1000);
+		}
+
+		setFreeHoursInfo(freeHours, officeId);
+
+	}
+
+	@SuppressWarnings("deprecation")
+	private void setFreeHoursInfo(List<Date> freeHours, String officeId) {
+		String res = "Free hours of office: " + officeId + "\n";
+		
+		for (Date d : freeHours) {
+			res += "\t" + d.getHours() + ":" + d.getMinutes() + "\n";
+		}
+	}
+
 }

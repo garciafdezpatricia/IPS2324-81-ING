@@ -582,7 +582,7 @@ public class ConnectionFactory {
 
 	public static DefaultListModel<Doctor> doctorFromName(String name) throws Exception {
 		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
-		
+
 		try {
 			// Establecer la conexión
 			Connection connection = ConnectionFactory.getOracleConnection();
@@ -610,7 +610,7 @@ public class ConnectionFactory {
 				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personal_id, specialization);
 
 				docs.addElement(doctor);
-				
+
 				// Ahora puedes trabajar con el objeto Doctor
 				System.out.println("Doctor found: " + doctor.getName());
 			} else {
@@ -625,7 +625,7 @@ public class ConnectionFactory {
 
 	public static DefaultListModel<Doctor> doctorFromSurname(String surname) throws Exception {
 		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
-		
+
 		try {
 			// Establecer la conexión
 			Connection connection = ConnectionFactory.getOracleConnection();
@@ -653,7 +653,7 @@ public class ConnectionFactory {
 				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personal_id, specialization);
 
 				docs.addElement(doctor);
-				
+
 				// Ahora puedes trabajar con el objeto Doctor
 				System.out.println("Doctor found: " + doctor.getName());
 			} else {
@@ -668,7 +668,8 @@ public class ConnectionFactory {
 
 	public static Doctor doctorFromNameAndSurname(String ns) throws Exception {
 		for (int i = 0; i < getDoctors().size(); i++) {
-			String a = getDoctors().get(i).getName().toLowerCase() + " " + getDoctors().get(i).getSurname().toLowerCase();
+			String a = getDoctors().get(i).getName().toLowerCase() + " "
+					+ getDoctors().get(i).getSurname().toLowerCase();
 			if (a.toLowerCase().equals(ns.toLowerCase())) {
 				System.out.println(a);
 				return getDoctors().get(i);
@@ -705,9 +706,9 @@ public class ConnectionFactory {
 
 				// Crear un objeto Doctor
 				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personalID, specialization);
-				
+
 				docs.addElement(doctor);
-				
+
 				// Ahora puedes trabajar con el objeto Doctor
 				System.out.println("Doctor found: " + doctor.getName());
 			} else {
@@ -750,7 +751,7 @@ public class ConnectionFactory {
 				Doctor doctor = new Doctor(id, medLicID, name, surname, email, personal_id, specialization);
 
 				docs.addElement(doctor);
-				
+
 				// Ahora puedes trabajar con el objeto Doctor
 				System.out.println("Doctor found: " + doctor.getName());
 			} else {
@@ -762,39 +763,38 @@ public class ConnectionFactory {
 
 		return docs;
 	}
-	
-	
-	public static boolean doctorHasWorkPeriod(BigInteger doctorId) { 
+
+	public static boolean doctorHasWorkPeriod(BigInteger doctorId) {
 		Connection con = null;
-	    PreparedStatement ps = null;
-	    ResultSet rs = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 
-	    try {
-	        con = getOracleConnection();
-	        ps = con.prepareStatement("SELECT 1 FROM WORKPERIOD WHERE fk_doctorid = ?");
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT 1 FROM WORKPERIOD WHERE fk_doctorid = ?");
 
-	        BigDecimal a = new BigDecimal(doctorId);
-	        ps.setBigDecimal(1, a);
+			BigDecimal a = new BigDecimal(doctorId);
+			ps.setBigDecimal(1, a);
 
-	        rs = ps.executeQuery();
+			rs = ps.executeQuery();
 
-	        System.out.println("the doctor has workperiod? " +  rs.next());
-	        return rs.next(); // Retorna true si hay al menos un registro, de lo contrario, retorna false
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        throw new RuntimeException();
-	    } finally {
-	        try {
-	            if (con != null)
-	                con.close();
-	            if (ps != null)
-	                ps.close();
-	            if (rs != null)
-	                rs.close();
-	        } catch (SQLException e) {
-	            throw new RuntimeException();
-	        }
-	    }
+			System.out.println("the doctor has workperiod? " + rs.next());
+			return rs.next(); // Retorna true si hay al menos un registro, de lo contrario, retorna false
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
 	}
 
 	public static List<WorkPeriod> getWorkPeriodByDoctorId(BigInteger doctorId) {
@@ -850,10 +850,6 @@ public class ConnectionFactory {
 			}
 		}
 	}
-	
-	
-	
-	
 
 	public static List<WorkDay> getWorkDayByWPId(BigInteger wpID) {
 		Connection con = null;
@@ -963,6 +959,59 @@ public class ConnectionFactory {
 			}
 
 		}
+	}
+
+	public static List<Appointment> getAppointmentsFromOffice(String officeId) {
+		List<Appointment> apps = new ArrayList<Appointment>();
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM APPOINTMENT WHERE officeId = ?");
+
+			ps.setString(1, officeId);
+
+			ResultSet resultSet = ps.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				int id = resultSet.getInt("id");
+				int patientId = resultSet.getInt("patientid");
+				int doctorId = resultSet.getInt("doctorid");
+				String startdate = resultSet.getString("startdate");
+				String endate = resultSet.getString("enddate");
+				int urgency = resultSet.getInt("urgency");
+				int attended = resultSet.getInt("attended");
+				String checkedin = resultSet.getString("checkedin");
+				String checkedout = resultSet.getString("checkedout");
+				int officeid = resultSet.getInt("officeid");
+				String information = resultSet.getString("information");
+
+				apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
+						checkedin, checkedout, officeid, information));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+		
+		return apps;
 	}
 
 }
