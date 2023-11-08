@@ -12,14 +12,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
@@ -55,10 +51,10 @@ import javax.swing.event.ListSelectionListener;
 
 import com.toedter.calendar.JDateChooser;
 
-import db.Appointment;
 import db.Doctor;
 import db.Patient;
 import util.ConnectionFactory;
+import javax.swing.JScrollBar;
 
 public class MedicalRecepcionistView extends JFrame {
 
@@ -94,8 +90,6 @@ public class MedicalRecepcionistView extends JFrame {
 	private boolean doctorChoosed = false;
 	private boolean patientChoosed = false;
 	private boolean officeChoosed = false;
-	private boolean fromDateChoosed = false;
-	private boolean toDateChoosed = false;
 
 	/**
 	 * Launch the application.
@@ -147,7 +141,8 @@ public class MedicalRecepcionistView extends JFrame {
 	private JTextField textFieldFrom;
 	private JTextField textFieldTo;
 	private JButton btnSeeFreeHours;
-	private JTextField txtFreeHours;
+	private JScrollPane scrollPane;
+	private JTextArea txtFreeHours;
 
 	/**
 	 * Create the frame.
@@ -256,7 +251,7 @@ public class MedicalRecepcionistView extends JFrame {
 					.setBorder(new TitledBorder(null, "Office ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panel_office.add(getPanel_office_north(), BorderLayout.NORTH);
 			panel_office.add(getBtnSeeFreeHours(), BorderLayout.SOUTH);
-			panel_office.add(getTxtFreeHours(), BorderLayout.CENTER);
+			panel_office.add(getScrollPane(), BorderLayout.CENTER);
 		}
 		return panel_office;
 	}
@@ -862,7 +857,7 @@ public class MedicalRecepcionistView extends JFrame {
 				}
 			});
 			dateChooser.getCalendarButton().setEnabled(false);
-			dateChooser.setMinSelectableDate(new Date());
+			dateChooser.setMinSelectableDate(new Date(System.currentTimeMillis()));
 
 		}
 		return dateChooser;
@@ -1041,83 +1036,49 @@ public class MedicalRecepcionistView extends JFrame {
 		return btnSeeFreeHours;
 	}
 
-	private JTextField getTxtFreeHours() {
-		if (txtFreeHours == null) {
-			txtFreeHours = new JTextField();
-			txtFreeHours.setEditable(false);
-			txtFreeHours.setColumns(10);
-
-		}
-		return txtFreeHours;
-	}
-
 	private void showFreeHours() {
 		int officeId = ConnectionFactory.getOfficeIDFromCode(getComboBoxOffices().getSelectedItem().toString());
 
-		List<Appointment> apps = ConnectionFactory.getAppointmentsFromOffice(officeId);
+		Calendar calendar = Calendar.getInstance();
 
-		List<LocalDateTime> freeHours = new ArrayList<LocalDateTime>();
+		Date today = new Date(calendar.getTimeInMillis());
 
-		LocalDateTime currentTime = LocalDateTime.now();
+		calendar.setTime(today);
+		calendar.set(Calendar.HOUR_OF_DAY, 00); 
+		calendar.set(Calendar.MINUTE, 01);
+		today.setTime(calendar.getTimeInMillis());
+		String start = today.toString();
+		
+		calendar.setTime(today);
+		calendar.set(Calendar.HOUR_OF_DAY, 23); 
+		calendar.set(Calendar.MINUTE, 59);
+		today.setTime(calendar.getTimeInMillis());
+		String end = today.toString();
 
-        // rango horario
-        LocalTime startTime = LocalTime.of(9, 0); 
-        LocalTime endTime = LocalTime.of(14, 0);  
-        
-        
-		while (currentTime.toLocalTime().isBefore(endTime) && currentTime.toLocalTime().isAfter(startTime)) {
-			boolean isHourFree = true;
-
-			// checkear si alguna cita se superpone con la hora actual
-			for (Appointment appointment : apps) {
-				
-				// format
-		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-				
-				LocalDateTime appointmentStartTime;
-				LocalDateTime appointmentEndTime;
-
-				try {
-					appointmentStartTime = LocalDateTime.parse(appointment.getStartdate(), formatter);
-					appointmentEndTime = LocalDateTime.parse(appointment.getEnddate(), formatter);
-				} catch (Exception e) {
-					e.printStackTrace();
-					return;
-				}
-
-				// si la hora actual coincide que es la hora a la que empieza algún appointment
-				// o cuadra en el medio de uno, isHourFree = false
-				if (currentTime.equals(appointmentStartTime)
-						|| (currentTime.isAfter(appointmentStartTime) && currentTime.isBefore(appointmentEndTime))) {
-					isHourFree = false;
-					break;
-				}
-			}
-
-			// hora actual libre? añadir
-			if (isHourFree) {
-				freeHours.add(currentTime);
-			}
-
-			// checkear en intervalos de 30 minutos
-			currentTime.plusMinutes(30);
+		String text = "";
+		try {
+			text = ConnectionFactory.getFreeHours(officeId, start, end);
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 
-		setFreeHoursInfo(freeHours, officeId);
+		System.out.println(today);
+		System.out.println(text);
+
+		getTxtFreeHours().setText(text);
 
 	}
-
-	private void setFreeHoursInfo(List<LocalDateTime> freeHours, int officeId) {
-		String res = "Today free hours of office: " + officeId + "\n";
-		
-		System.out.println(freeHours.toString());
-		for (LocalDateTime d : freeHours) {
-			res += "hora libre: ";
-			res += "\t" + d.getHour() + ":" + d.getMinute() + "\n";
+	private JScrollPane getScrollPane() {
+		if (scrollPane == null) {
+			scrollPane = new JScrollPane();
+			scrollPane.setViewportView(getTxtFreeHours());
 		}
-		
-		getTxtFreeHours().setText(res);
+		return scrollPane;
 	}
-
+	private JTextArea getTxtFreeHours() {
+		if (txtFreeHours == null) {
+			txtFreeHours = new JTextArea();
+		}
+		return txtFreeHours;
+	}
 }

@@ -12,6 +12,8 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -1055,4 +1057,100 @@ public class ConnectionFactory {
 		return id;
 	}
 
+	public static String getFreeHours(int officeId, String start, String end) throws Exception {
+		String res = "";
+		String res2 = "";
+		List<Appointment> apps = new ArrayList<Appointment>();
+		Connection connection = ConnectionFactory.getOracleConnection();
+		// hay que comprobar que la fecha que se pasa como parámetro esté dentro de ese
+		// workperiod
+		String query = "SELECT * from appointment where officeid = ?";
+		PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+		preparedStatement.setInt(1, officeId);
+
+		ResultSet resultSet = preparedStatement.executeQuery();
+
+		while (resultSet.next()) {
+			int id = resultSet.getInt("id");
+			int patientId = resultSet.getInt("patientid");
+			int doctorId = resultSet.getInt("doctorid");
+			String startdate = resultSet.getString("startdate");
+			String endate = resultSet.getString("enddate");
+			int urgency = resultSet.getInt("urgency");
+			int attended = resultSet.getInt("attended");
+			String checkedin = resultSet.getString("checkedin");
+			String checkedout = resultSet.getString("checkedout");
+			String information = resultSet.getString("information");
+
+			apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended, checkedin,
+					checkedout, officeId, information));
+		}
+
+		if (apps.size() == 0) {
+			return "The office has no appointments for today.";
+		}
+		// si si que tiene alguna cita reservada para ese día
+		else {
+
+			// filtrarlos por las que sean en el día, hay que pasar el string a date
+			List<Appointment> appsThatDay = new ArrayList<>();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			for (Appointment a : apps) {
+				java.util.Date st = dateFormat.parse(a.getStartdate());
+				java.util.Date e = dateFormat.parse(a.getEnddate());
+
+				java.util.Date stAux = dateFormat.parse(start + " 00:00:00");
+				java.util.Date eAux = dateFormat.parse(end + " 23:59:00");
+
+				if (st.after(stAux) && e.before(eAux)) {
+					appsThatDay.add(a);
+				}
+			}
+
+			System.out.println("appointments" + appsThatDay.toString());
+			// Define un comparador para ordenar por fecha
+			Comparator<Appointment> comparadorFecha = Comparator.comparing(Appointment::getStartdate);
+
+			// Ordena la lista usando el comparador
+			Collections.sort(appsThatDay, comparadorFecha);
+			// si hay citas ese dia
+			if (!appsThatDay.isEmpty()) {
+				res = "\n The office is booked from:\n ";
+				Date today = new Date(System.currentTimeMillis());
+				for (int i = 0; i < appsThatDay.size(); i++) {
+					java.util.Date st = dateFormat.parse(appsThatDay.get(i).getStartdate());
+
+					Calendar cal1 = Calendar.getInstance();
+					Calendar cal2 = Calendar.getInstance();
+					cal1.setTime(today);
+					cal2.setTime(st);
+
+					if (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
+							&& cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
+							&& cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)) {
+
+						
+								res += "\t" + dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes() + " to "
+								+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+								+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + "\n";
+
+						res2 += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
+						String aux = res;
+						res2 = "\n" + aux;
+					}
+				}
+			} else {
+				res2 += "14:00";
+				res2 = "\n" + res;
+			}
+
+		}
+		System.out.println(res2);
+		return res2;
+
+	}
 }
