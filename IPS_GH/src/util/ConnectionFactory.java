@@ -961,7 +961,7 @@ public class ConnectionFactory {
 		}
 	}
 
-	public static List<Appointment> getAppointmentsFromOffice(String officeId) {
+	public static List<Appointment> getAppointmentsFromOffice(int officeId) {
 		List<Appointment> apps = new ArrayList<Appointment>();
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
@@ -974,7 +974,7 @@ public class ConnectionFactory {
 			con = getOracleConnection();
 			ps = con.prepareStatement("SELECT * FROM APPOINTMENT WHERE officeId = ?");
 
-			ps.setString(1, officeId);
+			ps.setInt(1, officeId);
 
 			ResultSet resultSet = ps.executeQuery();
 
@@ -989,11 +989,10 @@ public class ConnectionFactory {
 				int attended = resultSet.getInt("attended");
 				String checkedin = resultSet.getString("checkedin");
 				String checkedout = resultSet.getString("checkedout");
-				int officeid = resultSet.getInt("officeid");
 				String information = resultSet.getString("information");
 
-				apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
-						checkedin, checkedout, officeid, information));
+				apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended, checkedin,
+						checkedout, officeId, information));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1010,8 +1009,50 @@ public class ConnectionFactory {
 				throw new RuntimeException();
 			}
 		}
-		
+
 		return apps;
+	}
+
+	public static int getOfficeIDFromCode(String code) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		int id = -100;
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM OFFICE WHERE officecode = ?");
+
+			System.out.println(code);
+			ps.setString(1, code);
+
+			rs = ps.executeQuery();
+
+			WorkPeriod wp = null;
+
+			while (rs.next()) {
+				id = rs.getInt("id");
+
+				System.out.println("id=" + id);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+		return id;
 	}
 
 }

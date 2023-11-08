@@ -14,6 +14,10 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -1048,39 +1052,35 @@ public class MedicalRecepcionistView extends JFrame {
 	}
 
 	private void showFreeHours() {
-		String officeId = getComboBoxOffices().getSelectedItem().toString();
+		int officeId = ConnectionFactory.getOfficeIDFromCode(getComboBoxOffices().getSelectedItem().toString());
 
 		List<Appointment> apps = ConnectionFactory.getAppointmentsFromOffice(officeId);
 
-		List<Date> freeHours = new ArrayList<Date>();
+		List<LocalDateTime> freeHours = new ArrayList<LocalDateTime>();
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date startTime;
-		Date endTime;
+		LocalDateTime currentTime = LocalDateTime.now();
 
-		// supongamos que el rango de horas en las que se dan citas en una office es de
-		// 9 de la mañana a 2 del mediodía
-		try {
-			startTime = sdf.parse("yyyy-MM-dd 09:00:00");
-			endTime = sdf.parse("yyyy-MM-dd 14:00:00");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
-
-		Date currentTime = new Date(startTime.getTime());
-
-		while (currentTime.before(endTime)) {
+        // rango horario
+        LocalTime startTime = LocalTime.of(9, 0); 
+        LocalTime endTime = LocalTime.of(14, 0);  
+        
+        
+		while (currentTime.toLocalTime().isBefore(endTime) && currentTime.toLocalTime().isAfter(startTime)) {
 			boolean isHourFree = true;
 
 			// checkear si alguna cita se superpone con la hora actual
 			for (Appointment appointment : apps) {
-				Date appointmentStartTime;
-				Date appointmentEndTime;
+				
+				// format
+		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+				
+				LocalDateTime appointmentStartTime;
+				LocalDateTime appointmentEndTime;
 
 				try {
-					appointmentStartTime = sdf.parse(appointment.getStartdate());
-					appointmentEndTime = sdf.parse(appointment.getEnddate());
+					appointmentStartTime = LocalDateTime.parse(appointment.getStartdate(), formatter);
+					appointmentEndTime = LocalDateTime.parse(appointment.getEnddate(), formatter);
 				} catch (Exception e) {
 					e.printStackTrace();
 					return;
@@ -1089,7 +1089,7 @@ public class MedicalRecepcionistView extends JFrame {
 				// si la hora actual coincide que es la hora a la que empieza algún appointment
 				// o cuadra en el medio de uno, isHourFree = false
 				if (currentTime.equals(appointmentStartTime)
-						|| (currentTime.after(appointmentStartTime) && currentTime.before(appointmentEndTime))) {
+						|| (currentTime.isAfter(appointmentStartTime) && currentTime.isBefore(appointmentEndTime))) {
 					isHourFree = false;
 					break;
 				}
@@ -1101,20 +1101,23 @@ public class MedicalRecepcionistView extends JFrame {
 			}
 
 			// checkear en intervalos de 30 minutos
-			currentTime.setTime(currentTime.getTime() + 30 * 60 * 1000);
+			currentTime.plusMinutes(30);
 		}
 
 		setFreeHoursInfo(freeHours, officeId);
 
 	}
 
-	@SuppressWarnings("deprecation")
-	private void setFreeHoursInfo(List<Date> freeHours, String officeId) {
-		String res = "Free hours of office: " + officeId + "\n";
+	private void setFreeHoursInfo(List<LocalDateTime> freeHours, int officeId) {
+		String res = "Today free hours of office: " + officeId + "\n";
 		
-		for (Date d : freeHours) {
-			res += "\t" + d.getHours() + ":" + d.getMinutes() + "\n";
+		System.out.println(freeHours.toString());
+		for (LocalDateTime d : freeHours) {
+			res += "hora libre: ";
+			res += "\t" + d.getHour() + ":" + d.getMinute() + "\n";
 		}
+		
+		getTxtFreeHours().setText(res);
 	}
 
 }
