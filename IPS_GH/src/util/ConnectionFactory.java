@@ -782,7 +782,7 @@ public class ConnectionFactory {
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
 
-//			// Establecer valores para los parámetros
+			// Establecer valores para los parámetros
 			BigDecimal aux2 = new BigDecimal(id_doctor);
 
 			preparedStatement.setDate(1, startDate);
@@ -839,8 +839,6 @@ public class ConnectionFactory {
 
 			// Establecer valores para los parámetros
 
-			BigDecimal aux2 = new BigDecimal(workperiod_id);
-
 			preparedStatement.setString(1, weekday);
 			preparedStatement.setString(2, startHour);
 			preparedStatement.setString(3, endHour);
@@ -849,11 +847,11 @@ public class ConnectionFactory {
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
 
-//			if (filasAfectadas > 0) {
-//				System.out.println("Inserción exitosa.");
-//			} else {
-//				System.out.println("La inserción no se pudo realizar.");
-//			}
+			if (filasAfectadas > 0) {
+				System.out.println("Inserción exitosa.");
+			} else {
+				System.out.println("La inserción no se pudo realizar.");
+			}
 
 			// Cerrar la conexión y el PreparedStatement
 			preparedStatement.close();
@@ -862,7 +860,6 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
-
 	@SuppressWarnings("unused")
 	public static String getFreeHours(List<Doctor> doctors, Date day) throws Exception {
 		String res = "";
@@ -1699,4 +1696,591 @@ public class ConnectionFactory {
 		}
 	}
 
+	public static DefaultListModel<Doctor> doctorFromName(String name) throws Exception {
+		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(name) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, name);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				String numColegiado = resultSet.getString("numColegiado");
+				String surname = resultSet.getString("surname");
+				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personal_id, specialization);
+
+				docs.addElement(doctor);
+
+				// Ahora puedes trabajar con el objeto Doctor
+				System.out.println("Doctor found: " + doctor.getName());
+			} else {
+//				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return docs;
+	}
+
+	public static DefaultListModel<Doctor> doctorFromSurname(String surname) throws Exception {
+		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(surname) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, surname);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				String numColegiado = resultSet.getString("numColegiado");
+				String name = resultSet.getString("name");
+				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personal_id, specialization);
+
+				docs.addElement(doctor);
+
+				// Ahora puedes trabajar con el objeto Doctor
+				System.out.println("Doctor found: " + doctor.getName());
+			} else {
+//				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return docs;
+	}
+
+	public static Doctor doctorFromNameAndSurname(String ns) throws Exception {
+		for (int i = 0; i < getDoctors().size(); i++) {
+			String a = getDoctors().get(i).getName().toLowerCase() + " "
+					+ getDoctors().get(i).getSurname().toLowerCase();
+			if (a.toLowerCase().equals(ns.toLowerCase())) {
+				System.out.println(a);
+				return getDoctors().get(i);
+			}
+		}
+		return null;
+	}
+
+	public static DefaultListModel<Doctor> doctorFromPersonalID(String personalID) throws Exception {
+		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(personal_id) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, personalID);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				String numColegiado = resultSet.getString("numColegiado");
+				String name = resultSet.getString("name");
+				String surname = resultSet.getString("surname");
+				String email = resultSet.getString("email");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doctor = new Doctor(id, numColegiado, name, surname, email, personalID, specialization);
+
+				docs.addElement(doctor);
+
+				// Ahora puedes trabajar con el objeto Doctor
+				System.out.println("Doctor found: " + doctor.getName());
+			} else {
+//				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return docs;
+	}
+
+	public static DefaultListModel<Doctor> doctorFromMedicalLicenseID(String medLicID) throws Exception {
+		DefaultListModel<Doctor> docs = new DefaultListModel<Doctor>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(personal_id) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, medLicID);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				BigInteger id = resultSet.getBigDecimal("id").toBigInteger();
+				String name = resultSet.getString("name");
+				String surname = resultSet.getString("surname");
+				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doctor = new Doctor(id, medLicID, name, surname, email, personal_id, specialization);
+
+				docs.addElement(doctor);
+
+				// Ahora puedes trabajar con el objeto Doctor
+				System.out.println("Doctor found: " + doctor.getName());
+			} else {
+//				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return docs;
+	}
+
+	public static boolean doctorHasWorkPeriod(BigInteger doctorId) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT 1 FROM WORKPERIOD WHERE fk_doctorid = ?");
+
+			BigDecimal a = new BigDecimal(doctorId);
+			ps.setBigDecimal(1, a);
+
+			rs = ps.executeQuery();
+
+			System.out.println("the doctor has workperiod? " + rs.next());
+			return rs.next(); // Retorna true si hay al menos un registro, de lo contrario, retorna false
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+	}
+
+	public static List<WorkPeriod> getWorkPeriodByDoctorId(BigInteger doctorId) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		List<WorkPeriod> workperiods = new ArrayList<WorkPeriod>();
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM WORKPERIOD WHERE fk_doctorid = ?");
+
+			BigDecimal a = new BigDecimal(doctorId);
+
+			System.out.println(a);
+			ps.setBigDecimal(1, a);
+
+			rs = ps.executeQuery();
+
+			WorkPeriod wp = null;
+
+			while (rs.next()) {
+				// BigInteger id, Date startDate, Date endDate, BigInteger id_doctor
+				BigDecimal aux = rs.getBigDecimal(1);
+
+				BigInteger id = aux.toBigInteger();
+				Date startDate = rs.getDate(2);
+				Date endDate = rs.getDate(3);
+
+				System.out.println("id=" + id + " startdate=" + startDate + " enddate=" + endDate);
+
+				wp = new WorkPeriod(id, startDate, endDate, doctorId);
+
+				workperiods.add(wp);
+
+			}
+			return workperiods;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+	}
+
+	public static List<WorkDay> getWorkDayByWPId(BigInteger wpID) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		List<WorkDay> workdays = new ArrayList<WorkDay>();
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM WORKDAY WHERE workperiodid = ?");
+			BigDecimal a = new BigDecimal(wpID);
+			ps.setBigDecimal(1, a);
+			rs = ps.executeQuery();
+			WorkDay wd = null;
+
+			while (rs.next()) {
+				// BigInteger id, String weekday, String startHour, String endHour, BigInteger
+				// workperiodid
+				BigDecimal aux = rs.getBigDecimal(1);
+
+				BigInteger id = aux.toBigInteger();
+				String weekday = rs.getString(2);
+				String startHour = rs.getString(3);
+				String endHour = rs.getString(4);
+
+				wd = new WorkDay(id, weekday, startHour, endHour, wpID);
+
+				workdays.add(wd);
+
+			}
+			return workdays;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+	}
+
+	public static void updateWorkPeriod(BigInteger wpID, Date startDate, Date endDate, BigInteger id_doctor) {
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		/*
+		 * 
+		 * 
+		 * 
+		 * 
+		 * ps = con.prepareStatement( "UPDATE APPOINTMENT SET " +
+		 * "attended = ?, checkedin = ?, checkedout = ? " + "WHERE id = ?");
+		 * ps.setInt(1, appointment.attended ? 1 : 0); ps.setString(2,
+		 * appointment.checkIn); ps.setString(3, appointment.checkOut); ps.setInt(4,
+		 * appointment.id); ps.executeUpdate();
+		 */
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL con parámetros
+			String insertQuery = "UPDATE workperiod SET startday = ?, finalday = ?, fk_doctorid = ? WHERE id = ?;";
+			// Crear un PreparedStatement
+			ps = connection.prepareStatement(insertQuery);
+			ps.setDate(1, startDate);
+			ps.setDate(2, endDate);
+			BigDecimal a = new BigDecimal(id_doctor);
+			ps.setBigDecimal(3, a);
+			BigDecimal b = new BigDecimal(wpID);
+			ps.setBigDecimal(4, b);
+
+			ps.executeUpdate();
+
+			// Ejecutar la inserción
+			int filasAfectadas = ps.executeUpdate();
+
+			if (filasAfectadas > 0) {
+				System.out.println("Inserción exitosa.");
+			} else {
+				System.out.println("La inserción no se pudo realizar.");
+			}
+
+			// Cerrar la conexión y el PreparedStatement
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+
+	public static List<Appointment> getAppointmentsFromOffice(int officeId) {
+		List<Appointment> apps = new ArrayList<Appointment>();
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM APPOINTMENT WHERE officeId = ?");
+
+			ps.setInt(1, officeId);
+
+			ResultSet resultSet = ps.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigDecimal idBD = resultSet.getBigDecimal("id");
+				BigInteger id = idBD.toBigInteger();
+				
+				BigDecimal patientIdBD = resultSet.getBigDecimal("patientid");
+				BigInteger patientId = patientIdBD.toBigInteger();
+				
+				BigDecimal doctorIdBD = resultSet.getBigDecimal("doctorid");
+				BigInteger doctorId = doctorIdBD.toBigInteger();
+				
+				
+				String startdate = resultSet.getString("startdate");
+				String endate = resultSet.getString("enddate");
+				int urgency = resultSet.getInt("urgency");
+				int attended = resultSet.getInt("attended");
+				String checkedin = resultSet.getString("checkedin");
+				String checkedout = resultSet.getString("checkedout");
+				String information = resultSet.getString("information");
+				String status = resultSet.getString("status");
+
+				apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended, checkedin,
+						checkedout, new BigInteger(String.valueOf(officeId)), information, status));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+
+		return apps;
+	}
+
+	public static int getOfficeIDFromCode(String code) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		int id = -100;
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM OFFICE WHERE officecode = ?");
+
+			System.out.println(code);
+			ps.setString(1, code);
+
+			rs = ps.executeQuery();
+
+			WorkPeriod wp = null;
+
+			while (rs.next()) {
+				id = rs.getInt("id");
+
+				System.out.println("id=" + id);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+		return id;
+	}
+
+	public static String getFreeHours(int officeId, String start, String end) throws Exception {
+		String res = "";
+		String res2 = "";
+		List<Appointment> apps = new ArrayList<Appointment>();
+		Connection connection = ConnectionFactory.getOracleConnection();
+		// hay que comprobar que la fecha que se pasa como parámetro esté dentro de ese
+		// workperiod
+		String query = "SELECT * from appointment where officeid = ?";
+		PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+		preparedStatement.setInt(1, officeId);
+
+		ResultSet resultSet = preparedStatement.executeQuery();
+
+		while (resultSet.next()) {
+			BigDecimal idBD = resultSet.getBigDecimal("id");
+			BigInteger id = idBD.toBigInteger();
+			
+			BigDecimal patientIdBD = resultSet.getBigDecimal("patientid");
+			BigInteger patientId = patientIdBD.toBigInteger();
+			
+			BigDecimal doctorIdBD = resultSet.getBigDecimal("doctorid");
+			BigInteger doctorId = doctorIdBD.toBigInteger();
+			
+			
+			String startdate = resultSet.getString("startdate");
+			String endate = resultSet.getString("enddate");
+			int urgency = resultSet.getInt("urgency");
+			int attended = resultSet.getInt("attended");
+			String checkedin = resultSet.getString("checkedin");
+			String checkedout = resultSet.getString("checkedout");
+			String information = resultSet.getString("information");
+			String status = resultSet.getString("status");
+
+			apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended, checkedin,
+					checkedout, new BigInteger(String.valueOf(officeId)), information, status));
+		}
+
+		if (apps.size() == 0) {
+			return "The office has no appointments for today.";
+		}
+		// si si que tiene alguna cita reservada para ese día
+		else {
+
+			// filtrarlos por las que sean en el día, hay que pasar el string a date
+			List<Appointment> appsThatDay = new ArrayList<>();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			for (Appointment a : apps) {
+				java.util.Date st = dateFormat.parse(a.getStartdate());
+				java.util.Date e = dateFormat.parse(a.getEnddate());
+
+				java.util.Date stAux = dateFormat.parse(start + " 00:00:00");
+				java.util.Date eAux = dateFormat.parse(end + " 23:59:00");
+
+				if (st.after(stAux) && e.before(eAux)) {
+					appsThatDay.add(a);
+				}
+			}
+
+			System.out.println("appointments" + appsThatDay.toString());
+			// Define un comparador para ordenar por fecha
+			Comparator<Appointment> comparadorFecha = Comparator.comparing(Appointment::getStartdate);
+
+			// Ordena la lista usando el comparador
+			Collections.sort(appsThatDay, comparadorFecha);
+			// si hay citas ese dia
+			if (!appsThatDay.isEmpty()) {
+				res = "\n The office is booked from:\n ";
+				Date today = new Date(System.currentTimeMillis());
+				for (int i = 0; i < appsThatDay.size(); i++) {
+					java.util.Date st = dateFormat.parse(appsThatDay.get(i).getStartdate());
+
+					Calendar cal1 = Calendar.getInstance();
+					Calendar cal2 = Calendar.getInstance();
+					cal1.setTime(today);
+					cal2.setTime(st);
+
+					if (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
+							&& cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
+							&& cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)) {
+
+						
+								res += "\t" + dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes() + " to "
+								+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+								+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + "\n";
+
+						res2 += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
+						String aux = res;
+						res2 = "\n" + aux;
+					}
+				}
+			} else {
+				res2 += "14:00";
+				res2 = "\n" + res;
+			}
+
+		}
+		System.out.println(res2);
+		return res2;
+
+	}
 }

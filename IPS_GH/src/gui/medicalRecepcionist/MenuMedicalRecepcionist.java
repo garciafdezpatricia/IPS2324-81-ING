@@ -19,6 +19,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 
+import gui.workPeriod.EditWorkPeriodView;
 import gui.workPeriod.WorkPeriodView;
 
 public class MenuMedicalRecepcionist extends JFrame {
@@ -56,7 +57,8 @@ public class MenuMedicalRecepcionist extends JFrame {
 	 * Create the frame.
 	 */
 	public MenuMedicalRecepcionist() {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Menu");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -93,8 +95,10 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JPanel getPanelButtons() {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
+
 			panelButtons.setLayout(new GridLayout(0, 2, 0, 0));
 			panelButtons.add(getBtnEditAndCancel());
+
 			panelButtons.add(getBtnCreateApp());
 			panelButtons.add(getBtnAssignWorkPeriod());
 			panelButtons.add(getBtnEditWp());
@@ -108,15 +112,15 @@ public class MenuMedicalRecepcionist extends JFrame {
 			btnCreateApp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					MedicalRecepcionistView mr;
-						try {
-							mr = new MedicalRecepcionistView();
-							mr.setVisible(true);
-							mr.setLocationRelativeTo(null);
+					try {
+						mr = new MedicalRecepcionistView();
+						mr.setVisible(true);
+						mr.setLocationRelativeTo(null);
 
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 
 				}
 			});
@@ -150,29 +154,31 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JButton getBtnAssignWorkPeriod() {
 		if (btnAssignWorkPeriod == null) {
 			btnAssignWorkPeriod = new JButton("Assign Workperiod");
-			
+
 			btnAssignWorkPeriod.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					WorkPeriodView wp;
-						try {
-							wp = new WorkPeriodView();
-							wp.setVisible(true);
-							wp.setLocationRelativeTo(null);
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+					try {
+						wp = new WorkPeriodView();
+						wp.setVisible(true);
+						wp.setLocationRelativeTo(null);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 
 				}
 			});
 		}
 		return btnAssignWorkPeriod;
 	}
+
 	private JButton getBtnEditWp() {
 		if (btnEditWp == null) {
 			btnEditWp = new JButton("Edit workperiod");
 			btnEditWp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+
 //					EditWorkPeriodView editWp;
 //					try {
 //						editWp = new EditWorkPeriodView();
@@ -188,10 +194,7 @@ public class MenuMedicalRecepcionist extends JFrame {
 		}
 		return btnEditWp;
 	}
-	
-	
-	
-	
+
 	private JButton getBtnEditAndCancel() {
 		if (btnEditAndCancel == null) {
 			btnEditAndCancel = new JButton("Edit or cancel appointment");
@@ -212,4 +215,5 @@ public class MenuMedicalRecepcionist extends JFrame {
 		}
 		return btnEditAndCancel;
 	}
+
 }

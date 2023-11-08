@@ -68,7 +68,7 @@ public class WorkPeriodView extends JFrame {
 	private JLabel lblClockOutTime;
 	private JLabel lblClockInTime;
 	private JLabel lblEmpty;
-	private IdentificationWindow iw;
+	private IdentificationWindowView iw;
 	private JButton btnDoctor;
 
 	private WorkPeriod wp;
@@ -95,7 +95,7 @@ public class WorkPeriodView extends JFrame {
 	 * Create the frame.
 	 */
 	public WorkPeriodView() {
-		iw = new IdentificationWindow();
+		iw = new IdentificationWindowView();
 
 		setIconImage(Toolkit.getDefaultToolkit().getImage(WorkPeriodView.class.getResource("/img/descarga.jpg")));
 		setTitle("Work period");
@@ -169,8 +169,8 @@ public class WorkPeriodView extends JFrame {
 	private void saveToDB(List<WorkDay> wds) {
 		try {
 			System.out.println("HOLA " + wp.getStartDate());
-			System.out.println("HOLA " +wp.getEndDate());
-			
+			System.out.println("HOLA " + wp.getEndDate());
+
 			System.out.println(wp.toString());
 
 			ConnectionFactory.createWorkPeriod(wp.getId(), wp.getStartDate(), wp.getEndDate(), wp.getId_doctor());
@@ -181,7 +181,7 @@ public class WorkPeriodView extends JFrame {
 
 		for (WorkDay wd : wds) {
 			ConnectionFactory.createWorkDay(wd.getId(), wd.getWeekday(), wd.getStartHour(), wd.getEndHour(),
-					wd.getWorkperiodid(),  wp.getId_doctor());
+					wd.getWorkperiodid(), wp.getId_doctor());
 		}
 	}
 
@@ -202,8 +202,7 @@ public class WorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Monday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Monday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay monday = new WorkDay(id, "Monday", startHour, endHour, workperiodid);
@@ -221,8 +220,7 @@ public class WorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Tuesday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Tuesday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay tuesday = new WorkDay(id, "Tuesday", startHour, endHour, workperiodid);
@@ -240,8 +238,7 @@ public class WorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Wednesday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Wednesday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay wednesday = new WorkDay(id, "Wednesday", startHour, endHour, workperiodid);
@@ -259,8 +256,7 @@ public class WorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Thursday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Thursday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay thursday = new WorkDay(id, "Thursday", startHour, endHour, workperiodid);
@@ -278,8 +274,7 @@ public class WorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Friday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Friday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay friday = new WorkDay(id, "Friday", startHour, endHour, workperiodid);
@@ -297,8 +292,7 @@ public class WorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Saturday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Saturday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay saturday = new WorkDay(id, "Saturday", startHour, endHour, workperiodid);
@@ -316,8 +310,7 @@ public class WorkPeriodView extends JFrame {
 		try {
 			if (startHour.trim().isEmpty() || endHour.trim().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Sunday: clock-out time and clock-in time must be defined.");
-			}
-			else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
+			} else if (sdf.parse(startHour + ":00").after(sdf.parse(endHour + ":00"))) {
 				JOptionPane.showMessageDialog(null, "Sunday: clock-out time must be later than clock-in time.");
 			} else {
 				WorkDay sunday = new WorkDay(id, "Sunday", startHour, endHour, workperiodid);
@@ -337,44 +330,44 @@ public class WorkPeriodView extends JFrame {
 	 */
 	private BigInteger createWorkPeriod() {
 		// ID
-				BigInteger id = generateID();
+		BigInteger id = generateID();
 
-				// startDate
-				String startDate = getTxtFirstDay().getText();
-				String endDate = getTxtLastDay().getText();
+		// startDate
+		String startDate = getTxtFirstDay().getText();
+		String endDate = getTxtLastDay().getText();
 
-				//esta bien
+		// esta bien
 
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				java.util.Date start = null;
-				java.util.Date end = null;
-				java.sql.Date startSQL = null;
-				java.sql.Date endSQL = null;
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		java.util.Date start = null;
+		java.util.Date end = null;
+		java.sql.Date startSQL = null;
+		java.sql.Date endSQL = null;
 
-				try {
-					start = format.parse(startDate + " 00:00:00");
-					System.out.println("  start: " + start);
-					end = format.parse(endDate + " 00:00:00");
-					System.out.println("  end: " + end);
+		try {
+			start = format.parse(startDate + " 00:00:00");
+			System.out.println("  start: " + start);
+			end = format.parse(endDate + " 00:00:00");
+			System.out.println("  end: " + end);
 
-					startSQL = new java.sql.Date(start.getTime());
-					System.out.println("  startsql: " + startSQL);
+			startSQL = new java.sql.Date(start.getTime());
+			System.out.println("  startsql: " + startSQL);
 
-					endSQL = new java.sql.Date(end.getTime());
-					System.out.println("  endsql: " + endSQL);
+			endSQL = new java.sql.Date(end.getTime());
+			System.out.println("  endsql: " + endSQL);
 
-				} catch (ParseException e) {
-					JOptionPane.showMessageDialog(null, "The format of the date is not correct.");
-				}
+		} catch (ParseException e) {
+			JOptionPane.showMessageDialog(null, "The format of the date is not correct.");
+		}
 
-				// id_doctor
-				BigInteger id_doctor = iw.getSelectedDoctor().getId();
+		// id_doctor
+		BigInteger id_doctor = iw.getSelectedDoctor().getId();
 
-				if (startSQL != null && endSQL != null) {
-					wp = new WorkPeriod(id, startSQL, endSQL, id_doctor);
-				}
+		if (startSQL != null && endSQL != null) {
+			wp = new WorkPeriod(id, startSQL, endSQL, id_doctor);
+		}
 
-				return id;
+		return id;
 	}
 
 	public static BigInteger generateID() {
@@ -621,7 +614,7 @@ public class WorkPeriodView extends JFrame {
 
 	private JLabel getLblFirstDay() {
 		if (lblFirstDay == null) {
-			lblFirstDay = new JLabel("First day of work period (dd/mm/yyyy)");
+			lblFirstDay = new JLabel("First day of work period (yyyy-mm-dd)");
 			lblFirstDay.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		}
 		return lblFirstDay;
@@ -637,7 +630,7 @@ public class WorkPeriodView extends JFrame {
 
 	private JLabel getLblLastDay() {
 		if (lblLastDay == null) {
-			lblLastDay = new JLabel("Last day of work period (dd/mm/yyyy)");
+			lblLastDay = new JLabel("Last day of work period (yyyy-mm-dd)");
 			lblLastDay.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		}
 		return lblLastDay;
@@ -679,7 +672,7 @@ public class WorkPeriodView extends JFrame {
 			btnDoctor = new JButton("Choose doctor");
 			btnDoctor.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					iw = new IdentificationWindow();
+					iw = new IdentificationWindowView();
 					iw.setVisible(true);
 					iw.setLocationRelativeTo(null);
 				}
