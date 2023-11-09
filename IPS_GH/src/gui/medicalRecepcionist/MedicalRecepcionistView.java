@@ -92,9 +92,8 @@ public class MedicalRecepcionistView extends JFrame {
 	private boolean officeChoosed = false;
 
 	private boolean dateChoosed = false;
-	
-	private SelectDate selectDate;
 
+	private SelectDate selectDate;
 
 	/**
 	 * Launch the application.
@@ -159,7 +158,6 @@ public class MedicalRecepcionistView extends JFrame {
 	private JButton btnSeeFreeHours;
 	private JScrollPane scrollPane;
 	private JTextArea txtFreeHours;
-
 
 	/**
 	 * Create the frame.
@@ -835,7 +833,6 @@ public class MedicalRecepcionistView extends JFrame {
 		return btnReset;
 	}
 
-
 	private JDateChooser getDateChooser_1() {
 		if (dateChooser == null) {
 			dateChooser = new JDateChooser();
@@ -1091,6 +1088,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return btnFilterSurname;
 	}
+
 	private JLabel getLblSurnameDoctor() {
 		if (lblSurnameDoctor == null) {
 			lblSurnameDoctor = new JLabel("By surname:");
@@ -1098,6 +1096,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return lblSurnameDoctor;
 	}
+
 	private JTextField getTextFieldSurnameDoctor() {
 		if (textFieldSurnameDoctor == null) {
 			textFieldSurnameDoctor = new JTextField();
@@ -1105,13 +1104,15 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return textFieldSurnameDoctor;
 	}
+
 	private JButton getBtnSurnameDoctor() {
 		if (btnSurnameDoctor == null) {
 			btnSurnameDoctor = new JButton("Filter");
 			btnSurnameDoctor.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					DefaultListModel<Doctor> filteredBySurname = new DefaultListModel<>();
-					if (!getTextFieldSurnameDoctor().getText().isBlank() && !getTextFieldSurnameDoctor().getText().isEmpty()) {
+					if (!getTextFieldSurnameDoctor().getText().isBlank()
+							&& !getTextFieldSurnameDoctor().getText().isEmpty()) {
 						for (int i = 0; i < patients.getSize(); i++) {
 							if ((doctors.get(i).getSurname().contains(getTextFieldSurname().getText()))) {
 								filteredBySurname.addElement(doctors.get(i));
@@ -1130,6 +1131,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return btnSurnameDoctor;
 	}
+
 	private JLabel getLblDNI() {
 		if (lblDNI == null) {
 			lblDNI = new JLabel("By DNI:");
@@ -1137,6 +1139,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return lblDNI;
 	}
+
 	private JTextField getTextFieldDni() {
 		if (textFieldDni == null) {
 			textFieldDni = new JTextField();
@@ -1144,6 +1147,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return textFieldDni;
 	}
+
 	private JButton getBtnDNI() {
 		if (btnDNI == null) {
 			btnDNI = new JButton("Filter");
@@ -1190,21 +1194,28 @@ public class MedicalRecepcionistView extends JFrame {
 
 		Date today = new Date(calendar.getTimeInMillis());
 
-		calendar.setTime(today);
-		calendar.set(Calendar.HOUR_OF_DAY, 00); 
-		calendar.set(Calendar.MINUTE, 01);
-		today.setTime(calendar.getTimeInMillis());
-		String start = today.toString();
+//		calendar.setTime(today);
+//		calendar.set(Calendar.HOUR_OF_DAY, 00); 
+//		calendar.set(Calendar.MINUTE, 01);
+//		today.setTime(calendar.getTimeInMillis());
+//		String start = today.toString();
+//		
+//		calendar.setTime(today);
+//		calendar.set(Calendar.HOUR_OF_DAY, 23); 
+//		calendar.set(Calendar.MINUTE, 59);
+//		today.setTime(calendar.getTimeInMillis());
+//		String end = today.toString();
+
+		Date tdy = new Date(System.currentTimeMillis());
+		java.sql.Date sqlDate = new java.sql.Date(tdy.getTime());
 		
-		calendar.setTime(today);
-		calendar.set(Calendar.HOUR_OF_DAY, 23); 
-		calendar.set(Calendar.MINUTE, 59);
-		today.setTime(calendar.getTimeInMillis());
-		String end = today.toString();
+		String date = sqlDate.toString();
+		
+		System.out.println(sqlDate);
 
 		String text = "";
 		try {
-			text = ConnectionFactory.getFreeHours(officeId, start, end);
+			text = ConnectionFactory.getFreeHours(officeId, date, date);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -1215,6 +1226,7 @@ public class MedicalRecepcionistView extends JFrame {
 		getTxtFreeHours().setText(text);
 
 	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -1222,6 +1234,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return scrollPane;
 	}
+
 	private JTextArea getTxtFreeHours() {
 		if (txtFreeHours == null) {
 			txtFreeHours = new JTextArea();

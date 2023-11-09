@@ -368,14 +368,14 @@ public class EditAppointmentView extends JFrame {
 			}
 			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
-				ConnectionFactory.updateAppointment(id, p.getId(), listDoctor.getSelectedValue().getId(),
+				ConnectionFactory.updateAppointment(id, listDoctor.getSelectedValue().getId(), p.getId(), 
 						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom() + ":00",
 						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo() + ":00", 1,
 						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 
 			} else {
-				ConnectionFactory.updateAppointment(id, p.getId(), listDoctor.getSelectedValue().getId(),
+				ConnectionFactory.updateAppointment(id,  listDoctor.getSelectedValue().getId(),p.getId(),
 						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom() + ":00",
 						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo() + ":00", 0,
 						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
