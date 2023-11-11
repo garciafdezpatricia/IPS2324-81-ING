@@ -147,6 +147,10 @@ public class DoctorAppointmentView extends JFrame {
 	private JPanel pnMedicalRecord;
 	private JButton btnMedicalRecord;
 	private MedicalRecordView medicalRecord;
+	private JLabel lblSearchCode;
+	private JTextField txtDiagnosisCode;
+	private JButton btnSearch;
+	private JLabel lblNoDiagnosis;
 	/**
 	 * Launch the application.
 	 */
@@ -185,7 +189,7 @@ public class DoctorAppointmentView extends JFrame {
 		});
 		this.appointment = appointment;
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 668, 603);
+		setBounds(100, 100, 668, 626);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		try {
@@ -506,6 +510,10 @@ public class DoctorAppointmentView extends JFrame {
 			pnDiagnosis.add(getBtnRemoveDiagnosis());
 			pnDiagnosis.add(getLblFinalDiagnosis());
 			pnDiagnosis.add(getScrollPane_9());
+			pnDiagnosis.add(getLblSearchCode());
+			pnDiagnosis.add(getTxtDiagnosisCode());
+			pnDiagnosis.add(getBtnSearch());
+			pnDiagnosis.add(getLblNoDiagnosis());
 		}
 		return pnDiagnosis;
 	}
@@ -1012,7 +1020,7 @@ public class DoctorAppointmentView extends JFrame {
 					}
 				}
 			});
-			btnAddDiagnosis.setBounds(403, 186, 89, 23);
+			btnAddDiagnosis.setBounds(538, 194, 89, 23);
 		}
 		return btnAddDiagnosis;
 	}
@@ -1032,7 +1040,7 @@ public class DoctorAppointmentView extends JFrame {
 					}
 				}
 			});
-			btnRemoveDiagnosis.setBounds(502, 186, 89, 23);
+			btnRemoveDiagnosis.setBounds(439, 194, 89, 23);
 		}
 		return btnRemoveDiagnosis;
 	}
@@ -1054,7 +1062,7 @@ public class DoctorAppointmentView extends JFrame {
 		if (scrollPane_9 == null) {
 			scrollPane_9 = new JScrollPane();
 			scrollPane_9.setEnabled(true);
-			scrollPane_9.setBounds(345, 11, 282, 151);
+			scrollPane_9.setBounds(345, 98, 282, 85);
 			scrollPane_9.setViewportView(getTxtAreaDiagnosisDescription());
 		}
 		return scrollPane_9;
@@ -1128,5 +1136,59 @@ public class DoctorAppointmentView extends JFrame {
 			});
 		}
 		return btnMedicalRecord;
+	}
+	private JLabel getLblSearchCode() {
+		if (lblSearchCode == null) {
+			lblSearchCode = new JLabel("Search diagnosis code:");
+			lblSearchCode.setBounds(345, 13, 136, 14);
+		}
+		return lblSearchCode;
+	}
+	private JTextField getTxtDiagnosisCode() {
+		if (txtDiagnosisCode == null) {
+			txtDiagnosisCode = new JTextField();
+			txtDiagnosisCode.setBounds(345, 35, 114, 30);
+			txtDiagnosisCode.setColumns(10);
+		}
+		return txtDiagnosisCode;
+	}
+	private JButton getBtnSearch() {
+		if (btnSearch == null) {
+			btnSearch = new JButton("Search");
+			btnSearch.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					// get the diagnosis code from the txt field
+					String code = getTxtDiagnosisCode().getText();
+					// search for the diagnosis in the db
+					
+					Diagnosis search = ConnectionFactory.getDiagnosis(code);
+					// if there is a result show it
+					if (search.code != null) {
+						// remove warning 
+						getLblNoDiagnosis().setVisible(false);
+						// show it in the description area
+						getTxtAreaDiagnosisDescription().setText("Code: " + search.code + "\n"
+                				+ "Name: " + search.description.toLowerCase() + "\n"
+                				+ "Description: " + search.longDescription.toLowerCase());
+					}
+					// else show label "no results for this search"
+					else {
+						getLblNoDiagnosis().setVisible(true);
+						getTxtAreaDiagnosisDescription().setText("");
+					}					
+				}
+			});
+			btnSearch.setBounds(487, 39, 89, 23);
+		}
+		return btnSearch;
+	}
+	private JLabel getLblNoDiagnosis() {
+		if (lblNoDiagnosis == null) {
+			lblNoDiagnosis = new JLabel("No diagnosis found for this code!");
+			lblNoDiagnosis.setForeground(Color.RED);
+			lblNoDiagnosis.setBounds(345, 73, 282, 14);
+			lblNoDiagnosis.setVisible(false);
+		}
+		return lblNoDiagnosis;
 	}
 }
