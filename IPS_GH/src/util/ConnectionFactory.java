@@ -918,6 +918,9 @@ public class ConnectionFactory {
 					endHour = resultSet2.getString("endhour");
 
 				}
+				if(id==null) {
+					return "The doctor do not have a workperiod assigned yet";
+				}
 				workday = new WorkDay(id.toBigInteger(), weekday, startHour, endHour, wpid.toBigInteger());
 
 				if (workday == null) {

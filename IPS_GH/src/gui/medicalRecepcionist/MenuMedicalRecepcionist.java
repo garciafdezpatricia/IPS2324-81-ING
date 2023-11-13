@@ -34,6 +34,7 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JButton btnAssignWorkPeriod;
 	private JButton btnEditWp;
 	private JButton btnEditAndCancel;
+	private JButton btnProgram;
 
 	/**
 	 * Launch the application.
@@ -96,12 +97,13 @@ public class MenuMedicalRecepcionist extends JFrame {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
 
-			panelButtons.setLayout(new GridLayout(0, 2, 0, 0));
+			panelButtons.setLayout(new GridLayout(0, 3, 0, 0));
 			panelButtons.add(getBtnEditAndCancel());
 
 			panelButtons.add(getBtnCreateApp());
 			panelButtons.add(getBtnAssignWorkPeriod());
 			panelButtons.add(getBtnEditWp());
+			panelButtons.add(getBtnProgram());
 		}
 		return panelButtons;
 	}
@@ -216,4 +218,14 @@ public class MenuMedicalRecepcionist extends JFrame {
 		return btnEditAndCancel;
 	}
 
+	private JButton getBtnProgram() {
+		if (btnProgram == null) {
+			btnProgram = new JButton("Program Appointment with a specialit");
+			btnProgram.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+				}
+			});
+		}
+		return btnProgram;
+	}
 }
