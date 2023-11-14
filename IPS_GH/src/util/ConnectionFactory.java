@@ -25,6 +25,7 @@ import db.ICDChapter;
 import db.ICDSubchapter;
 import db.Office;
 import db.Patient;
+import db.Procedure;
 import db.WorkDay;
 import db.WorkPeriod;
 
@@ -38,6 +39,88 @@ public class ConnectionFactory {
 		String DB_PASSWORD = "LyQmZ7HwG4edJ2";// Encontrar manera de esconder contraseña
 		return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
 
+	}
+	
+	public static boolean addProceduresToAppointment(AppointmentBLDto appointment, List<String> listOfProcedures) {
+		boolean result = false;
+		String procedures = String.join("-", listOfProcedures);
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			String insertQuery = "INSERT INTO PROCEDURES (PATIENTID, DOCTORID, APPOINTMENTID, PROCEDURESINFO) "
+					+ "VALUES (?, ?, ?, ?)";
+			// Crear una sentencia SQL
+			PreparedStatement statement = connection.prepareStatement(insertQuery);
+			// Ejecutar una consulta SQL
+
+			statement.setBigDecimal(1, new BigDecimal(appointment.patientid));
+			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
+			statement.setBigDecimal(3, new BigDecimal(appointment.id));
+			statement.setString(4, procedures);
+			result = statement.executeUpdate() > 0 ? true : false;
+			// Cerrar la conexión
+			statement.close();
+			connection.close();
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public static boolean addCausesToAppointment(AppointmentBLDto appointment, List<String> causesOfAppointment) {
+		boolean result = false;
+		String causes = String.join("-", causesOfAppointment);
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			String insertQuery = "INSERT INTO CAUSES (PATIENTID, DOCTORID, APPOINTMENTID, CAUSEINFO) "
+					+ "VALUES (?, ?, ?, ?)";
+			// Crear una sentencia SQL
+			PreparedStatement statement = connection.prepareStatement(insertQuery);
+			// Ejecutar una consulta SQL
+
+			statement.setBigDecimal(1, new BigDecimal(appointment.patientid));
+			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
+			statement.setBigDecimal(3, new BigDecimal(appointment.id));
+			statement.setString(4, causes);
+			result = statement.executeUpdate() > 0 ? true : false;
+			// Cerrar la conexión
+			statement.close();
+			connection.close();
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public static Procedure getProcedure(String code) {
+		Procedure proce = new Procedure();
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM ICD10PROCEDURES WHERE CODE LIKE '" + code + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String theCode = resultSet.getString("CODE");
+				String desc = resultSet.getString("DESCRIPTION");
+				// Procesa otros campos según la estructura de tu tabla
+				proce.code = theCode;
+				proce.description = desc;
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return proce;
 	}
 
 	public static Diagnosis getDiagnosis(String code) {
@@ -101,6 +184,35 @@ public class ConnectionFactory {
 		return diagnosis;
 	}
 
+	public static List<Procedure> getProcedures(String from, String to) {
+		List<Procedure> procedures = new ArrayList<Procedure>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM ICD10PROCEDURES WHERE CODE between '" + from.toUpperCase() + "' AND '"
+					+ to.toUpperCase() + "' ORDER BY CODE ASC";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String code = resultSet.getString("CODE");
+				String description = resultSet.getString("DESCRIPTION");
+				// Procesa otros campos según la estructura de tu tabla
+				procedures.add(new Procedure(code, description));
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return procedures;
+	}
+
 	public static List<Diagnosis> getDiagnosis(String from, int numDigits) {
 		List<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
 
@@ -159,6 +271,70 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 		return chapters;
+	}
+
+	public static List<ICDChapter> getProcedureChapters() {
+		List<ICDChapter> chapters = new ArrayList<ICDChapter>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM ICD10PROCEDURECHAPTERS ORDER BY CODE ASC";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String chapter = resultSet.getString("CODE");
+				String description = resultSet.getString("DESCRIPTION");
+				String from = resultSet.getString("from");
+				String to = resultSet.getString("to");
+				// Procesa otros campos según la estructura de tu tabla
+				chapters.add(new ICDChapter(chapter, description, from, to));
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return chapters;
+	}
+
+	public static List<ICDSubchapter> getProcedureSubchapters(String from, String to) {
+		List<ICDSubchapter> subchapters = new ArrayList<ICDSubchapter>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			String sql = "";
+			// Ejecutar una consulta SQL
+			if (from.equals(to)) {
+				sql = "SELECT * FROM ICD10PROCEDURESUBCHAPTERS WHERE CODE LIKE '" + from + "'";
+			} else
+				sql = "SELECT * FROM ICD10PROCEDURESUBCHAPTERS WHERE CODE BETWEEN '" + from + "' AND '" + to + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String sections = resultSet.getString("CODE");
+				String description = resultSet.getString("DESCRIPTION");
+				String from1 = resultSet.getString("DESDE");
+				String to1 = resultSet.getString("HASTA");
+				// Procesa otros campos según la estructura de tu tabla
+				subchapters.add(new ICDSubchapter(sections, description, from1, to1));
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return subchapters;
 	}
 
 	public static List<ICDSubchapter> getSubchapters(String from, String to) {
@@ -860,6 +1036,7 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
+
 	@SuppressWarnings("unused")
 	public static String getFreeHours(List<Doctor> doctors, Date day) throws Exception {
 		String res = "";
@@ -1339,8 +1516,7 @@ public class ConnectionFactory {
 		ResultSet rs = null;
 		try {
 			con = getOracleConnection();
-			ps = con.prepareStatement(
-					"SELECT *FROM (APPOINTMENT JOIN PATIENT on appointment.patientid = "
+			ps = con.prepareStatement("SELECT *FROM (APPOINTMENT JOIN PATIENT on appointment.patientid = "
 					+ "patient.id ) JOIN DOCTOR ON appointment.doctorid = doctor.id WHERE patientid=?");
 			ps.setInt(1, pid);
 			rs = ps.executeQuery();
@@ -2098,14 +2274,13 @@ public class ConnectionFactory {
 			while (resultSet.next()) {
 				BigDecimal idBD = resultSet.getBigDecimal("id");
 				BigInteger id = idBD.toBigInteger();
-				
+
 				BigDecimal patientIdBD = resultSet.getBigDecimal("patientid");
 				BigInteger patientId = patientIdBD.toBigInteger();
-				
+
 				BigDecimal doctorIdBD = resultSet.getBigDecimal("doctorid");
 				BigInteger doctorId = doctorIdBD.toBigInteger();
-				
-				
+
 				String startdate = resultSet.getString("startdate");
 				String endate = resultSet.getString("enddate");
 				int urgency = resultSet.getInt("urgency");
@@ -2196,14 +2371,13 @@ public class ConnectionFactory {
 		while (resultSet.next()) {
 			BigDecimal idBD = resultSet.getBigDecimal("id");
 			BigInteger id = idBD.toBigInteger();
-			
+
 			BigDecimal patientIdBD = resultSet.getBigDecimal("patientid");
 			BigInteger patientId = patientIdBD.toBigInteger();
-			
+
 			BigDecimal doctorIdBD = resultSet.getBigDecimal("doctorid");
 			BigInteger doctorId = doctorIdBD.toBigInteger();
-			
-			
+
 			String startdate = resultSet.getString("startdate");
 			String endate = resultSet.getString("enddate");
 			int urgency = resultSet.getInt("urgency");
@@ -2261,8 +2435,7 @@ public class ConnectionFactory {
 							&& cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
 							&& cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)) {
 
-						
-								res += "\t" + dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+						res += "\t" + dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes() + " to "
 								+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
 								+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + "\n";
