@@ -223,6 +223,16 @@ public class MenuMedicalRecepcionist extends JFrame {
 			btnProgram = new JButton("Program Appointment with a specialit");
 			btnProgram.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					ProgramAppointmentWithSpecialist editWp;
+					try {
+						editWp = new ProgramAppointmentWithSpecialist();
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 		}
