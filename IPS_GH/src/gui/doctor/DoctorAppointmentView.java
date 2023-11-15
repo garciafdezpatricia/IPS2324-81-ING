@@ -28,6 +28,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -64,7 +65,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JPanel contentPane;
 	private JPanel patientInfoPanel;
 	private JPanel buttonsPanel;
-	private JButton btnExit;
+	private JButton btnBack;
 	private JButton btnSave;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private CausesCreator causesCreator;
@@ -178,6 +179,7 @@ public class DoctorAppointmentView extends JFrame {
 				try {
 					DoctorAppointmentView frame = new DoctorAppointmentView(null);
 					frame.setVisible(true);
+					frame.setLocationRelativeTo(null);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -251,10 +253,15 @@ public class DoctorAppointmentView extends JFrame {
 	}
 
 	private JButton getBtnExit() {
-		if (btnExit == null) {
-			btnExit = new JButton("Exit");
+		if (btnBack == null) {
+			btnBack = new JButton("Back");
+			btnBack.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
 		}
-		return btnExit;
+		return btnBack;
 	}
 
 	private JButton getBtnSave() {
@@ -272,15 +279,64 @@ public class DoctorAppointmentView extends JFrame {
 					appointment.checkOut = txtCheckoutTime.getText();
 					List<String> causes = getFinalCauses();
 					List<String> procedures = getFinalProcedures();
+					List<String> diagnosis = getFinalDiagnosis();
+					List<String> prescriptions = getFinalPrescriptions();
+					List<String> vaccines = getFinalVaccines();
+					// save causes, procedures, diagnosis, prescriptions and vaccines into the db
 					ConnectionFactory.updateAppointment(appointment);
+					boolean causesSaved = true;
+					boolean procSaved = true;
+					boolean diagnSaved = true;
+					boolean prescrSaved = true;
+					boolean vaccinesSaved = true;
 					if (!causes.isEmpty())
-						System.out.println(ConnectionFactory.addCausesToAppointment(appointment, causes));
+						causesSaved = ConnectionFactory.addCausesToAppointment(appointment, causes);
 					if (!procedures.isEmpty())
-						System.out.println(ConnectionFactory.addProceduresToAppointment(appointment, procedures));
+						procSaved = ConnectionFactory.addProceduresToAppointment(appointment, procedures);
+					if (!diagnosis.isEmpty())
+						diagnSaved = ConnectionFactory.addDiagnosisToAppointment(appointment, diagnosis);
+					if (!prescriptions.isEmpty())
+						prescrSaved = ConnectionFactory.addPrescriptionsToAppointment(appointment, prescriptions);
+					if (!vaccines.isEmpty())
+						vaccinesSaved = ConnectionFactory.addVaccinesToAppointment(appointment, vaccines);
+					
+					if (causesSaved && procSaved && diagnSaved && prescrSaved && vaccinesSaved)
+						JOptionPane.showMessageDialog(DoctorAppointmentView.this, "Data correctly saved", "Success", JOptionPane.INFORMATION_MESSAGE);
+					else
+						JOptionPane.showMessageDialog(DoctorAppointmentView.this, "Some data could not be saved", "Warning", JOptionPane.INFORMATION_MESSAGE);
 				}
 			});
 		}
 		return btnSave;
+	}
+	
+	private List<String> getFinalVaccines() {
+		List<String> vaccines = new ArrayList<String>();
+		for (int i = 0; i < finalPrescription.getSize(); i++) {
+			String item = finalPrescription.getElementAt(i);
+		    if (item.contains("vaccine"))
+		    	vaccines.add(item);
+		}
+		return vaccines;
+	}
+	
+	private List<String> getFinalPrescriptions() {
+		List<String> prescriptions = new ArrayList<String>();
+		for (int i = 0; i < finalPrescription.getSize(); i++) {
+			String item = finalPrescription.getElementAt(i);
+		    if (!item.contains("vaccine"))
+		    	prescriptions.add(item);
+		}
+		return prescriptions;
+	}
+	
+	private List<String> getFinalDiagnosis() {
+		DefaultListModel<String> model = (DefaultListModel<String>) this.selectedDiagnosisList.getModel();
+		List<String> diagnosis = new ArrayList<String>();
+		for (int i = 0; i < model.getSize(); i++) {
+		    diagnosis.add(model.getElementAt(i));
+		}
+		return diagnosis;
 	}
 	
 	private List<String> getFinalProcedures() {
@@ -791,9 +847,8 @@ public class DoctorAppointmentView extends JFrame {
 					String interval = getTxtInterval().getText();
 					String duration = getTextField_2_1().getText();
 					String comments = getTxtAreaComments().getText();
-					String medication = "Medication: " + selMed + ". Quantity: " + quantity +
-							". Interval: " + interval + ". Duration: " + duration + ". Comments: "
-							+ comments;
+					String medication = selMed + ": " + quantity + " " + interval + " " + duration + 
+							". Comments: " + comments;
 					finalPrescription.addElement(medication);
 				}
 			});

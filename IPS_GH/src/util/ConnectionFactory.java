@@ -40,10 +40,92 @@ public class ConnectionFactory {
 		return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
 
 	}
+
+	public static boolean addVaccinesToAppointment(AppointmentBLDto appointment, List<String> listOfVaccines) {
+		boolean result = false;
+		String vaccines = String.join("||", listOfVaccines);
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			String insertQuery = "INSERT INTO VACCINES (PATIENTID, DOCTORID, APPOINTMENTID, VACCINEINFO) "
+					+ "VALUES (?, ?, ?, ?)";
+			// Crear una sentencia SQL
+			PreparedStatement statement = connection.prepareStatement(insertQuery);
+			// Ejecutar una consulta SQL
+
+			statement.setBigDecimal(1, new BigDecimal(appointment.patientid));
+			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
+			statement.setBigDecimal(3, new BigDecimal(appointment.id));
+			statement.setString(4, vaccines);
+			result = statement.executeUpdate() > 0 ? true : false;
+			// Cerrar la conexión
+			statement.close();
+			connection.close();
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static boolean addPrescriptionsToAppointment(AppointmentBLDto appointment, List<String> listOfPrescriptions) {
+		boolean result = false;
+		String prescriptions = String.join("||", listOfPrescriptions);
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			String insertQuery = "INSERT INTO PRESCRIPTION (PATIENTID, DOCTORID, APPOINTMENTID, PRESCRIPTIONINFO) "
+					+ "VALUES (?, ?, ?, ?)";
+			// Crear una sentencia SQL
+			PreparedStatement statement = connection.prepareStatement(insertQuery);
+			// Ejecutar una consulta SQL
+
+			statement.setBigDecimal(1, new BigDecimal(appointment.patientid));
+			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
+			statement.setBigDecimal(3, new BigDecimal(appointment.id));
+			statement.setString(4, prescriptions);
+			result = statement.executeUpdate() > 0 ? true : false;
+			// Cerrar la conexión
+			statement.close();
+			connection.close();
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static boolean addDiagnosisToAppointment(AppointmentBLDto appointment, List<String> listOfDiagnosis) {
+		boolean result = false;
+		String diagnosis = String.join("||", listOfDiagnosis);
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			String insertQuery = "INSERT INTO DIAGNOSIS (PATIENTID, DOCTORID, INITDATE, APPOINTMENTID, DIAGNOSIS) "
+					+ "VALUES (?, ?, ?, ?, ?)";
+			// Crear una sentencia SQL
+			PreparedStatement statement = connection.prepareStatement(insertQuery);
+			// Ejecutar una consulta SQL
+
+			statement.setBigDecimal(1, new BigDecimal(appointment.patientid));
+			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
+			statement.setString(3, appointment.startDate);
+			statement.setBigDecimal(4, new BigDecimal(appointment.id));
+			statement.setString(5, diagnosis);
+			result = statement.executeUpdate() > 0 ? true : false;
+			// Cerrar la conexión
+			statement.close();
+			connection.close();
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 	
 	public static boolean addProceduresToAppointment(AppointmentBLDto appointment, List<String> listOfProcedures) {
 		boolean result = false;
-		String procedures = String.join("-", listOfProcedures);
+		String procedures = String.join("||", listOfProcedures);
 		try {
 			// Establecer la conexión
 			Connection connection = ConnectionFactory.getOracleConnection();
@@ -70,7 +152,7 @@ public class ConnectionFactory {
 
 	public static boolean addCausesToAppointment(AppointmentBLDto appointment, List<String> causesOfAppointment) {
 		boolean result = false;
-		String causes = String.join("-", causesOfAppointment);
+		String causes = String.join("||", causesOfAppointment);
 		try {
 			// Establecer la conexión
 			Connection connection = ConnectionFactory.getOracleConnection();
