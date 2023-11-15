@@ -70,6 +70,7 @@ public class MedicalRecordView extends JFrame {
 				try {
 					MedicalRecordView frame = new MedicalRecordView(1);
 					frame.setVisible(true);
+					frame.setLocationRelativeTo(null);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

@@ -28,6 +28,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -53,6 +54,7 @@ import creator.CausesCreator;
 import db.Diagnosis;
 import db.ICDChapter;
 import db.ICDSubchapter;
+import db.Procedure;
 import gui.medicalRecord.MedicalRecordView;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
@@ -63,7 +65,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JPanel contentPane;
 	private JPanel patientInfoPanel;
 	private JPanel buttonsPanel;
-	private JButton btnExit;
+	private JButton btnBack;
 	private JButton btnSave;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private CausesCreator causesCreator;
@@ -72,7 +74,10 @@ public class DoctorAppointmentView extends JFrame {
 	private DefaultListModel<String> finalPrescription = new DefaultListModel<String>();
 	private String[] vaccines = new String[] {"Covid-19 vaccine", "Tetanos vaccine", "Spanish flu vaccine", "Viruela vaccine", "Other..."};
 	private List<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
+	private List<Procedure> procedures = new ArrayList<Procedure>();
 	private List<ICDChapter> chapters;
+	private List<ICDChapter> procedureChapters;
+	private List<ICDSubchapter> procedureSubchapters = new ArrayList<ICDSubchapter>();
 	private List<ICDSubchapter> subchapters = new ArrayList<ICDSubchapter>();
 	private AppointmentBLDto appointment;
 	private JTabbedPane tabbedPane;
@@ -151,6 +156,20 @@ public class DoctorAppointmentView extends JFrame {
 	private JTextField txtDiagnosisCode;
 	private JButton btnSearch;
 	private JLabel lblNoDiagnosis;
+	private JPanel pnProcedures;
+	private JTree procedureTree;
+	private JScrollPane scrollPane_10;
+	private JList selectedProceduresList;
+	private JScrollPane scrollPane_11;
+	private JLabel lblFinalProcedures;
+	private JButton btnAddProcedure;
+	private JButton btnRemoveProcedure;
+	private JTextArea txtAreaProcedureDescription;
+	private JLabel lblNoProcedureResults;
+	private JScrollPane scrollPane_12;
+	private JTextField txtFieldSearchProcedure;
+	private JButton btnSearchProcedure;
+	private JLabel lblSearchProcedure;
 	/**
 	 * Launch the application.
 	 */
@@ -160,6 +179,7 @@ public class DoctorAppointmentView extends JFrame {
 				try {
 					DoctorAppointmentView frame = new DoctorAppointmentView(null);
 					frame.setVisible(true);
+					frame.setLocationRelativeTo(null);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -233,10 +253,15 @@ public class DoctorAppointmentView extends JFrame {
 	}
 
 	private JButton getBtnExit() {
-		if (btnExit == null) {
-			btnExit = new JButton("Exit");
+		if (btnBack == null) {
+			btnBack = new JButton("Back");
+			btnBack.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
 		}
-		return btnExit;
+		return btnBack;
 	}
 
 	private JButton getBtnSave() {
@@ -252,18 +277,91 @@ public class DoctorAppointmentView extends JFrame {
 						appointment.attended = 2;
 					appointment.checkIn = txtCheckinTime.getText();
 					appointment.checkOut = txtCheckoutTime.getText();
-					//TODO: add causes to DB
+					List<String> causes = getFinalCauses();
+					List<String> procedures = getFinalProcedures();
+					List<String> diagnosis = getFinalDiagnosis();
+					List<String> prescriptions = getFinalPrescriptions();
+					List<String> vaccines = getFinalVaccines();
+					// save causes, procedures, diagnosis, prescriptions and vaccines into the db
 					ConnectionFactory.updateAppointment(appointment);
+					boolean causesSaved = true;
+					boolean procSaved = true;
+					boolean diagnSaved = true;
+					boolean prescrSaved = true;
+					boolean vaccinesSaved = true;
+					if (!causes.isEmpty())
+						causesSaved = ConnectionFactory.addCausesToAppointment(appointment, causes);
+					if (!procedures.isEmpty())
+						procSaved = ConnectionFactory.addProceduresToAppointment(appointment, procedures);
+					if (!diagnosis.isEmpty())
+						diagnSaved = ConnectionFactory.addDiagnosisToAppointment(appointment, diagnosis);
+					if (!prescriptions.isEmpty())
+						prescrSaved = ConnectionFactory.addPrescriptionsToAppointment(appointment, prescriptions);
+					if (!vaccines.isEmpty())
+						vaccinesSaved = ConnectionFactory.addVaccinesToAppointment(appointment, vaccines);
+					
+					if (causesSaved && procSaved && diagnSaved && prescrSaved && vaccinesSaved)
+						JOptionPane.showMessageDialog(DoctorAppointmentView.this, "Data correctly saved", "Success", JOptionPane.INFORMATION_MESSAGE);
+					else
+						JOptionPane.showMessageDialog(DoctorAppointmentView.this, "Some data could not be saved", "Warning", JOptionPane.INFORMATION_MESSAGE);
 				}
 			});
 		}
 		return btnSave;
+	}
+	
+	private List<String> getFinalVaccines() {
+		List<String> vaccines = new ArrayList<String>();
+		for (int i = 0; i < finalPrescription.getSize(); i++) {
+			String item = finalPrescription.getElementAt(i);
+		    if (item.contains("vaccine"))
+		    	vaccines.add(item);
+		}
+		return vaccines;
+	}
+	
+	private List<String> getFinalPrescriptions() {
+		List<String> prescriptions = new ArrayList<String>();
+		for (int i = 0; i < finalPrescription.getSize(); i++) {
+			String item = finalPrescription.getElementAt(i);
+		    if (!item.contains("vaccine"))
+		    	prescriptions.add(item);
+		}
+		return prescriptions;
+	}
+	
+	private List<String> getFinalDiagnosis() {
+		DefaultListModel<String> model = (DefaultListModel<String>) this.selectedDiagnosisList.getModel();
+		List<String> diagnosis = new ArrayList<String>();
+		for (int i = 0; i < model.getSize(); i++) {
+		    diagnosis.add(model.getElementAt(i));
+		}
+		return diagnosis;
+	}
+	
+	private List<String> getFinalProcedures() {
+		DefaultListModel<String> model = (DefaultListModel<String>) selectedProceduresList.getModel();
+		List<String> procedures = new ArrayList<String>();
+		for (int i = 0; i < model.getSize(); i++) {
+		    procedures.add(model.getElementAt(i));
+		}
+		return procedures;
+	}
+	
+	private List<String> getFinalCauses() {
+		DefaultListModel<String> model = (DefaultListModel<String>) listSelectedCauses.getModel();
+		List<String> causes = new ArrayList<String>();
+		for (int i = 0; i < model.getSize(); i++) {
+		    causes.add(model.getElementAt(i));
+		}
+		return causes;
 	}
 
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			tabbedPane.addTab("Appointment causes", null, getAppointmentOptionsPanel_1(), null);
+			tabbedPane.addTab("Procedures", null, getPnProcedures(), null);
 			tabbedPane.addTab("Diagnosis", null, getPnDiagnosis(), null);
 			tabbedPane.addTab("Prescription", null, getPnPrescription(), null);
 		}
@@ -341,7 +439,7 @@ public class DoctorAppointmentView extends JFrame {
 	}
 	private JLabel getLblSelectedCauses_1() {
 		if (lblSelectedCauses == null) {
-			lblSelectedCauses = new JLabel("Selected cause(s):");
+			lblSelectedCauses = new JLabel("Final cause(s):");
 			lblSelectedCauses.setBounds(380, 41, 217, 14);
 		}
 		return lblSelectedCauses;
@@ -562,9 +660,9 @@ public class DoctorAppointmentView extends JFrame {
 	                			if (chapter.description.equals(selectedNode.getUserObject())) {
 	                				from = chapter.from;
 	                				to = chapter.to;
-	                				getTxtAreaDiagnosisDescription().setText("Chapter: " +chapter.cardinality + "\n"
-	                						+ "Description: " + chapter.description.toLowerCase() + "\n"
-	                						+ "From codes " + chapter.from + " to " + chapter.to
+	                				getTxtAreaDiagnosisDescription().setText(chapter.cardinality + "\n"
+	                						+ chapter.description.toLowerCase() + "\n"
+	                						+ chapter.from + " " + chapter.to
 	                						);
 	                				break;
 	                			}
@@ -596,8 +694,8 @@ public class DoctorAppointmentView extends JFrame {
 	                            String from = input.substring(indexOfOpeningParenthesis + 1, indexOfHyphen);
 	                            // Extrae la parte derecha entre "-" y ")"
 	                            String to = input.substring(indexOfHyphen + 1, indexOfClosingParenthesis);
-	                            getTxtAreaDiagnosisDescription().setText("Subchapter: " + input + "\n"
-	                            		+ "From codes " + from + " to " + to);
+	                            getTxtAreaDiagnosisDescription().setText(input + "\n"
+	                            		+ from + " " + to);
 	                            List<Diagnosis> newdiagnosis = ConnectionFactory.getDiagnosis(from, to);
 	                            diagnosis.addAll(newdiagnosis);
 		                		for (Diagnosis item : newdiagnosis) {
@@ -621,8 +719,8 @@ public class DoctorAppointmentView extends JFrame {
 		                     // Extrae la parte entre "(" y ")"
 	                            String from = input.substring(indexOfOpeningParenthesis + 1, indexOfClosingParenthesis);
 	                            
-	                            getTxtAreaDiagnosisDescription().setText("Subchapter: " + input + "\n"
-	                            		+ "From code " + from);
+	                            getTxtAreaDiagnosisDescription().setText(input + "\n"
+	                            		+ from);
 	                            Diagnosis newdiagnosis = ConnectionFactory.getDiagnosis(from);
 	                            diagnosis.add(newdiagnosis);
 	                			DefaultMutableTreeNode subnode = new 
@@ -640,9 +738,9 @@ public class DoctorAppointmentView extends JFrame {
 	                		// coger el código
 	                		String code = ((String) selectedNode.getUserObject()).split("\t")[0];
 	                		Diagnosis selectedDiag = ConnectionFactory.getDiagnosis(code);
-	                		getTxtAreaDiagnosisDescription().setText("Code: " + selectedDiag.code + "\n"
-	                				+ "Name: " + selectedDiag.description.toLowerCase() + "\n"
-	                				+ "Description: " + selectedDiag.longDescription.toLowerCase());
+	                		getTxtAreaDiagnosisDescription().setText(selectedDiag.code + "\n"
+	                				+ selectedDiag.description.toLowerCase() + "\n"
+	                				+ selectedDiag.longDescription.toLowerCase());
 	                		List<Diagnosis> childDiagnosis = ConnectionFactory.getDiagnosis(code, code.length()+1);
 	                		if (childDiagnosis.size() > 0) {
 	                			diagnosis.addAll(childDiagnosis);
@@ -706,11 +804,20 @@ public class DoctorAppointmentView extends JFrame {
 	    	root.add(node);
 	    }
     }
+	
+	private void loadProcedure() {
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("ICD10 Procedures"); // Nodo raíz
+	    DefaultTreeModel model = new DefaultTreeModel(root);
+	    procedureTree.setModel(model);
+	    
+	    procedureChapters = ConnectionFactory.getProcedureChapters();
+	    
+	    for (ICDChapter item : procedureChapters) {
+	    	DefaultMutableTreeNode node = new DefaultMutableTreeNode(item.description);
+	    	root.add(node);
+	    }
+	}
 
-    private boolean consultaBaseDeDatosParaExpansion(DefaultMutableTreeNode node) {
-        // TODO
-        return false;
-    }
 	private JLabel getLblMedication() {
 		if (lblMedication == null) {
 			lblMedication = new JLabel("Medication:");
@@ -740,9 +847,8 @@ public class DoctorAppointmentView extends JFrame {
 					String interval = getTxtInterval().getText();
 					String duration = getTextField_2_1().getText();
 					String comments = getTxtAreaComments().getText();
-					String medication = "Medication: " + selMed + ". Quantity: " + quantity +
-							". Interval: " + interval + ". Duration: " + duration + ". Comments: "
-							+ comments;
+					String medication = selMed + ": " + quantity + " " + interval + " " + duration + 
+							". Comments: " + comments;
 					finalPrescription.addElement(medication);
 				}
 			});
@@ -1011,11 +1117,14 @@ public class DoctorAppointmentView extends JFrame {
 			btnAddDiagnosis = new JButton("Add");
 			btnAddDiagnosis.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-					if (selectedNode != null) {
-						String title = (String) selectedNode.getUserObject();
+					if (!getTxtAreaDiagnosisDescription().getText().equals("")) {
+						String[] portions = getTxtAreaDiagnosisDescription().getText().split("\n");
+						String diagnosis = "";
+						for (String item : portions) {
+							diagnosis += item + " ";
+						}
 						DefaultListModel m =(DefaultListModel) getSelectedDiagnosisList().getModel();
-						m.addElement(title);
+						m.addElement(diagnosis);
 						getSelectedDiagnosisList().setModel(m);
 					}
 				}
@@ -1167,9 +1276,9 @@ public class DoctorAppointmentView extends JFrame {
 						// remove warning 
 						getLblNoDiagnosis().setVisible(false);
 						// show it in the description area
-						getTxtAreaDiagnosisDescription().setText("Code: " + search.code + "\n"
-                				+ "Name: " + search.description.toLowerCase() + "\n"
-                				+ "Description: " + search.longDescription.toLowerCase());
+						getTxtAreaDiagnosisDescription().setText(search.code + "\n"
+                				+ search.description.toLowerCase() + "\n"
+                				+ search.longDescription.toLowerCase());
 					}
 					// else show label "no results for this search"
 					else {
@@ -1190,5 +1299,240 @@ public class DoctorAppointmentView extends JFrame {
 			lblNoDiagnosis.setVisible(false);
 		}
 		return lblNoDiagnosis;
+	}
+	private JPanel getPnProcedures() {
+		if (pnProcedures == null) {
+			pnProcedures = new JPanel();
+			pnProcedures.setLayout(null);
+			pnProcedures.add(getScrollPane_10());
+			pnProcedures.add(getScrollPane_11());
+			pnProcedures.add(getLblFinalProcedures());
+			pnProcedures.add(getBtnAddProcedure());
+			pnProcedures.add(getBtnRemoveProcedure());
+			pnProcedures.add(getScrollPane_12());
+			pnProcedures.add(getLblNoProcedureResults());
+			pnProcedures.add(getTxtFieldSearchProcedure());
+			pnProcedures.add(getBtnSearchProcedure());
+			pnProcedures.add(getLblSearchProcedure());
+		}
+		return pnProcedures;
+	}
+	private JTree getProcedureTree() {
+		if (procedureTree == null) {
+			procedureTree = new JTree();
+			loadProcedure();
+			procedureTree.addTreeSelectionListener(new TreeSelectionListener() {
+				public void valueChanged(TreeSelectionEvent e) {
+	                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) procedureTree.getLastSelectedPathComponent();
+	                //getTxtAreaDiagnosisDescription().setText("");
+	                if (selectedNode != null && selectedNode.isLeaf()) {
+	                	if (selectedNode.getLevel() ==1) { // if is chapter then expand subchapters
+	                		String from = "", to = "";
+	                		for (ICDChapter chapter : procedureChapters) {
+	                			if (chapter.description.equals(selectedNode.getUserObject())) {
+	                				from = chapter.from;
+	                				to = chapter.to;
+	                				getTxtAreaProcedureDescription().setText(chapter.cardinality + "\n"
+	                						+ chapter.description + "\n"
+	                						+ chapter.from + " " + chapter.to
+	                						);
+	                				break;
+	                			}
+	                		}
+	                		List<ICDSubchapter> newsubchapters = ConnectionFactory.getProcedureSubchapters(from, to);
+	                		procedureSubchapters.addAll(newsubchapters);
+	                		for (ICDSubchapter item : newsubchapters) {
+	                			DefaultMutableTreeNode subnode = new 
+	                					DefaultMutableTreeNode(item.description);
+	                			selectedNode.add(subnode);
+	                			// Notificar al modelo del árbol que la estructura ha cambiado
+		                        DefaultTreeModel model = (DefaultTreeModel) procedureTree.getModel();
+		                        model.nodeStructureChanged(selectedNode);
+		                        // Expandir el nodo seleccionado
+		                        procedureTree.expandPath(new TreePath(selectedNode.getPath()));
+	                		}
+	                	}
+	                	// if it is subchapter expand procedures
+	                	else if (selectedNode.getLevel() == 2) {
+	                		String from = "", to = "";
+	                		for (ICDSubchapter subchapter : procedureSubchapters) {
+	                			if (subchapter.description.equals(selectedNode.getUserObject())) {
+	                				from = subchapter.from;
+	                				to = subchapter.to;
+	                				getTxtAreaProcedureDescription().setText(subchapter.sections + "\n"
+	                						+ subchapter.description + "\n"
+	                						+ subchapter.from + " " + subchapter.to
+	                						);
+	                				break;
+	                			}
+	                		}
+	                		List<Procedure> nprocedures = ConnectionFactory.getProcedures(from, to);
+	                		procedures.addAll(nprocedures);
+	                		for (Procedure item : nprocedures) {
+	                			DefaultMutableTreeNode subnode = new 
+	                					DefaultMutableTreeNode(item.description);
+	                			selectedNode.add(subnode);
+	                			// Notificar al modelo del árbol que la estructura ha cambiado
+		                        DefaultTreeModel model = (DefaultTreeModel) procedureTree.getModel();
+		                        model.nodeStructureChanged(selectedNode);
+		                        // Expandir el nodo seleccionado
+		                        procedureTree.expandPath(new TreePath(selectedNode.getPath()));
+	                		}
+	                	}
+	                	else if (selectedNode.getLevel() == 3) {
+	                		for (Procedure p : procedures) {
+	                			if (p.description.equals(selectedNode.getUserObject())) {
+	                				getTxtAreaProcedureDescription().setText(p.code + "\n"
+	                						+ p.description);
+	                				break;
+	                			}
+	                		}
+	                	}
+	                }
+				}
+			});
+		}
+		return procedureTree;
+	}
+	
+	private JScrollPane getScrollPane_10() {
+		if (scrollPane_10 == null) {
+			scrollPane_10 = new JScrollPane();
+			scrollPane_10.setBounds(10, 11, 325, 206);
+			scrollPane_10.setViewportView(getProcedureTree());
+		}
+		return scrollPane_10;
+	}
+	
+	private JList getSelectedProceduresList() {
+		if (selectedProceduresList == null) {
+			DefaultListModel<String> model = new DefaultListModel<String>();
+			selectedProceduresList = new JList(model);
+		}
+		return selectedProceduresList;
+	}
+	private JScrollPane getScrollPane_11() {
+		if (scrollPane_11 == null) {
+			scrollPane_11 = new JScrollPane();
+			scrollPane_11.setBounds(10, 267, 617, 95);
+			scrollPane_11.setViewportView(getSelectedProceduresList());
+		}
+		return scrollPane_11;
+	}
+	private JLabel getLblFinalProcedures() {
+		if (lblFinalProcedures == null) {
+			lblFinalProcedures = new JLabel("Final procedures:");
+			lblFinalProcedures.setBounds(10, 242, 131, 14);
+		}
+		return lblFinalProcedures;
+	}
+	private JButton getBtnAddProcedure() {
+		if (btnAddProcedure == null) {
+			btnAddProcedure = new JButton("Add");
+			btnAddProcedure.setBounds(524, 194, 89, 23);
+			btnAddProcedure.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (!getTxtAreaProcedureDescription().getText().equals("")) {
+						String[] portions = getTxtAreaProcedureDescription().getText().split("\n");
+						String procedure = "";
+						for (String item : portions) {
+							procedure += item + " ";
+						}
+						DefaultListModel m =(DefaultListModel) getSelectedProceduresList().getModel();
+						m.addElement(procedure);
+						getSelectedProceduresList().setModel(m);
+					}
+				}
+			});
+		}
+		return btnAddProcedure;
+	}
+	private JButton getBtnRemoveProcedure() {
+		if (btnRemoveProcedure == null) {
+			btnRemoveProcedure = new JButton("Remove");
+			btnRemoveProcedure.setBounds(425, 194, 89, 23);
+			btnRemoveProcedure.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (getSelectedProceduresList().getSelectedValuesList().size() > 0) {
+						DefaultListModel model = (DefaultListModel) getSelectedProceduresList().getModel();
+						List<String> sels = getSelectedProceduresList().getSelectedValuesList();
+						for (String item : sels) {
+							if (model.contains(item))
+								model.removeElement(item);
+						}
+						getSelectedProceduresList().setModel(model);
+					}
+				}
+			});
+		}
+		return btnRemoveProcedure;
+	}
+	private JTextArea getTxtAreaProcedureDescription() {
+		if (txtAreaProcedureDescription == null) {
+			txtAreaProcedureDescription = new JTextArea();
+			txtAreaProcedureDescription.setEditable(false);
+		}
+		return txtAreaProcedureDescription;
+	}
+	private JLabel getLblNoProcedureResults() {
+		if (lblNoProcedureResults == null) {
+			lblNoProcedureResults = new JLabel("No procedures found for this code!");
+			lblNoProcedureResults.setForeground(Color.RED);
+			lblNoProcedureResults.setBounds(345, 73, 234, 14);
+			lblNoProcedureResults.setVisible(false);
+		}
+		return lblNoProcedureResults;
+	}
+	private JScrollPane getScrollPane_12() {
+		if (scrollPane_12 == null) {
+			scrollPane_12 = new JScrollPane();
+			scrollPane_12.setBounds(345, 98, 282, 85);
+			scrollPane_12.setViewportView(getTxtAreaProcedureDescription());
+		}
+		return scrollPane_12;
+	}
+	private JTextField getTxtFieldSearchProcedure() {
+		if (txtFieldSearchProcedure == null) {
+			txtFieldSearchProcedure = new JTextField();
+			txtFieldSearchProcedure.setBounds(345, 35, 114, 30);
+			txtFieldSearchProcedure.setColumns(10);
+		}
+		return txtFieldSearchProcedure;
+	}
+	private JButton getBtnSearchProcedure() {
+		if (btnSearchProcedure == null) {
+			btnSearchProcedure = new JButton("Search");
+			btnSearchProcedure.setBounds(494, 39, 89, 23);
+			btnSearchProcedure.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					// get the procedure code from the txt field
+					String code = getTxtFieldSearchProcedure().getText();
+					// search for the diagnosis in the db
+					
+					Procedure search = ConnectionFactory.getProcedure(code);
+					// if there is a result show it
+					if (search.code != null) {
+						// remove warning 
+						getLblNoProcedureResults().setVisible(false);
+						// show it in the description area
+						getTxtAreaProcedureDescription().setText(search.code + "\n"
+                				+ search.description);
+					}
+					// else show label "no results for this search"
+					else {
+						getLblNoProcedureResults().setVisible(true);
+						getTxtAreaProcedureDescription().setText("");
+					}					
+				}
+			});
+		}
+		return btnSearchProcedure;
+	}
+	private JLabel getLblSearchProcedure() {
+		if (lblSearchProcedure == null) {
+			lblSearchProcedure = new JLabel("Search procedure:");
+			lblSearchProcedure.setBounds(345, 13, 131, 14);
+		}
+		return lblSearchProcedure;
 	}
 }

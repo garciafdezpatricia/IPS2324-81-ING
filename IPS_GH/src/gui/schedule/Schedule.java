@@ -192,7 +192,7 @@ public class Schedule extends JFrame {
 			btnBack = new JButton("Back");
 			btnBack.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					setVisible(false);
+					dispose();
 				}
 			});
 		}
@@ -321,6 +321,7 @@ public class Schedule extends JFrame {
 				public void mouseClicked(MouseEvent e) {
 					doctorView = new DoctorAppointmentView(p);
 					doctorView.setVisible(true);
+					doctorView.setLocationRelativeTo(null);
 				}
 			});
 		
