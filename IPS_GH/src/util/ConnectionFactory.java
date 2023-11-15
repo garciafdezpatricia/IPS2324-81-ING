@@ -538,7 +538,7 @@ public class ConnectionFactory {
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				System.out.println("no trabaja");
+//				System.out.println("no trabaja");
 			}
 
 			connection.close();
@@ -848,9 +848,9 @@ public class ConnectionFactory {
 			int filasAfectadas = preparedStatement.executeUpdate();
 
 			if (filasAfectadas > 0) {
-				System.out.println("Inserción exitosa.");
+//				System.out.println("Inserción exitosa.");
 			} else {
-				System.out.println("La inserción no se pudo realizar.");
+//				System.out.println("La inserción no se pudo realizar.");
 			}
 
 			// Cerrar la conexión y el PreparedStatement
@@ -860,6 +860,7 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
+
 	@SuppressWarnings("unused")
 	public static String getFreeHours(List<Doctor> doctors, Date day) throws Exception {
 		String res = "";
@@ -918,7 +919,7 @@ public class ConnectionFactory {
 					endHour = resultSet2.getString("endhour");
 
 				}
-				if(id==null) {
+				if (id == null) {
 					return "The doctor do not have a workperiod assigned yet";
 				}
 				workday = new WorkDay(id.toBigInteger(), weekday, startHour, endHour, wpid.toBigInteger());
@@ -1342,8 +1343,7 @@ public class ConnectionFactory {
 		ResultSet rs = null;
 		try {
 			con = getOracleConnection();
-			ps = con.prepareStatement(
-					"SELECT *FROM (APPOINTMENT JOIN PATIENT on appointment.patientid = "
+			ps = con.prepareStatement("SELECT *FROM (APPOINTMENT JOIN PATIENT on appointment.patientid = "
 					+ "patient.id ) JOIN DOCTOR ON appointment.doctorid = doctor.id WHERE patientid=?");
 			ps.setInt(1, pid);
 			rs = ps.executeQuery();
@@ -1731,7 +1731,7 @@ public class ConnectionFactory {
 				docs.addElement(doctor);
 
 				// Ahora puedes trabajar con el objeto Doctor
-				System.out.println("Doctor found: " + doctor.getName());
+//				System.out.println("Doctor found: " + doctor.getName());
 			} else {
 //				System.out.println("Doctor not found.");
 			}
@@ -1774,7 +1774,7 @@ public class ConnectionFactory {
 				docs.addElement(doctor);
 
 				// Ahora puedes trabajar con el objeto Doctor
-				System.out.println("Doctor found: " + doctor.getName());
+//				System.out.println("Doctor found: " + doctor.getName());
 			} else {
 //				System.out.println("Doctor not found.");
 			}
@@ -1790,7 +1790,7 @@ public class ConnectionFactory {
 			String a = getDoctors().get(i).getName().toLowerCase() + " "
 					+ getDoctors().get(i).getSurname().toLowerCase();
 			if (a.toLowerCase().equals(ns.toLowerCase())) {
-				System.out.println(a);
+//				System.out.println(a);
 				return getDoctors().get(i);
 			}
 		}
@@ -1829,7 +1829,7 @@ public class ConnectionFactory {
 				docs.addElement(doctor);
 
 				// Ahora puedes trabajar con el objeto Doctor
-				System.out.println("Doctor found: " + doctor.getName());
+//				System.out.println("Doctor found: " + doctor.getName());
 			} else {
 //				System.out.println("Doctor not found.");
 			}
@@ -1872,7 +1872,7 @@ public class ConnectionFactory {
 				docs.addElement(doctor);
 
 				// Ahora puedes trabajar con el objeto Doctor
-				System.out.println("Doctor found: " + doctor.getName());
+//				System.out.println("Doctor found: " + doctor.getName());
 			} else {
 //				System.out.println("Doctor not found.");
 			}
@@ -1897,7 +1897,7 @@ public class ConnectionFactory {
 
 			rs = ps.executeQuery();
 
-			System.out.println("the doctor has workperiod? " + rs.next());
+//			System.out.println("the doctor has workperiod? " + rs.next());
 			return rs.next(); // Retorna true si hay al menos un registro, de lo contrario, retorna false
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1929,7 +1929,7 @@ public class ConnectionFactory {
 
 			BigDecimal a = new BigDecimal(doctorId);
 
-			System.out.println(a);
+//			System.out.println(a);
 			ps.setBigDecimal(1, a);
 
 			rs = ps.executeQuery();
@@ -1944,7 +1944,7 @@ public class ConnectionFactory {
 				Date startDate = rs.getDate(2);
 				Date endDate = rs.getDate(3);
 
-				System.out.println("id=" + id + " startdate=" + startDate + " enddate=" + endDate);
+//				System.out.println("id=" + id + " startdate=" + startDate + " enddate=" + endDate);
 
 				wp = new WorkPeriod(id, startDate, endDate, doctorId);
 
@@ -2101,14 +2101,13 @@ public class ConnectionFactory {
 			while (resultSet.next()) {
 				BigDecimal idBD = resultSet.getBigDecimal("id");
 				BigInteger id = idBD.toBigInteger();
-				
+
 				BigDecimal patientIdBD = resultSet.getBigDecimal("patientid");
 				BigInteger patientId = patientIdBD.toBigInteger();
-				
+
 				BigDecimal doctorIdBD = resultSet.getBigDecimal("doctorid");
 				BigInteger doctorId = doctorIdBD.toBigInteger();
-				
-				
+
 				String startdate = resultSet.getString("startdate");
 				String endate = resultSet.getString("enddate");
 				int urgency = resultSet.getInt("urgency");
@@ -2151,7 +2150,7 @@ public class ConnectionFactory {
 			con = getOracleConnection();
 			ps = con.prepareStatement("SELECT * FROM OFFICE WHERE officecode = ?");
 
-			System.out.println(code);
+//			System.out.println(code);
 			ps.setString(1, code);
 
 			rs = ps.executeQuery();
@@ -2161,7 +2160,7 @@ public class ConnectionFactory {
 			while (rs.next()) {
 				id = rs.getInt("id");
 
-				System.out.println("id=" + id);
+//				System.out.println("id=" + id);
 			}
 
 		} catch (Exception e) {
@@ -2185,6 +2184,7 @@ public class ConnectionFactory {
 	public static String getFreeHours(int officeId, String start, String end) throws Exception {
 		String res = "";
 		String res2 = "";
+		String freeHours = "\n The office is free from ";
 		List<Appointment> apps = new ArrayList<Appointment>();
 		Connection connection = ConnectionFactory.getOracleConnection();
 		// hay que comprobar que la fecha que se pasa como parámetro esté dentro de ese
@@ -2199,14 +2199,13 @@ public class ConnectionFactory {
 		while (resultSet.next()) {
 			BigDecimal idBD = resultSet.getBigDecimal("id");
 			BigInteger id = idBD.toBigInteger();
-			
+
 			BigDecimal patientIdBD = resultSet.getBigDecimal("patientid");
 			BigInteger patientId = patientIdBD.toBigInteger();
-			
+
 			BigDecimal doctorIdBD = resultSet.getBigDecimal("doctorid");
 			BigInteger doctorId = doctorIdBD.toBigInteger();
-			
-			
+
 			String startdate = resultSet.getString("startdate");
 			String endate = resultSet.getString("enddate");
 			int urgency = resultSet.getInt("urgency");
@@ -2242,7 +2241,8 @@ public class ConnectionFactory {
 				}
 			}
 
-			System.out.println("appointments" + appsThatDay.toString());
+//			System.out.println("appointments" + appsThatDay.toString());
+			freeHours += "00:00:00 to ";
 			// Define un comparador para ordenar por fecha
 			Comparator<Appointment> comparadorFecha = Comparator.comparing(Appointment::getStartdate);
 
@@ -2250,7 +2250,7 @@ public class ConnectionFactory {
 			Collections.sort(appsThatDay, comparadorFecha);
 			// si hay citas ese dia
 			if (!appsThatDay.isEmpty()) {
-				res = "\n The office is booked from:\n ";
+				res += "\n The office is booked from:\n ";
 				Date today = new Date(System.currentTimeMillis());
 				for (int i = 0; i < appsThatDay.size(); i++) {
 					java.util.Date st = dateFormat.parse(appsThatDay.get(i).getStartdate());
@@ -2264,25 +2264,44 @@ public class ConnectionFactory {
 							&& cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
 							&& cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)) {
 
-						
-								res += "\t" + dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+						res += "\t" + dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes() + " to "
 								+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
 								+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + "\n";
 
-						res2 += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+						freeHours += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
-						String aux = res;
-						res2 = "\n" + aux;
+						if (appsThatDay.size() > 1 && i < appsThatDay.size() - 1) {
+							freeHours += " \n\tand from "
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+							;
+						} else {
+							freeHours += " \n\tand from "
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+									+ " 23:59:00";
+							String aux = res;
+							res2 = freeHours + "\n" + aux;
+						}
+						
+//						res2 += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
+//								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
+//						String aux = res;
+//						res2 = "\n" + aux;
 					}
 				}
 			} else {
-				res2 += "14:00";
-				res2 = "\n" + res;
+//				res2 += "14:00";
+//				res2 = "\n" + res;
+				freeHours += "23:59:00";;
+				String aux = res;
+				res2 = freeHours + "\n" + aux;
+//				res += freeHours;
+//				System.out.println("no tiene más citas");
 			}
 
 		}
-		System.out.println(res2);
 		return res2;
 
 	}

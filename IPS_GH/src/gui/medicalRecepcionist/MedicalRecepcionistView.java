@@ -154,10 +154,7 @@ public class MedicalRecepcionistView extends JFrame {
 	private JLabel lblDNI;
 	private JTextField textFieldDni;
 	private JButton btnDNI;
-
-	private JButton btnSeeFreeHours;
 	private JScrollPane scrollPane;
-	private JTextArea txtFreeHours;
 	private JPanel panelDoctorAvailability;
 	private JPanel panelOfficeAvailability;
 	private JScrollPane scrollPaneDoctorAvailability;
@@ -241,12 +238,12 @@ public class MedicalRecepcionistView extends JFrame {
 		if (panelGeneral == null) {
 			panelGeneral = new JPanel();
 			panelGeneral.setLayout(new GridLayout(0, 3, 0, 0));
+			panelGeneral.add(getPanelDoctorAvailability());
 			panelGeneral.add(getPanel_doctor());
 			panelGeneral.add(getPanel_patient());
-			panelGeneral.add(getPanelDoctorAvailability());
+			panelGeneral.add(getPanelOfficeAvailability());
 			panelGeneral.add(getPanel_office());
 			panelGeneral.add(getPanel_information());
-			panelGeneral.add(getPanelOfficeAvailability());
 		}
 		return panelGeneral;
 	}
@@ -290,7 +287,6 @@ public class MedicalRecepcionistView extends JFrame {
 			panel_office
 					.setBorder(new TitledBorder(null, "Office ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panel_office.add(getPanel_office_north(), BorderLayout.NORTH);
-			panel_office.add(getBtnSeeFreeHours(), BorderLayout.SOUTH);
 			panel_office.add(getScrollPane(), BorderLayout.CENTER);
 		}
 		return panel_office;
@@ -342,8 +338,8 @@ public class MedicalRecepcionistView extends JFrame {
 									if (ConnectionFactory.hasAnAppointment(listDoctor.getSelectedValuesList().get(i),
 											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
 													+ getTextFieldFromH().getText() + ":00",
-													new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
-													+ ":00")) {
+											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+													+ getTextFieldToH().getText() + ":00")) {
 										int opcion2 = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
 												"The doctor has another appointment at that time, do you want to reserve this appointment either?",
 												"Confirmation", JOptionPane.YES_NO_OPTION);
@@ -402,7 +398,8 @@ public class MedicalRecepcionistView extends JFrame {
 				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
 						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldFromH().getText()
 								+ ":00",
-						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText() + ":00",
+						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
+								+ ":00",
 						1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 
@@ -410,10 +407,23 @@ public class MedicalRecepcionistView extends JFrame {
 				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
 						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldFromH().getText()
 								+ ":00",
-						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText() + ":00",
+						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
+								+ ":00",
 						0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo);
 			}
+			getTextAreaDoctorAvailability().removeAll();
+			try {
+				getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
+						new java.sql.Date(dateChooser.getDate().getTime())));
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			getTextAreaOfficeAvailability().removeAll();
+			;
+			showFreeHours(dateChooser.getDate());
 		} else {
 			// El usuario ha cancelado la acción
 			System.out.println("Acción cancelada.");
@@ -509,7 +519,7 @@ public class MedicalRecepcionistView extends JFrame {
 			list_patients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			list_patients.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
-					
+
 					Patient p = (Patient) getList_patients().getSelectedValue();
 					if (p != null) {
 						getTxtContactInfo().setText(p.getContactInfo());
@@ -950,7 +960,7 @@ public class MedicalRecepcionistView extends JFrame {
 			comboBoxOffices.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					officeChoosed = true;
-					getBtnSeeFreeHours().setEnabled(true);
+//					getBtnSeeFreeHours().setEnabled(true);
 
 					checkFinishBtnEnabled();
 					showFreeHours(getDateChooser().getDate());
@@ -1180,48 +1190,20 @@ public class MedicalRecepcionistView extends JFrame {
 		return btnDNI;
 	}
 
-	private JButton getBtnSeeFreeHours() {
-		if (btnSeeFreeHours == null) {
-			btnSeeFreeHours = new JButton("See free hours");
-			btnSeeFreeHours.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					showFreeHours(getDateChooser().getDate());
-				}
-			});
-			btnSeeFreeHours.setEnabled(false);
-		}
-		return btnSeeFreeHours;
-	}
-
 	private void showFreeHours(Date d) {
 		int officeId = ConnectionFactory.getOfficeIDFromCode(getComboBoxOffices().getSelectedItem().toString());
 
-
-
-//		calendar.setTime(today);
-//		calendar.set(Calendar.HOUR_OF_DAY, 00); 
-//		calendar.set(Calendar.MINUTE, 01);
-//		today.setTime(calendar.getTimeInMillis());
-//		String start = today.toString();
-//		
-//		calendar.setTime(today);
-//		calendar.set(Calendar.HOUR_OF_DAY, 23); 
-//		calendar.set(Calendar.MINUTE, 59);
-//		today.setTime(calendar.getTimeInMillis());
-//		String end = today.toString();
-
 		Date tdy = d;
 		java.sql.Date sqlDate = new java.sql.Date(tdy.getTime());
-		
+
 		String date = sqlDate.toString();
-		
+
 		String text = "";
 		try {
 			text = ConnectionFactory.getFreeHours(officeId, date, date);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-
 
 		getTextAreaOfficeAvailability().setText(text);
 
@@ -1230,17 +1212,10 @@ public class MedicalRecepcionistView extends JFrame {
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
-			scrollPane.setViewportView(getTxtFreeHours());
 		}
 		return scrollPane;
 	}
 
-	private JTextArea getTxtFreeHours() {
-		if (txtFreeHours == null) {
-			txtFreeHours = new JTextArea();
-		}
-		return txtFreeHours;
-	}
 	private JPanel getPanelDoctorAvailability() {
 		if (panelDoctorAvailability == null) {
 			panelDoctorAvailability = new JPanel();
@@ -1250,6 +1225,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return panelDoctorAvailability;
 	}
+
 	private JPanel getPanelOfficeAvailability() {
 		if (panelOfficeAvailability == null) {
 			panelOfficeAvailability = new JPanel();
@@ -1259,7 +1235,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return panelOfficeAvailability;
 	}
-	
+
 	public JDateChooser getDateChooser() {
 		if (dateChooser == null) {
 			dateChooser = new JDateChooser(new Date());
@@ -1281,6 +1257,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return dateChooser;
 	}
+
 	private JScrollPane getScrollPaneDoctorAvailability() {
 		if (scrollPaneDoctorAvailability == null) {
 			scrollPaneDoctorAvailability = new JScrollPane();
@@ -1288,6 +1265,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return scrollPaneDoctorAvailability;
 	}
+
 	private JTextArea getTextAreaDoctorAvailability() {
 		if (textAreaDoctorAvailability == null) {
 			textAreaDoctorAvailability = new JTextArea();
@@ -1301,6 +1279,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return textAreaDoctorAvailability;
 	}
+
 	private JPanel getPanelOfficeButtons() {
 		if (panelOfficeButtons == null) {
 			panelOfficeButtons = new JPanel();
@@ -1310,6 +1289,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return panelOfficeButtons;
 	}
+
 	private JPanel getPanelPrevAndNext() {
 		if (panelPrevAndNext == null) {
 			panelPrevAndNext = new JPanel();
@@ -1319,6 +1299,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return panelPrevAndNext;
 	}
+
 	private JButton getBtnPrev() {
 		if (btnPrev == null) {
 			btnPrev = new JButton("Previous");
@@ -1354,9 +1335,9 @@ public class MedicalRecepcionistView extends JFrame {
 					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd");
 					System.out.println(getDateChooser().getDate());
 					System.out.println(new Date());
-					if (getDateChooser().getDate().getDay() == new Date().getDay() &&
-							getDateChooser().getDate().getMonth() == new Date().getMonth() &&
-							getDateChooser().getDate().getYear() == new Date().getYear()) {
+					if (getDateChooser().getDate().getDay() == new Date().getDay()
+							&& getDateChooser().getDate().getMonth() == new Date().getMonth()
+							&& getDateChooser().getDate().getYear() == new Date().getYear()) {
 						btnPrev.setEnabled(false);
 					}
 				}
@@ -1364,6 +1345,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return btnPrev;
 	}
+
 	private JButton getBtnNext() {
 		if (btnNext == null) {
 			btnNext = new JButton("Next");
@@ -1394,14 +1376,16 @@ public class MedicalRecepcionistView extends JFrame {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					
-					getTextAreaOfficeAvailability().removeAll();;
+
+					getTextAreaOfficeAvailability().removeAll();
+					;
 					showFreeHours(newDate);
 				}
 			});
 		}
 		return btnNext;
 	}
+
 	private JPanel getPanelHours() {
 		if (panelHours == null) {
 			panelHours = new JPanel();
@@ -1413,12 +1397,14 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return panelHours;
 	}
+
 	private JLabel getLblFrom() {
 		if (lblFrom == null) {
 			lblFrom = new JLabel("From");
 		}
 		return lblFrom;
 	}
+
 	private JTextField getTextFieldFromH() {
 		if (textFieldFromH == null) {
 			textFieldFromH = new JTextField();
@@ -1426,12 +1412,14 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return textFieldFromH;
 	}
+
 	private JLabel getLblTo() {
 		if (lblTo == null) {
 			lblTo = new JLabel("To");
 		}
 		return lblTo;
 	}
+
 	private JTextField getTextFieldToH() {
 		if (textFieldToH == null) {
 			textFieldToH = new JTextField();
@@ -1439,6 +1427,7 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return textFieldToH;
 	}
+
 	private JScrollPane getScrollPane_1_1() {
 		if (scrollPaneOfficeAvailability == null) {
 			scrollPaneOfficeAvailability = new JScrollPane();
@@ -1446,12 +1435,13 @@ public class MedicalRecepcionistView extends JFrame {
 		}
 		return scrollPaneOfficeAvailability;
 	}
+
 	private JTextArea getTextAreaOfficeAvailability() {
 		if (textAreaOfficeAvailability == null) {
 			textAreaOfficeAvailability = new JTextArea();
 			textAreaOfficeAvailability.setEditable(false);
 			showFreeHours(getDateChooser().getDate());
-			
+
 		}
 		return textAreaOfficeAvailability;
 	}
