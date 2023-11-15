@@ -58,6 +58,10 @@ import db.Procedure;
 import gui.medicalRecord.MedicalRecordView;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
+import javax.swing.border.LineBorder;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.BevelBorder;
 
 public class DoctorAppointmentView extends JFrame {
 
@@ -170,6 +174,9 @@ public class DoctorAppointmentView extends JFrame {
 	private JTextField txtFieldSearchProcedure;
 	private JButton btnSearchProcedure;
 	private JLabel lblSearchProcedure;
+	private JPanel pnAtenzzioneDiagnosis;
+	private JButton btnAtenzzione;
+	private JPanel pnButtons;
 	/**
 	 * Launch the application.
 	 */
@@ -244,10 +251,10 @@ public class DoctorAppointmentView extends JFrame {
 	private JPanel getButtonsPanel() {
 		if (buttonsPanel == null) {
 			buttonsPanel = new JPanel();
-			FlowLayout flowLayout = (FlowLayout) buttonsPanel.getLayout();
-			flowLayout.setAlignment(FlowLayout.RIGHT);
-			buttonsPanel.add(getBtnExit());
-			buttonsPanel.add(getBtnSave());
+			buttonsPanel.setBorder(null);
+			buttonsPanel.setLayout(new BorderLayout(0, 0));
+			buttonsPanel.add(getPnAtenzzioneDiagnosis(), BorderLayout.WEST);
+			buttonsPanel.add(getPnButtons(), BorderLayout.EAST);
 		}
 		return buttonsPanel;
 	}
@@ -1534,5 +1541,40 @@ public class DoctorAppointmentView extends JFrame {
 			lblSearchProcedure.setBounds(345, 13, 131, 14);
 		}
 		return lblSearchProcedure;
+	}
+	private JPanel getPnAtenzzioneDiagnosis() {
+		if (pnAtenzzioneDiagnosis == null) {
+			pnAtenzzioneDiagnosis = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) pnAtenzzioneDiagnosis.getLayout();
+			flowLayout.setAlignment(FlowLayout.LEADING);
+			pnAtenzzioneDiagnosis.add(getBtnAtenzzione());
+		}
+		return pnAtenzzioneDiagnosis;
+	}
+	private JButton getBtnAtenzzione() {
+		if (btnAtenzzione == null) {
+			btnAtenzzione = new JButton("Report dangerous diagnosis");
+			btnAtenzzione.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					// nombredelaventana frame = new nombredelaventana()
+					// frame.setvisible(true)
+					// frame.setlocationrelativeto(null)  
+				}
+			});
+			btnAtenzzione.setPreferredSize(new Dimension(167, 27));
+			btnAtenzzione.setBorder(new CompoundBorder(null, new LineBorder(new Color(255, 255, 153))));
+		}
+		return btnAtenzzione;
+	}
+	private JPanel getPnButtons() {
+		if (pnButtons == null) {
+			pnButtons = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) pnButtons.getLayout();
+			flowLayout.setHgap(10);
+			flowLayout.setAlignment(FlowLayout.RIGHT);
+			pnButtons.add(getBtnExit());
+			pnButtons.add(getBtnSave());
+		}
+		return pnButtons;
 	}
 }
