@@ -34,6 +34,7 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JButton btnAssignWorkPeriod;
 	private JButton btnEditWp;
 	private JButton btnEditAndCancel;
+	private JButton btnBandejaDeEntrada;
 
 	/**
 	 * Launch the application.
@@ -96,12 +97,13 @@ public class MenuMedicalRecepcionist extends JFrame {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
 
-			panelButtons.setLayout(new GridLayout(0, 2, 0, 0));
+			panelButtons.setLayout(new GridLayout(0, 3, 0, 0));
 			panelButtons.add(getBtnEditAndCancel());
 
 			panelButtons.add(getBtnCreateApp());
 			panelButtons.add(getBtnAssignWorkPeriod());
 			panelButtons.add(getBtnEditWp());
+			panelButtons.add(getBtnBandejaDeEntrada());
 		}
 		return panelButtons;
 	}
@@ -216,4 +218,10 @@ public class MenuMedicalRecepcionist extends JFrame {
 		return btnEditAndCancel;
 	}
 
+	private JButton getBtnBandejaDeEntrada() {
+		if (btnBandejaDeEntrada == null) {
+			btnBandejaDeEntrada = new JButton("InBox");
+		}
+		return btnBandejaDeEntrada;
+	}
 }

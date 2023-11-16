@@ -147,6 +147,8 @@ public class EditAppointmentView extends JFrame {
 	private JLabel lblSurname;
 	private JTextField textFieldSurname;
 	private JButton btnFilterSurname;
+	private DefaultListModel<Doctor> d = ConnectionFactory.getDoctors();
+	private DefaultListModel<Patient> p = ConnectionFactory.getPatients();
 
 	/**
 	 * Create the frame.
@@ -166,11 +168,11 @@ public class EditAppointmentView extends JFrame {
 		this.id = id;
 		setTitle("Edition of appointment");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(EditAppointmentView.class.getResource("/img/descarga.jpg")));
-		doctors = ConnectionFactory.getDoctors();
-		doctorsReset = ConnectionFactory.getDoctors();
+		doctors = d;
+		doctorsReset = d;
 
-		patients = ConnectionFactory.getPatients();
-		patientsReset = ConnectionFactory.getPatients();
+		patients = p;
+		patientsReset = p;
 
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
