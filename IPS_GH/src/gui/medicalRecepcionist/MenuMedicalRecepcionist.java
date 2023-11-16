@@ -34,7 +34,7 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JButton btnAssignWorkPeriod;
 	private JButton btnEditWp;
 	private JButton btnEditAndCancel;
-	private JButton btnProgram;
+	private JButton btnBandejaDeEntrada;
 
 	/**
 	 * Launch the application.
@@ -103,7 +103,7 @@ public class MenuMedicalRecepcionist extends JFrame {
 			panelButtons.add(getBtnCreateApp());
 			panelButtons.add(getBtnAssignWorkPeriod());
 			panelButtons.add(getBtnEditWp());
-			panelButtons.add(getBtnProgram());
+			panelButtons.add(getBtnBandejaDeEntrada());
 		}
 		return panelButtons;
 	}
@@ -218,24 +218,10 @@ public class MenuMedicalRecepcionist extends JFrame {
 		return btnEditAndCancel;
 	}
 
-	private JButton getBtnProgram() {
-		if (btnProgram == null) {
-			btnProgram = new JButton("Program Appointment with a specialit");
-			btnProgram.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					ProgramAppointmentWithSpecialist editWp;
-					try {
-						editWp = new ProgramAppointmentWithSpecialist();
-						editWp.setVisible(true);
-						editWp.setLocationRelativeTo(null);
-
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-			});
+	private JButton getBtnBandejaDeEntrada() {
+		if (btnBandejaDeEntrada == null) {
+			btnBandejaDeEntrada = new JButton("InBox");
 		}
-		return btnProgram;
+		return btnBandejaDeEntrada;
 	}
 }

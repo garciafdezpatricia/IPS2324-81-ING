@@ -238,12 +238,12 @@ public class MedicalRecepcionistView extends JFrame {
 		if (panelGeneral == null) {
 			panelGeneral = new JPanel();
 			panelGeneral.setLayout(new GridLayout(0, 3, 0, 0));
-			panelGeneral.add(getPanelDoctorAvailability());
 			panelGeneral.add(getPanel_doctor());
 			panelGeneral.add(getPanel_patient());
-			panelGeneral.add(getPanelOfficeAvailability());
+			panelGeneral.add(getPanelDoctorAvailability());
 			panelGeneral.add(getPanel_office());
 			panelGeneral.add(getPanel_information());
+			panelGeneral.add(getPanelOfficeAvailability());
 		}
 		return panelGeneral;
 	}
