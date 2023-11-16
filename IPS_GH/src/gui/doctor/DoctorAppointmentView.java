@@ -177,6 +177,9 @@ public class DoctorAppointmentView extends JFrame {
 	private JPanel pnAtenzzioneDiagnosis;
 	private JButton btnAtenzzione;
 	private JPanel pnButtons;
+	private JTextArea txtAreaProcedureComments;
+	private JScrollPane scrollPane_13;
+	private JLabel lblProcedureComments;
 	/**
 	 * Launch the application.
 	 */
@@ -216,7 +219,7 @@ public class DoctorAppointmentView extends JFrame {
 		});
 		this.appointment = appointment;
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 668, 626);
+		setBounds(100, 100, 668, 656);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		try {
@@ -1321,6 +1324,8 @@ public class DoctorAppointmentView extends JFrame {
 			pnProcedures.add(getTxtFieldSearchProcedure());
 			pnProcedures.add(getBtnSearchProcedure());
 			pnProcedures.add(getLblSearchProcedure());
+			pnProcedures.add(getScrollPane_13());
+			pnProcedures.add(getLblProcedureComments());
 		}
 		return pnProcedures;
 	}
@@ -1405,7 +1410,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JScrollPane getScrollPane_10() {
 		if (scrollPane_10 == null) {
 			scrollPane_10 = new JScrollPane();
-			scrollPane_10.setBounds(10, 11, 325, 206);
+			scrollPane_10.setBounds(10, 11, 325, 246);
 			scrollPane_10.setViewportView(getProcedureTree());
 		}
 		return scrollPane_10;
@@ -1421,7 +1426,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JScrollPane getScrollPane_11() {
 		if (scrollPane_11 == null) {
 			scrollPane_11 = new JScrollPane();
-			scrollPane_11.setBounds(10, 267, 617, 95);
+			scrollPane_11.setBounds(10, 293, 617, 95);
 			scrollPane_11.setViewportView(getSelectedProceduresList());
 		}
 		return scrollPane_11;
@@ -1429,14 +1434,14 @@ public class DoctorAppointmentView extends JFrame {
 	private JLabel getLblFinalProcedures() {
 		if (lblFinalProcedures == null) {
 			lblFinalProcedures = new JLabel("Final procedures:");
-			lblFinalProcedures.setBounds(10, 242, 131, 14);
+			lblFinalProcedures.setBounds(10, 268, 131, 14);
 		}
 		return lblFinalProcedures;
 	}
 	private JButton getBtnAddProcedure() {
 		if (btnAddProcedure == null) {
 			btnAddProcedure = new JButton("Add");
-			btnAddProcedure.setBounds(524, 194, 89, 23);
+			btnAddProcedure.setBounds(538, 259, 89, 23);
 			btnAddProcedure.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (!getTxtAreaProcedureDescription().getText().equals("")) {
@@ -1445,6 +1450,7 @@ public class DoctorAppointmentView extends JFrame {
 						for (String item : portions) {
 							procedure += item + " ";
 						}
+						procedure += getTxtAreaProcedureComments().getText().isEmpty() ? "" : getTxtAreaProcedureComments().getText();
 						DefaultListModel m =(DefaultListModel) getSelectedProceduresList().getModel();
 						m.addElement(procedure);
 						getSelectedProceduresList().setModel(m);
@@ -1457,7 +1463,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JButton getBtnRemoveProcedure() {
 		if (btnRemoveProcedure == null) {
 			btnRemoveProcedure = new JButton("Remove");
-			btnRemoveProcedure.setBounds(425, 194, 89, 23);
+			btnRemoveProcedure.setBounds(439, 259, 89, 23);
 			btnRemoveProcedure.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (getSelectedProceduresList().getSelectedValuesList().size() > 0) {
@@ -1493,7 +1499,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JScrollPane getScrollPane_12() {
 		if (scrollPane_12 == null) {
 			scrollPane_12 = new JScrollPane();
-			scrollPane_12.setBounds(345, 98, 282, 85);
+			scrollPane_12.setBounds(345, 98, 282, 61);
 			scrollPane_12.setViewportView(getTxtAreaProcedureDescription());
 		}
 		return scrollPane_12;
@@ -1576,5 +1582,26 @@ public class DoctorAppointmentView extends JFrame {
 			pnButtons.add(getBtnSave());
 		}
 		return pnButtons;
+	}
+	private JTextArea getTxtAreaProcedureComments() {
+		if (txtAreaProcedureComments == null) {
+			txtAreaProcedureComments = new JTextArea();
+		}
+		return txtAreaProcedureComments;
+	}
+	private JScrollPane getScrollPane_13() {
+		if (scrollPane_13 == null) {
+			scrollPane_13 = new JScrollPane();
+			scrollPane_13.setBounds(345, 196, 282, 61);
+			scrollPane_13.setViewportView(getTxtAreaProcedureComments());
+		}
+		return scrollPane_13;
+	}
+	private JLabel getLblProcedureComments() {
+		if (lblProcedureComments == null) {
+			lblProcedureComments = new JLabel("Comments:");
+			lblProcedureComments.setBounds(345, 174, 103, 14);
+		}
+		return lblProcedureComments;
 	}
 }
