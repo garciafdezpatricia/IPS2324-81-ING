@@ -29,18 +29,15 @@ import gui.medicalRecepcionist.MenuMedicalRecepcionist;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
 import util.MedicalRecordBLDto;
+import javax.swing.JSplitPane;
+import javax.swing.JScrollPane;
 
 public class MedicalRecordView extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JPanel panel;
+	private JPanel pnButtons;
 	private JButton btnBack;
-	private JTabbedPane tabbedPane;
-	private JPanel pnAppointments;
-	private JPanel pnPrescription;
-	private JPanel pnDiagnosis;
-	private JPanel pnVaccines;
 	private List<AppointmentBLDto> appointments;
 	private List<MedicalRecordBLDto> causes;
 	private List<MedicalRecordBLDto> diagnosis;
@@ -55,11 +52,22 @@ public class MedicalRecordView extends JFrame {
 	private JButton btnOpen;
 	private JLabel lblDoctor_1;
 	private DoctorAppointmentView doctorView;
-	private JList lPrescriptions;
-	private JList lDiagnosis;
-	private JPanel pnCauses;
-	private JList lCauses;
-	private JList lVaccines;
+	private JTabbedPane tabbedPane;
+	private JPanel pnDiagnosis;
+	private JPanel pnAppointmentList;
+	private JList list;
+	private JScrollPane scrollPane;
+	private JPanel pnContent;
+	private JLabel lblInitialDate;
+	private JList list_1;
+	private JScrollPane scrollPane_1;
+	private JLabel lblHistory;
+	private JLabel lblNewLabel;
+	private JLabel lblNewLabel_1;
+	private JLabel lblNewLabel_2;
+	private JLabel lblPutDoctor;
+	private JLabel lblPutDate;
+	private JPanel pnHistory;
 
 	/**
 	 * Launch the application.
@@ -92,7 +100,7 @@ public class MedicalRecordView extends JFrame {
 				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Medical record");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 668, 414);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		try {
@@ -110,46 +118,18 @@ public class MedicalRecordView extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 //		contentPane.add(getPnSearch(), BorderLayout.NORTH);
-		contentPane.add(getPanel(), BorderLayout.SOUTH);
-		contentPane.add(getTabbedPane(), BorderLayout.CENTER);
+		contentPane.add(getPnButtons(), BorderLayout.SOUTH);
 		contentPane.add(getPnPatient(), BorderLayout.NORTH);
+		contentPane.add(getTabbedPane_1(), BorderLayout.CENTER);
 	}
 
-//	private JPanel getPnSearch() {
-//		if (pnSearch == null) {
-//			pnSearch = new JPanel();
-//			pnSearch.add(getLblNewLabel());
-//			pnSearch.add(getTxtfSearch());
-//			pnSearch.add(getBtnSearch());
-//		}
-//		return pnSearch;
-//	}
-//	private JTextField getTxtfSearch() {
-//		if (txtfSearch == null) {
-//			txtfSearch = new JTextField();
-//			
-//			txtfSearch.setColumns(20);
-//		}
-//		return txtfSearch;
-//	}
-//	private JButton getBtnSearch() {
-//		if (btnSearch == null) {
-//			btnSearch = new JButton("Search");
-//			btnSearch.addActionListener(new ActionListener() {
-//				public void actionPerformed(ActionEvent e) {
-//					
-//				}
-//			});
-//		}
-//		return btnSearch;
-//	}
-	private JPanel getPanel() {
-		if (panel == null) {
-			panel = new JPanel();
-			panel.setLayout(new BorderLayout(0, 0));
-			panel.add(getBtnBack(), BorderLayout.WEST);
+	private JPanel getPnButtons() {
+		if (pnButtons == null) {
+			pnButtons = new JPanel();
+			pnButtons.setLayout(new BorderLayout(0, 0));
+			pnButtons.add(getBtnBack(), BorderLayout.WEST);
 		}
-		return panel;
+		return pnButtons;
 	}
 
 	private JButton getBtnBack() {
@@ -164,66 +144,6 @@ public class MedicalRecordView extends JFrame {
 		}
 		return btnBack;
 	}
-
-//	private JLabel getLblNewLabel() {
-//		if (lblNewLabel == null) {
-//			lblNewLabel = new JLabel("Select Patient ID");
-//		}
-//		return lblNewLabel;
-//	}
-	private JTabbedPane getTabbedPane() {
-		if (tabbedPane == null) {
-			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-			tabbedPane.addTab("Appointments", null, getPnAppointments(), null);
-			pnAppointments.setLayout(new GridLayout(0, 1, 0, 0));
-			tabbedPane.addTab("Prescription", null, getPnPrescription(), null);
-			tabbedPane.addTab("Causes", null, getPnCauses(), null);
-			tabbedPane.addTab("Diagnosis", null, getPnDiagnosis(), null);
-			tabbedPane.addTab("Vaccines", null, getPnVaccines(), null);
-		}
-		return tabbedPane;
-	}
-
-	private JPanel getPnAppointments() {
-
-			pnAppointments = new JPanel();
-			for(AppointmentBLDto appointment: appointments)
-				pnAppointments.add(getPnAppointmentInfo(appointment));
-			pnAppointments.invalidate();
-			pnAppointments.validate();
-			pnAppointments.repaint();
-	
-		return pnAppointments;
-	}
-
-	private JPanel getPnPrescription() {
-		if (pnPrescription == null) {
-			pnPrescription = new JPanel();
-			pnPrescription.setLayout(new BorderLayout(0, 0));
-			pnPrescription.add(getLPrescriptions());
-		}
-		return pnPrescription;
-	}
-
-	private JPanel getPnDiagnosis() {
-		if (pnDiagnosis == null) {
-			pnDiagnosis = new JPanel();
-			pnDiagnosis.setLayout(new BorderLayout(0, 0));
-			pnDiagnosis.add(getLDiagnosis());
-		}
-		return pnDiagnosis;
-	}
-
-	private JPanel getPnVaccines() {
-		if (pnVaccines == null) {
-			pnVaccines = new JPanel();
-			pnVaccines.setLayout(new BorderLayout(0, 0));
-			pnVaccines.add(getLVaccines());
-		}
-		return pnVaccines;
-	}
-
-	
 
 	private JPanel getPnPatient() {
 		if (pnPatient == null) {
@@ -297,54 +217,118 @@ public class MedicalRecordView extends JFrame {
 		
 		return btnOpen;
 	}
+	
+	private JTabbedPane getTabbedPane_1() {
+		if (tabbedPane == null) {
+			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane.addTab("Medical History", null, getPnHistory(), null);
+			tabbedPane.addTab("Diagnosis", null, getPnDiagnosis(), null);
+		}
+		return tabbedPane;
+	}
+	private JPanel getPnDiagnosis() {
+		if (pnDiagnosis == null) {
+			pnDiagnosis = new JPanel();
+			pnDiagnosis.setLayout(new BorderLayout(0, 0));
+			pnDiagnosis.add(getPnAppointmentList(), BorderLayout.WEST);
+			pnDiagnosis.add(getPnContent(), BorderLayout.CENTER);
+		}
+		return pnDiagnosis;
+	}
+	private JPanel getPnAppointmentList() {
+		if (pnAppointmentList == null) {
+			pnAppointmentList = new JPanel();
+			pnAppointmentList.setLayout(new BorderLayout(0, 0));
+			pnAppointmentList.add(getScrollPane());
+		}
+		return pnAppointmentList;
+	}
+	private JList getList() {
+		if (list == null) {
+			list = new JList();
+		}
+		return list;
+	}
+	private JScrollPane getScrollPane() {
+		if (scrollPane == null) {
+			scrollPane = new JScrollPane();
+			scrollPane.setViewportView(getList());
+		}
+		return scrollPane;
+	}
+	private JPanel getPnContent() {
+		if (pnContent == null) {
+			pnContent = new JPanel();
+			pnContent.setLayout(null);
+			pnContent.add(getLblInitialDate());
+			pnContent.add(getScrollPane_1());
+			pnContent.add(getLblHistory());
+			pnContent.add(getLblNewLabel_2());
+			pnContent.add(getLblPutDoctor());
+			pnContent.add(getLblPutDate());
+		}
+		return pnContent;
+	}
+	private JLabel getLblInitialDate() {
+		if (lblInitialDate == null) {
+			lblInitialDate = new JLabel("Initial date:");
+			lblInitialDate.setBounds(10, 11, 74, 14);
+		}
+		return lblInitialDate;
+	}
+	private JList getList_1() {
+		if (list_1 == null) {
+			list_1 = new JList();
+		}
+		return list_1;
+	}
+	private JScrollPane getScrollPane_1() {
+		if (scrollPane_1 == null) {
+			scrollPane_1 = new JScrollPane();
+			scrollPane_1.setBounds(10, 65, 217, 179);
+			scrollPane_1.setViewportView(getList_1());
+		}
+		return scrollPane_1;
+	}
+	private JLabel getLblHistory() {
+		if (lblHistory == null) {
+			lblHistory = new JLabel("History:");
+			lblHistory.setBounds(10, 44, 74, 14);
+		}
+		return lblHistory;
+	}
 	private JLabel getLblDoctor() {
-		
-			lblDoctor_1 = new JLabel("Doctor:");
-		
-		return lblDoctor_1;
-	}
-	private JList getLPrescriptions() {
-		if (lPrescriptions == null) {
-			lPrescriptions = new JList();
-			var model = new DefaultListModel<MedicalRecordBLDto>();
-			model.addAll(prescription);
-			lPrescriptions.setModel(model);
+		if (lblNewLabel_1 == null) {
+			lblNewLabel_1 = new JLabel("New label");
+			lblNewLabel_1.setBounds(237, 67, 46, 14);
 		}
-		return lPrescriptions;
+		return lblNewLabel_1;
 	}
-	private JList getLDiagnosis() {
-		if (lDiagnosis == null) {
-			lDiagnosis = new JList();
-			var model = new DefaultListModel<MedicalRecordBLDto>();
-			model.addAll(diagnosis);
-			lDiagnosis.setModel(model);
+	private JLabel getLblNewLabel_2() {
+		if (lblNewLabel_2 == null) {
+			lblNewLabel_2 = new JLabel("Doctor:");
+			lblNewLabel_2.setBounds(237, 67, 46, 14);
 		}
-		return lDiagnosis;
+		return lblNewLabel_2;
 	}
-	private JPanel getPnCauses() {
-		if (pnCauses == null) {
-			pnCauses = new JPanel();
-			pnCauses.setLayout(new BorderLayout(0, 0));
-			pnCauses.add(getLCauses(), BorderLayout.NORTH);
+	private JLabel getLblPutDoctor() {
+		if (lblPutDoctor == null) {
+			lblPutDoctor = new JLabel("");
+			lblPutDoctor.setBounds(237, 84, 132, 14);
 		}
-		return pnCauses;
+		return lblPutDoctor;
 	}
-	private JList getLCauses() {
-		if (lCauses == null) {
-			lCauses = new JList();
-			var model = new DefaultListModel<MedicalRecordBLDto>();
-			model.addAll(causes);
-			lCauses.setModel(model);
+	private JLabel getLblPutDate() {
+		if (lblPutDate == null) {
+			lblPutDate = new JLabel("");
+			lblPutDate.setBounds(94, 11, 133, 14);
 		}
-		return lCauses;
+		return lblPutDate;
 	}
-	private JList getLVaccines() {
-		if (lVaccines == null) {
-			lVaccines = new JList();
-			var model = new DefaultListModel<MedicalRecordBLDto>();
-			model.addAll(vaccines);
-			lVaccines.setModel(model);
+	private JPanel getPnHistory() {
+		if (pnHistory == null) {
+			pnHistory = new JPanel();
 		}
-		return lVaccines;
+		return pnHistory;
 	}
 }
