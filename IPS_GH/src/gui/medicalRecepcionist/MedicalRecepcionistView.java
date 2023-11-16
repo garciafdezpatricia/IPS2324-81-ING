@@ -56,6 +56,7 @@ import db.Doctor;
 import db.Office;
 import db.Patient;
 import util.ConnectionFactory;
+import javax.swing.JTabbedPane;
 
 public class MedicalRecepcionistView extends JFrame {
 
@@ -96,6 +97,7 @@ public class MedicalRecepcionistView extends JFrame {
 
 	private SelectDate selectDate;
 
+	private DefaultListModel<String> specializations = new DefaultListModel<String>();
 	/**
 	 * Launch the application.
 	 */
@@ -170,6 +172,9 @@ public class MedicalRecepcionistView extends JFrame {
 	private JTextField textFieldToH;
 	private JScrollPane scrollPaneOfficeAvailability;
 	private JTextArea textAreaOfficeAvailability;
+	private JTabbedPane tabbedPane;
+	private JScrollPane scrollPaneSpecialization;
+	private JList listSpecialization;
 
 	/**
 	 * Create the frame.
@@ -177,6 +182,7 @@ public class MedicalRecepcionistView extends JFrame {
 	 * @throws Exception
 	 */
 	public MedicalRecepcionistView() throws Exception {
+		fulfillSpecializations();
 
 		setTitle("Reservation of appointment");
 		setIconImage(
@@ -217,6 +223,51 @@ public class MedicalRecepcionistView extends JFrame {
 
 	}
 
+	private void fulfillSpecializations() {
+		specializations.addElement("Pediatrician");
+		specializations.addElement("Gynecologist");
+		specializations.addElement("Cardiologist");
+		specializations.addElement("Neurologist");
+		specializations.addElement("Surgeon");
+		specializations.addElement("Oncologist");
+		specializations.addElement("Hematologist");
+		specializations.addElement("Dermatologist");
+		specializations.addElement("Oncologist");
+		specializations.addElement("Endocrinologist");
+		specializations.addElement("Gastroenterologist");
+		specializations.addElement("Orthopedic Surgeon");
+		specializations.addElement("Radiologist");
+		specializations.addElement("Psychiatrist");
+		specializations.addElement("Ophthalmologist");
+		specializations.addElement("Pulmonologist");
+		specializations.addElement("Rheumatologist");
+		specializations.addElement("Nephrologist");
+		specializations.addElement("Infectious Disease Specialist");
+		specializations.addElement("Urologist");
+		specializations.addElement("Emergency Medicine Physician");
+		specializations.addElement("Anesthesiologist");
+		specializations.addElement("Family Medicine Physician");
+		specializations.addElement("General Practitioner");
+		specializations.addElement("Immunologist");
+		specializations.addElement("Anesthesiologist");
+		specializations.addElement("Otolaryngologist");
+		specializations.addElement("Geriatrician");
+		specializations.addElement("Podiatrist");
+		specializations.addElement("Plastic Surgeon");
+		specializations.addElement("Forensic Pathologist");
+		specializations.addElement("Colon and Rectal Surgeon");
+		specializations.addElement("Critical Care Physician");
+		specializations.addElement("Nuclear Medicine Physician");
+
+
+
+
+
+
+
+		
+	}
+
 	private List<Doctor> getSelectedDoctors() {
 
 		List<Doctor> res = new ArrayList<>();
@@ -238,7 +289,8 @@ public class MedicalRecepcionistView extends JFrame {
 		if (panelGeneral == null) {
 			panelGeneral = new JPanel();
 			panelGeneral.setLayout(new GridLayout(0, 3, 0, 0));
-			panelGeneral.add(getPanel_doctor());
+//			panelGeneral.add(getPanel_doctor());
+			panelGeneral.add(getTabbedPane());
 			panelGeneral.add(getPanel_patient());
 			panelGeneral.add(getPanelDoctorAvailability());
 			panelGeneral.add(getPanel_office());
@@ -1444,5 +1496,32 @@ public class MedicalRecepcionistView extends JFrame {
 
 		}
 		return textAreaOfficeAvailability;
+	}
+	private JTabbedPane getTabbedPane() {
+		if (tabbedPane == null) {
+			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane.addTab("Doctor", null, getPanel_doctor(), null);
+			tabbedPane.addTab("Specialization", null, getScrollPaneSpecialization(), null);
+		}
+		return tabbedPane;
+	}
+	private JScrollPane getScrollPaneSpecialization() {
+		if (scrollPaneSpecialization == null) {
+			scrollPaneSpecialization = new JScrollPane();
+			scrollPaneSpecialization.setViewportView(getListSpecialization());
+		}
+		return scrollPaneSpecialization;
+	}
+	private JList<String> getListSpecialization() {
+		if (listSpecialization == null) {
+			listSpecialization = new JList<String>(specializations);
+			listSpecialization.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					getTextAreaDoctorAvailability().removeAll();
+					
+				}
+			});
+		}
+		return listSpecialization;
 	}
 }

@@ -2230,6 +2230,7 @@ public class ConnectionFactory {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			for (Appointment a : apps) {
+				System.out.println(a.getStartdate());
 				java.util.Date st = dateFormat.parse(a.getStartdate());
 				java.util.Date e = dateFormat.parse(a.getEnddate());
 
