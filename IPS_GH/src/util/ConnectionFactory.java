@@ -202,7 +202,7 @@ public class ConnectionFactory {
 			Statement statement = connection.createStatement();
 
 			// Ejecutar una consulta SQL
-			String sql = "SELECT * FROM DOCTOR";
+			String sql = "SELECT * FROM DOCTOR WHERE ID != 62";
 			ResultSet resultSet = statement.executeQuery(sql);
 
 			// Procesar los resultados
@@ -612,7 +612,7 @@ public class ConnectionFactory {
 	}
 
 	public static void createAppointment(BigInteger patientID, BigInteger doctorID, String startDate, String endDate,
-			int urgency, int officeId, String information) throws Exception {
+			int urgency, int officeId, String information, String status) throws Exception {
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
 
@@ -643,7 +643,7 @@ public class ConnectionFactory {
 			preparedStatement.setInt(8, 0);
 			preparedStatement.setInt(9, officeId);
 			preparedStatement.setString(10, information);
-			preparedStatement.setString(11, "Booked");
+			preparedStatement.setString(11, status);
 
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
@@ -960,7 +960,7 @@ public class ConnectionFactory {
 					for (Appointment a : apps) {
 						if (dateFormat.parse(a.getStartdate()).after(dateFormat.parse(day + " 00:00:00"))
 								&& dateFormat.parse(a.getEnddate()).before(dateFormat.parse(day + " 24:00:00"))
-								&& !a.getStatus().equals("Cancelled")) {
+								&& a.getStatus().toLowerCase().equals("booked")) {
 
 							appsThatDay.add(a);
 						}
@@ -1122,7 +1122,7 @@ public class ConnectionFactory {
 //							System.out.println("a.getend" + a.getEnddate());
 							if (dateFormat2.parse(a.getStartdate()).after(dateFormat2.parse(day + " 00:00:00"))
 									&& dateFormat2.parse(a.getEnddate()).before(dateFormat2.parse(day + " 24:00:00"))
-									&& !a.getStatus().toLowerCase().equals("cancelled")) {
+									&& a.getStatus().toLowerCase().equals("booked")) {
 //								System.out.println(a);
 								appsThatDay.add(a);
 							}
