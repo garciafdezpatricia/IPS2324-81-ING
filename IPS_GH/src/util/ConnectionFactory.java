@@ -447,6 +447,54 @@ public class ConnectionFactory {
 		}
 	}
 
+	public static DefaultListModel<Appointment> getAppointmentsPendingOfAssigning() {
+		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM APPOINTMENT WHERE status = 'Pending of assigning'";
+			ResultSet resultSet = statement.executeQuery(sql);
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigDecimal id = resultSet.getBigDecimal("id");
+				BigDecimal patientid = resultSet.getBigDecimal("patientid");
+				BigDecimal doctorid = resultSet.getBigDecimal("doctorid");
+
+				String startDate = resultSet.getString("startdate");
+				String enddate = resultSet.getString("enddate");
+
+				int urgency = resultSet.getInt("urgency");
+				int attended = resultSet.getInt("attended");
+
+				String checkedin = resultSet.getString("checkedin");
+				String checkedout = resultSet.getString("checkedout");
+				BigDecimal officeid = resultSet.getBigDecimal("officeid");
+				String information = resultSet.getString("information");
+				String status = resultSet.getString("status");
+
+				// Procesa otros campos según la estructura de tu tabla
+				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
+						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
+						officeid.toBigInteger(), information, status));
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+	}
 	public static boolean isWorking(Date utilDate, String hourFrom, String hourTo, BigInteger idDoctor)
 			throws Exception {
 		DefaultListModel<WorkPeriod> workperiod = new DefaultListModel<>();

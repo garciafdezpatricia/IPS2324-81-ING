@@ -141,9 +141,17 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				} else {
+				} else if ( getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						e.printStackTrace();
+
+					}
+				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
+					try {
+						return "[URGENT] \n\tPatient: " + p +  "; \n\tFrom: " + startdate
 								+ "; \n\tTo: " + enddate;
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -165,10 +173,18 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				} else {
+				}else if ( getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
 								+ enddate;
+					} catch (Exception e) {
+						e.printStackTrace();
+
+					}
+				}else if (getStatus().toLowerCase().equals("pending of assigning")) {
+					try {
+						return "\n\tPatient: " + p +  "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
 					} catch (Exception e) {
 						e.printStackTrace();
 
