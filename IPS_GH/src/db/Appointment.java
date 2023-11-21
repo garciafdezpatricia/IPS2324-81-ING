@@ -177,7 +177,7 @@ public class Appointment {
 				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
 					try {
 						return "[URGENT] \n\tPatient: " + p +  "; \n\tFrom: " + startdate
-								+ "; \n\tTo: " + enddate;
+								+ "; \n\tTo: " + enddate + "Specialization: " + comments;
 					} catch (Exception e) {
 						e.printStackTrace();
 
@@ -209,7 +209,7 @@ public class Appointment {
 				}else if (getStatus().toLowerCase().equals("pending of assigning")) {
 					try {
 						return "\n\tPatient: " + p +  "; \n\tFrom: " + startdate
-								+ "; \n\tTo: " + enddate;
+								+ "; \n\tTo: " + enddate + "Specialization: " + comments;
 					} catch (Exception e) {
 						e.printStackTrace();
 

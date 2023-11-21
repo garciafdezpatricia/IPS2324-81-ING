@@ -420,71 +420,70 @@ public class MedicalRecepcionistView extends JFrame {
 						}
 
 					}
-					//si se elige especializacion
-					if(selectedIndex == 1) {
+					// si se elige especializacion
+					if (selectedIndex == 1) {
 						int opcion = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
 								"Are you sure you want to reserve the appointment between an  "
-										+ listSpecialization.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
-										+ " on  " + dateChooser.getDate().getDay() + "/" + dateChooser.getDate().getMonth() + "/"
-										+ dateChooser.getDate().getYear() + " at " + getTextFieldFrom().getText() + " in the office "
+										+ listSpecialization.getSelectedValuesList() + " and the patient "
+										+ list_patients.getSelectedValue() + " on  " + dateChooser.getDate().getDay()
+										+ "/" + dateChooser.getDate().getMonth() + "/" + dateChooser.getDate().getYear()
+										+ " at " + getTextFieldFrom().getText() + " in the office "
 										+ getComboBoxOffices().getSelectedItem() + "?",
 								"Confirmation", JOptionPane.YES_NO_OPTION);
 
 						// Verificar la respuesta del usuario
 						if (opcion == JOptionPane.YES_OPTION) {
 							String comments = "";
-							for(int i = 0; i<listSpecialization.getSelectedValuesList().size(); i++){
-								comments+= listSpecialization.getSelectedValuesList().get(i) + "\n";
-							}
-							// El usuario ha confirmado, realiza la acción
-							// Puedes poner aquí el código que quieras ejecutar después de la confirmación
-							System.out.println("Acción realizada.");
-							if (rdbtnUrgent.isSelected()) {
-								for (int j = 0; j < listSpecialization.getSelectedValuesList().size(); j++) {
-									sendEmail(((Doctor) listSpecialization.getSelectedValuesList().get(j)).getEmail());
+							for (int i = 0; i < listSpecialization.getSelectedValuesList().size(); i++) {
+								comments = listSpecialization.getSelectedValuesList().get(i) + "\n";
+								Patient p = (Patient) list_patients.getSelectedValue();
+								if (rdbtnUrgent.isSelected()) {
+									try {
+										ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
+												new BigInteger(String.valueOf(62)),
+												new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+														+ getTextFieldFromH().getText() + ":00",
+												new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+														+ getTextFieldToH().getText() + ":00",
+												1,
+												ConnectionFactory.officeIdFrom(
+														getComboBoxOffices().getSelectedItem().toString()),
+												newContactInfo, "Pending of assigning", comments);
+									} catch (Exception e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+
+								} else {
+									try {
+										ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
+												new BigInteger(String.valueOf(62)),
+												new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+														+ getTextFieldFromH().getText() + ":00",
+												new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+														+ getTextFieldToH().getText() + ":00",
+												0,
+												ConnectionFactory.officeIdFrom(
+														getComboBoxOffices().getSelectedItem().toString()),
+												newContactInfo, "Pending of assigning", comments);
+									} catch (Exception e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
 								}
-							}
-							Patient p = (Patient) list_patients.getSelectedValue();
-							if (rdbtnUrgent.isSelected()) {
+								getTextAreaDoctorAvailability().removeAll();
 								try {
-									ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(), new BigInteger(String.valueOf(62)),
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldFromH().getText()
-													+ ":00",
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
-													+ ":00",
-											1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-											newContactInfo, "Pending of assigning", comments);
+									getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(
+											getSelectedDoctors(), new java.sql.Date(dateChooser.getDate().getTime())));
 								} catch (Exception e1) {
 									// TODO Auto-generated catch block
 									e1.printStackTrace();
 								}
 
-							} else {
-								try {
-									ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(), new BigInteger(String.valueOf(62)),
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldFromH().getText()
-													+ ":00",
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
-													+ ":00",
-											0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-											newContactInfo, "Pending of assigning", comments);
-								} catch (Exception e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-							}
-							getTextAreaDoctorAvailability().removeAll();
-							try {
-								getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-										new java.sql.Date(dateChooser.getDate().getTime())));
-							} catch (Exception e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
+								getTextAreaOfficeAvailability().removeAll();
+								showFreeHours(dateChooser.getDate());
 
-							getTextAreaOfficeAvailability().removeAll();
-							;
-							showFreeHours(dateChooser.getDate());
+							}
 						} else {
 							// El usuario ha cancelado la acción
 							System.out.println("Acción cancelada.");

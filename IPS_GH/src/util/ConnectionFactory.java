@@ -2355,6 +2355,7 @@ public class ConnectionFactory {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			for (Appointment a : apps) {
+				System.out.println(a.getStartdate());
 				java.util.Date st = dateFormat.parse(a.getStartdate());
 				java.util.Date e = dateFormat.parse(a.getEnddate());
 
@@ -2397,16 +2398,19 @@ public class ConnectionFactory {
 						freeHours += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
 						if (appsThatDay.size() > 1 && i < appsThatDay.size() - 1) {
-							freeHours += " \n\tand from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
-									+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to ";
+							freeHours += " \n\tand from "
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+							;
 						} else {
-							freeHours += " \n\tand from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
-									+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+							freeHours += " \n\tand from "
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
+									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
 									+ " 23:59:00";
 							String aux = res;
 							res2 = freeHours + "\n" + aux;
 						}
-
+						
 //						res2 += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 //								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
 //						String aux = res;
@@ -2416,8 +2420,7 @@ public class ConnectionFactory {
 			} else {
 //				res2 += "14:00";
 //				res2 = "\n" + res;
-				freeHours += "23:59:00";
-				;
+				freeHours += "23:59:00";;
 				String aux = res;
 				res2 = freeHours + "\n" + aux;
 //				res += freeHours;
@@ -2426,44 +2429,6 @@ public class ConnectionFactory {
 
 		}
 		return res2;
-
-	}
-
-	public static int checkIfDoctorIDExists(String id) {
-		Connection con = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		int aux = -1;
-
-		try {
-			con = getOracleConnection();
-			ps = con.prepareStatement("SELECT * FROM DOCTOR WHERE personal_id = ?");
-
-			ps.setString(1, id);
-
-			rs = ps.executeQuery();
-
-			while (rs.next()) {
-				aux = rs.getInt("id");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException();
-		} finally {
-			try {
-				if (con != null)
-					con.close();
-				if (ps != null)
-					ps.close();
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-				throw new RuntimeException();
-			}
-		}
-		return aux;
 
 	}
 }
