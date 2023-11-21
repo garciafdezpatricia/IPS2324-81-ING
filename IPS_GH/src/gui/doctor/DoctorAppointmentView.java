@@ -1246,11 +1246,11 @@ public class DoctorAppointmentView extends JFrame {
 		if (btnMedicalRecord == null) {
 			btnMedicalRecord = new JButton("Open MedicalRecord");
 			btnMedicalRecord.addActionListener(new ActionListener() {
-				
 
 				public void actionPerformed(ActionEvent e) {
 					medicalRecord = new MedicalRecordView(appointment.patientid);
 					medicalRecord.setVisible(true);
+					medicalRecord.setLocationRelativeTo(null);
 				}
 			});
 		}

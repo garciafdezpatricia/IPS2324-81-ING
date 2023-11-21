@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
@@ -42,6 +43,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import java.awt.Font;
+import javax.swing.ListSelectionModel;
+import java.awt.Dimension;
 
 public class MedicalRecordView extends JFrame {
 
@@ -50,7 +53,7 @@ public class MedicalRecordView extends JFrame {
 	private JPanel pnButtons;
 	private JButton btnBack;
 	private List<Appointment> appointments;
-	
+	private Diagnosis selected;
 	private JPanel pnPatient;
 	private JLabel lblName;
 	private JPanel pnAppointmentInfo;
@@ -115,6 +118,7 @@ public class MedicalRecordView extends JFrame {
 	private JScrollPane scrollPane_6;
 	private String name;
 	private BigInteger patientID;
+	private JButton btnNewButton;
 	/**
 	 * Launch the application.
 	 */
@@ -148,7 +152,7 @@ public class MedicalRecordView extends JFrame {
 				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Medical record");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 668, 456);
+		setBounds(100, 100, 789, 456);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -212,16 +216,7 @@ public class MedicalRecordView extends JFrame {
 			tabbedPane.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 	                if (tabbedPane.getSelectedIndex() == 1) {
-	                    // Carga las citas desde la base de datos
-	                    List<Diagnosis> allDiagnosis = ConnectionFactory.getDiagnosisOfPatient(patientID);
-	                    DefaultListModel<Diagnosis> model = new DefaultListModel<Diagnosis>();
-	                    if (allDiagnosis.size()>0) {
-	                    	// construct each diagnosis
-	                    	for (Diagnosis item : allDiagnosis) {
-	                    		model.addElement(item);
-	                    	}
-	                    }
-	                    list.setModel(model);
+	                    cargarDiagnosticosPaciente();
 	                }
 				}
 			});
@@ -230,6 +225,22 @@ public class MedicalRecordView extends JFrame {
 		}
 		return tabbedPane;
 	}
+	
+	private void cargarDiagnosticosPaciente() {
+		int selIndex = list.getSelectedIndex();
+		// Carga los diagnosticos desde la base de datos
+        List<Diagnosis> allDiagnosis = ConnectionFactory.getDiagnosisOfPatient(patientID);
+        DefaultListModel<Diagnosis> model = new DefaultListModel<Diagnosis>();
+        if (allDiagnosis.size()>0) {
+        	// construct each diagnosis
+        	for (Diagnosis item : allDiagnosis) {
+        		model.addElement(item);
+        	}
+        }
+        list.setModel(model);
+        list.setSelectedIndex(selIndex);
+	}
+	
 	private JPanel getPnDiagnosis() {
 		if (pnDiagnosis == null) {
 			pnDiagnosis = new JPanel();
@@ -242,6 +253,7 @@ public class MedicalRecordView extends JFrame {
 	private JPanel getPnAppointmentList() {
 		if (pnAppointmentList == null) {
 			pnAppointmentList = new JPanel();
+			pnAppointmentList.setMaximumSize(new Dimension(100, 100));
 			pnAppointmentList.setLayout(new BorderLayout(0, 0));
 			pnAppointmentList.add(getScrollPane());
 			pnAppointmentList.add(getLblDiagnosisHistory(), BorderLayout.NORTH);
@@ -251,11 +263,16 @@ public class MedicalRecordView extends JFrame {
 	private JList getList() {
 		if (list == null) {
 			list = new JList();
+			list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			list.setMaximumSize(new Dimension(100, 100));
 			list.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
-					Diagnosis selected = (Diagnosis) list.getSelectedValue();
-					lblPutDoctor.setText(ConnectionFactory.getDoctor(selected.doctor));
-					lblPutDate.setText(selected.date);
+					if (list.getSelectedValue() != null) {
+						selected = (Diagnosis) list.getSelectedValue();
+						lblPutDoctor.setText(ConnectionFactory.getDoctor(selected.doctor));
+						lblPutDate.setText(selected.date);
+						// rellenar historial
+					}
 				}
 			});
 		}
@@ -283,6 +300,7 @@ public class MedicalRecordView extends JFrame {
 			pnContent.add(getBtnOpenDiagnosis());
 			pnContent.add(getLblDetailHistory());
 			pnContent.add(getScrollPane_2());
+			pnContent.add(getBtnNewButton());
 		}
 		return pnContent;
 	}
@@ -360,14 +378,31 @@ public class MedicalRecordView extends JFrame {
 	private JButton getBtnAddReport() {
 		if (btnAddReport == null) {
 			btnAddReport = new JButton("Add report");
-			btnAddReport.setBounds(28, 292, 89, 23);
+			btnAddReport.setBounds(10, 292, 89, 23);
 		}
 		return btnAddReport;
 	}
 	private JButton getBtnCloseProcedure() {
 		if (btnCloseProcedure == null) {
 			btnCloseProcedure = new JButton("Close");
-			btnCloseProcedure.setBounds(256, 292, 95, 23);
+			btnCloseProcedure.setBounds(238, 292, 95, 23);
+			btnCloseProcedure.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (selected.status != 2) {
+						selected.status = 2;
+						boolean result = ConnectionFactory.updateDiagnosis(selected);
+						if (result) {
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis closed", "Success", JOptionPane.INFORMATION_MESSAGE);
+							cargarDiagnosticosPaciente();
+						}
+						else
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis could not be closed", "Error", JOptionPane.INFORMATION_MESSAGE);
+					}
+					else {
+						JOptionPane.showMessageDialog(MedicalRecordView.this, "This diagnosis is already closed!", "Information", JOptionPane.INFORMATION_MESSAGE);
+					}
+				}
+			});
 		}
 		return btnCloseProcedure;
 	}
@@ -376,15 +411,28 @@ public class MedicalRecordView extends JFrame {
 			btnOpenDiagnosis = new JButton("Open");
 			btnOpenDiagnosis.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					if (selected.status != 1) {
+						selected.status = 1;
+						boolean result = ConnectionFactory.updateDiagnosis(selected);
+						if (result) {
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis opened", "Success", JOptionPane.INFORMATION_MESSAGE);
+							cargarDiagnosticosPaciente();
+						}
+						else
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis could not be opened", "Error", JOptionPane.INFORMATION_MESSAGE);
+					}
+					else {
+						JOptionPane.showMessageDialog(MedicalRecordView.this, "This diagnosis is already opened!", "Information", JOptionPane.INFORMATION_MESSAGE);
+					}
 				}
 			});
-			btnOpenDiagnosis.setBounds(145, 292, 83, 23);
+			btnOpenDiagnosis.setBounds(127, 292, 83, 23);
 		}
 		return btnOpenDiagnosis;
 	}
 	private JLabel getLblDetailHistory() {
 		if (lblDetailHistory == null) {
-			lblDetailHistory = new JLabel("Details:");
+			lblDetailHistory = new JLabel("Report:");
 			lblDetailHistory.setBounds(10, 212, 46, 14);
 		}
 		return lblDetailHistory;
@@ -419,6 +467,7 @@ public class MedicalRecordView extends JFrame {
 				model.addElement(item.getStartdate());
 			}
 			listapptmnt = new JList(model);
+			listapptmnt.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			listapptmnt.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					if (listapptmnt.getSelectedValuesList().size() > 0) {
@@ -442,17 +491,9 @@ public class MedicalRecordView extends JFrame {
 						String allDiagnosis = "";
 						List<String> result = ConnectionFactory.getDiagnosisFromAppointment(apnmt.getId()); 
 						if (result.size() > 0) {
-							allDiagnosis = result.get(0);
-							// if there are more than one diagnosis
-							if (allDiagnosis.contains("||")) {
-								String[] diagnosis = allDiagnosis.split("||");
-								for (String item : diagnosis) {
-									diagn.addElement(item.strip());
-								}
+							for (String diagnosis : result) {
+								diagn.addElement(diagnosis);
 							}
-							// if there is only one diagnosis
-							else
-								diagn.addElement(allDiagnosis.strip());
 						}
 						listPutDiagnosis.setModel(diagn);
 					}
@@ -626,7 +667,7 @@ public class MedicalRecordView extends JFrame {
 		if (lblNewLabel_9 == null) {
 			lblNewLabel_9 = new JLabel("Diagnosis:");
 			lblNewLabel_9.setFont(new Font("Tahoma", Font.BOLD, 11));
-			lblNewLabel_9.setBounds(10, 162, 84, 14);
+			lblNewLabel_9.setBounds(10, 172, 84, 14);
 		}
 		return lblNewLabel_9;
 	}
@@ -685,5 +726,29 @@ public class MedicalRecordView extends JFrame {
 			scrollPane_6.setViewportView(getProceduresOfAppointmentList());
 		}
 		return scrollPane_6;
+	}
+	private JButton getBtnNewButton() {
+		if (btnNewButton == null) {
+			btnNewButton = new JButton("Don't track");
+			btnNewButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (selected.status != 0) {
+						selected.status = 0;
+						boolean result = ConnectionFactory.updateDiagnosis(selected);
+						if (result) {
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis untracked", "Success", JOptionPane.INFORMATION_MESSAGE);
+							cargarDiagnosticosPaciente();
+						}
+						else
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis could not be untracked", "Error", JOptionPane.INFORMATION_MESSAGE);
+					}
+					else {
+						JOptionPane.showMessageDialog(MedicalRecordView.this, "This diagnosis is already untracked!", "Information", JOptionPane.INFORMATION_MESSAGE);
+					}
+				}
+			});
+			btnNewButton.setBounds(361, 292, 89, 23);
+		}
+		return btnNewButton;
 	}
 }

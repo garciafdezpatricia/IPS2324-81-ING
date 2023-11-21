@@ -96,6 +96,40 @@ public class ConnectionFactory {
 		return result;
 	}
 
+	public static boolean updateDiagnosis(Diagnosis diagnosis) {
+		boolean result = false;
+		
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement(
+					"UPDATE DIAGNOSIS SET estado = ? " + "WHERE id = ?");
+			ps.setInt(1, diagnosis.status);
+			ps.setInt(2, diagnosis.id);
+			ps.executeUpdate();
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+		return result;
+
+	}
+	
+	
 	public static List<Diagnosis> getDiagnosisOfPatient(BigInteger patientID) {
 		List<Diagnosis> result = new ArrayList<Diagnosis>();
 		try {
@@ -104,13 +138,15 @@ public class ConnectionFactory {
 			// Crear una sentencia SQL
 			Statement statement = connection.createStatement();
 			// Ejecutar una consulta SQL
-			String sql = "SELECT DIAGNOSIS, INITDATE, DOCTORID FROM DIAGNOSIS WHERE PATIENTID LIKE '" 
+			String sql = "SELECT DIAGNOSIS, INITDATE, DOCTORID, ESTADO, ID FROM DIAGNOSIS WHERE PATIENTID LIKE '" 
 					+ patientID + "'";
 			ResultSet resultSet = statement.executeQuery(sql);
 			// Procesar los resultados
 			while (resultSet.next()) {
 				Diagnosis diagnosisInfo = new Diagnosis(resultSet.getString("DIAGNOSIS"), 
-						resultSet.getString("INITDATE"), resultSet.getBigDecimal("DOCTORID").toBigInteger());
+						resultSet.getString("INITDATE"), resultSet.getBigDecimal("DOCTORID").toBigInteger(), 
+						resultSet.getInt("ESTADO"));
+				diagnosisInfo.id = resultSet.getInt("ID");
 	            result.add(diagnosisInfo);
 			}
 			// Cerrar la conexión
@@ -131,12 +167,11 @@ public class ConnectionFactory {
 			// Crear una sentencia SQL
 			Statement statement = connection.createStatement();
 			// Ejecutar una consulta SQL
-			String sql = "SELECT DIAGNOSIS, INITDATE FROM DIAGNOSIS WHERE APPOINTMENTID LIKE '" + appointmentid + "'";
+			String sql = "SELECT DIAGNOSIS FROM DIAGNOSIS WHERE APPOINTMENTID LIKE '" + appointmentid + "'";
 			ResultSet resultSet = statement.executeQuery(sql);
 			// Procesar los resultados
 			while (resultSet.next()) {
 				result.add(resultSet.getString("DIAGNOSIS"));
-				result.add(resultSet.getString("INITDATE"));
 			}
 			// Cerrar la conexión
 			resultSet.close();
@@ -150,7 +185,6 @@ public class ConnectionFactory {
 
 	public static boolean addDiagnosisToAppointment(AppointmentBLDto appointment, List<String> listOfDiagnosis) {
 		boolean result = false;
-		String diagnosis = String.join("||", listOfDiagnosis);
 		try {
 			// Establecer la conexión
 			Connection connection = ConnectionFactory.getOracleConnection();
@@ -159,13 +193,14 @@ public class ConnectionFactory {
 			// Crear una sentencia SQL
 			PreparedStatement statement = connection.prepareStatement(insertQuery);
 			// Ejecutar una consulta SQL
-
-			statement.setBigDecimal(1, new BigDecimal(appointment.patientid));
-			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
-			statement.setString(3, appointment.startDate);
-			statement.setBigDecimal(4, new BigDecimal(appointment.id));
-			statement.setString(5, diagnosis);
-			result = statement.executeUpdate() > 0 ? true : false;
+			for (String item : listOfDiagnosis) {
+				statement.setBigDecimal(1, new BigDecimal(appointment.patientid));
+				statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
+				statement.setString(3, appointment.startDate);
+				statement.setBigDecimal(4, new BigDecimal(appointment.id));
+				statement.setString(5, item);
+				result = statement.executeUpdate() > 0;
+			}
 			// Cerrar la conexión
 			statement.close();
 			connection.close();
