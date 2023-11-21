@@ -401,7 +401,7 @@ public class MedicalRecepcionistView extends JFrame {
 						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
 								+ ":00",
 						1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-						newContactInfo, "");
+						newContactInfo);
 
 			} else {
 				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
@@ -410,7 +410,7 @@ public class MedicalRecepcionistView extends JFrame {
 						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
 								+ ":00",
 						0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-						newContactInfo, "");
+						newContactInfo);
 			}
 			getTextAreaDoctorAvailability().removeAll();
 			try {

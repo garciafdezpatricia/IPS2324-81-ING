@@ -32,6 +32,25 @@ public class Appointment {
 		this.status = status;
 		this.comments = comments;
 	}
+	
+	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
+			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
+			String status) {
+		super();
+		this.id = id;
+		this.patientid = patientid;
+		this.doctorid = doctorid;
+		this.startdate = startdate;
+		this.enddate = enddate;
+		this.urgency = urgency;
+		this.attended = attended;
+		this.checkedin = checkedin;
+		this.checkedout = checkedout;
+		this.officeId = officeId;
+		this.information = information;
+		this.status = status;
+		this.comments = "";
+	}
 
 	public String getStatus() {
 		return status;

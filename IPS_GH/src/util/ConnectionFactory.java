@@ -583,7 +583,7 @@ public class ConnectionFactory {
 				String status = resultSet.getString("status");
 
 				apps.addElement(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
-						checkedin, checkedout, officeid, information, status, ""));
+						checkedin, checkedout, officeid, information, status));
 
 			}
 
@@ -612,7 +612,7 @@ public class ConnectionFactory {
 	}
 
 	public static void createAppointment(BigInteger patientID, BigInteger doctorID, String startDate, String endDate,
-			int urgency, int officeId, String information, String comments) throws Exception {
+			int urgency, int officeId, String information) throws Exception {
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
 
@@ -644,7 +644,7 @@ public class ConnectionFactory {
 			preparedStatement.setInt(9, officeId);
 			preparedStatement.setString(10, information);
 			preparedStatement.setString(11, "Booked");
-			preparedStatement.setString(12, comments);
+			preparedStatement.setString(12, "");
 
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
@@ -983,7 +983,7 @@ public class ConnectionFactory {
 								resultSet3.getString("enddate"), resultSet3.getInt("urgency"),
 								resultSet3.getInt("attended"), resultSet3.getString("checkedin"),
 								resultSet3.getString("checkedout"), resultSet3.getBigDecimal("officeid").toBigInteger(),
-								resultSet3.getString("information"), resultSet3.getString("status"), resultSet3.getString("comments")));
+								resultSet3.getString("information"), resultSet3.getString("status")));
 
 					}
 
@@ -1141,7 +1141,7 @@ public class ConnectionFactory {
 										resultSet3.getInt("urgency"), resultSet3.getInt("attended"),
 										resultSet3.getString("checkedin"), resultSet3.getString("checkedout"),
 										resultSet3.getBigDecimal("officeid").toBigInteger(),
-										resultSet3.getString("information"), resultSet3.getString("status"), resultSet3.getString("comments")));
+										resultSet3.getString("information"), resultSet3.getString("status")));
 							}
 						}
 
@@ -1251,7 +1251,7 @@ public class ConnectionFactory {
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status, ""));
+						officeid.toBigInteger(), information, status));
 			}
 
 			// Cerrar la conexión
@@ -1304,7 +1304,7 @@ public class ConnectionFactory {
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status, ""));
+						officeid.toBigInteger(), information, status));
 			}
 
 			// Cerrar la conexión
@@ -1356,7 +1356,7 @@ public class ConnectionFactory {
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status, ""));
+						officeid.toBigInteger(), information, status));
 			}
 
 			// Cerrar la conexión
@@ -1464,7 +1464,7 @@ public class ConnectionFactory {
 					// Procesa otros campos según la estructura de tu tabla
 					appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 							doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-							officeid.toBigInteger(), information, status, ""));
+							officeid.toBigInteger(), information, status));
 				}
 				resultSet.close();
 
@@ -1518,7 +1518,7 @@ public class ConnectionFactory {
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status, ""));
+						officeid.toBigInteger(), information, status));
 			}
 
 			// Cerrar la conexión
@@ -2152,7 +2152,7 @@ public class ConnectionFactory {
 				String status = resultSet.getString("status");
 
 				apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended, checkedin,
-						checkedout, new BigInteger(String.valueOf(officeId)), information, status, ""));
+						checkedout, new BigInteger(String.valueOf(officeId)), information, status));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2246,7 +2246,7 @@ public class ConnectionFactory {
 			String status = resultSet.getString("status");
 
 			apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended, checkedin,
-					checkedout, new BigInteger(String.valueOf(officeId)), information, status, ""));
+					checkedout, new BigInteger(String.valueOf(officeId)), information, status));
 		}
 
 		if (apps.size() == 0) {
