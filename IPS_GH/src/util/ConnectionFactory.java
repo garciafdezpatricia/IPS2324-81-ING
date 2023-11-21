@@ -67,8 +67,9 @@ public class ConnectionFactory {
 		}
 		return result;
 	}
-	
-	public static boolean addPrescriptionsToAppointment(AppointmentBLDto appointment, List<String> listOfPrescriptions) {
+
+	public static boolean addPrescriptionsToAppointment(AppointmentBLDto appointment,
+			List<String> listOfPrescriptions) {
 		boolean result = false;
 		String prescriptions = String.join("||", listOfPrescriptions);
 		try {
@@ -94,7 +95,59 @@ public class ConnectionFactory {
 		}
 		return result;
 	}
-	
+
+	public static List<Diagnosis> getDiagnosisOfPatient(BigInteger patientID) {
+		List<Diagnosis> result = new ArrayList<Diagnosis>();
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT DIAGNOSIS, INITDATE, DOCTORID FROM DIAGNOSIS WHERE PATIENTID LIKE '" 
+					+ patientID + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				Diagnosis diagnosisInfo = new Diagnosis(resultSet.getString("DIAGNOSIS"), 
+						resultSet.getString("INITDATE"), resultSet.getBigDecimal("DOCTORID").toBigInteger());
+	            result.add(diagnosisInfo);
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public static List<String> getDiagnosisFromAppointment(BigInteger appointmentid) {
+		List<String> result = new ArrayList<String>();
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT DIAGNOSIS, INITDATE FROM DIAGNOSIS WHERE APPOINTMENTID LIKE '" + appointmentid + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				result.add(resultSet.getString("DIAGNOSIS"));
+				result.add(resultSet.getString("INITDATE"));
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 	public static boolean addDiagnosisToAppointment(AppointmentBLDto appointment, List<String> listOfDiagnosis) {
 		boolean result = false;
 		String diagnosis = String.join("||", listOfDiagnosis);
@@ -122,7 +175,7 @@ public class ConnectionFactory {
 		}
 		return result;
 	}
-	
+
 	public static boolean addProceduresToAppointment(AppointmentBLDto appointment, List<String> listOfProcedures) {
 		boolean result = false;
 		String procedures = String.join("||", listOfProcedures);
@@ -1539,7 +1592,7 @@ public class ConnectionFactory {
 		return appointments;
 	}
 
-	public static DefaultListModel<Appointment> getAppointmentsByPatientID(BigInteger pid) throws Exception {
+	public static DefaultListModel<Appointment> getAppointmentsByPatientID(BigInteger pid) {
 		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
 
 		try {
@@ -1590,6 +1643,39 @@ public class ConnectionFactory {
 
 		return appointments;
 
+	}
+
+	public static String getPatientInformation(int pid) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT firstname, surname FROM Patient WHERE id=?");
+			ps.setInt(1, pid);
+			rs = ps.executeQuery();
+			String name = "";
+
+			while (rs.next()) {
+				name += rs.getString("firstname");
+				name += " " + rs.getString("surname");
+			}
+			return name;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
 	}
 
 	public static List<AppointmentBLDto> getAppointmentsByPatientIDList(int pid) {
@@ -1823,7 +1909,7 @@ public class ConnectionFactory {
 
 	}
 
-	public static String getDoctor(BigInteger id) throws Exception {
+	public static String getDoctor(BigInteger id) {
 
 		String name = "";
 
@@ -1832,7 +1918,7 @@ public class ConnectionFactory {
 			Connection connection = ConnectionFactory.getOracleConnection();
 
 			// Ejecutar una consulta SQL
-			String sql = "SELECT name FROM doctor where id = ?";
+			String sql = "SELECT name, surname FROM doctor where id = ?";
 
 			PreparedStatement statement = connection.prepareStatement(sql);
 
@@ -1842,8 +1928,7 @@ public class ConnectionFactory {
 			// Procesar los resultados
 			while (resultSet.next()) {
 
-				name = resultSet.getString("name");
-
+				name = resultSet.getString("name") + " " + resultSet.getString("surname");
 			}
 
 			// Cerrar la conexión
