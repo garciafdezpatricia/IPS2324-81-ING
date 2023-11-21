@@ -202,7 +202,7 @@ public class ConnectionFactory {
 			Statement statement = connection.createStatement();
 
 			// Ejecutar una consulta SQL
-			String sql = "SELECT * FROM DOCTOR WHERE ID != 62";
+			String sql = "SELECT * FROM DOCTOR";
 			ResultSet resultSet = statement.executeQuery(sql);
 
 			// Procesar los resultados
@@ -478,11 +478,12 @@ public class ConnectionFactory {
 				BigDecimal officeid = resultSet.getBigDecimal("officeid");
 				String information = resultSet.getString("information");
 				String status = resultSet.getString("status");
+				String comments = resultSet.getString("comments");
 
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status));
+						officeid.toBigInteger(), information, status, comments));
 			}
 
 			// Cerrar la conexión
@@ -495,6 +496,7 @@ public class ConnectionFactory {
 
 		return appointments;
 	}
+
 	public static boolean isWorking(Date utilDate, String hourFrom, String hourTo, BigInteger idDoctor)
 			throws Exception {
 		DefaultListModel<WorkPeriod> workperiod = new DefaultListModel<>();
@@ -671,8 +673,8 @@ public class ConnectionFactory {
 			Connection connection = ConnectionFactory.getOracleConnection();
 
 			// Consulta SQL con parámetros
-			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status) "
-					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status, Comments) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
@@ -692,17 +694,96 @@ public class ConnectionFactory {
 			preparedStatement.setInt(9, officeId);
 			preparedStatement.setString(10, information);
 			preparedStatement.setString(11, status);
+			preparedStatement.setString(12, "");
 
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
 
-//			if (filasAfectadas > 0) {
-//				System.out.println("Inserción exitosa.");
-//			} else {
-//				System.out.println("La inserción no se pudo realizar.");
-//			}
+			preparedStatement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
-			// Cerrar la conexión y el PreparedStatement
+	public static void createAppointmentPendingOfAssigning(BigInteger patientID, BigInteger doctorID, String startDate,
+			String endDate, int urgency, int officeId, String information, String status, String comments) throws Exception {
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		// Datos para la inserción
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL con parámetros
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status, Comments) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+			// Crear un PreparedStatement
+			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+			BigDecimal doc = new BigDecimal(doctorID);
+
+			// Establecer valores para los parámetros
+			preparedStatement.setBigDecimal(1, new BigDecimal(patientID));
+			preparedStatement.setBigDecimal(2, doc);
+			preparedStatement.setString(3, startDate);
+			preparedStatement.setString(4, endDate);
+			preparedStatement.setInt(5, urgency);
+			preparedStatement.setInt(6, 0);
+			preparedStatement.setString(7, "");
+			preparedStatement.setString(8, "");
+			preparedStatement.setInt(8, 0);
+			preparedStatement.setInt(9, officeId);
+			preparedStatement.setString(10, information);
+			preparedStatement.setString(11, status);
+			preparedStatement.setString(12, comments);
+
+			// Ejecutar la inserción
+			int filasAfectadas = preparedStatement.executeUpdate();
+
+			preparedStatement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void createRequestForAppointment(BigInteger patientID, BigInteger doctorID, String startDate,
+			String endDate, int urgency, int officeId, String information, String comments) throws Exception {
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL con parámetros
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status, Comments) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+			// Crear un PreparedStatement
+			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+			BigDecimal doc = new BigDecimal(doctorID);
+
+			// Establecer valores para los parámetros
+			preparedStatement.setBigDecimal(1, new BigDecimal(patientID));
+			preparedStatement.setBigDecimal(2, doc);
+			preparedStatement.setString(3, startDate);
+			preparedStatement.setString(4, endDate);
+			preparedStatement.setInt(5, urgency);
+			preparedStatement.setInt(6, 0);
+			preparedStatement.setString(7, "");
+			preparedStatement.setString(8, "");
+			preparedStatement.setInt(8, 0);
+			preparedStatement.setInt(9, officeId);
+			preparedStatement.setString(10, information);
+			preparedStatement.setString(11, "Requested");
+			preparedStatement.setString(12, comments);
+
+			// Ejecutar la inserción
+			int filasAfectadas = preparedStatement.executeUpdate();
+
 			preparedStatement.close();
 			connection.close();
 		} catch (SQLException e) {
@@ -1008,7 +1089,7 @@ public class ConnectionFactory {
 					for (Appointment a : apps) {
 						if (dateFormat.parse(a.getStartdate()).after(dateFormat.parse(day + " 00:00:00"))
 								&& dateFormat.parse(a.getEnddate()).before(dateFormat.parse(day + " 24:00:00"))
-								&& a.getStatus().toLowerCase().equals("booked")) {
+								&& !a.getStatus().equals("Cancelled")) {
 
 							appsThatDay.add(a);
 						}
@@ -1170,7 +1251,7 @@ public class ConnectionFactory {
 //							System.out.println("a.getend" + a.getEnddate());
 							if (dateFormat2.parse(a.getStartdate()).after(dateFormat2.parse(day + " 00:00:00"))
 									&& dateFormat2.parse(a.getEnddate()).before(dateFormat2.parse(day + " 24:00:00"))
-									&& a.getStatus().toLowerCase().equals("booked")) {
+									&& !a.getStatus().toLowerCase().equals("cancelled")) {
 //								System.out.println(a);
 								appsThatDay.add(a);
 							}
@@ -2198,17 +2279,12 @@ public class ConnectionFactory {
 			con = getOracleConnection();
 			ps = con.prepareStatement("SELECT * FROM OFFICE WHERE officecode = ?");
 
-//			System.out.println(code);
 			ps.setString(1, code);
 
 			rs = ps.executeQuery();
 
-			WorkPeriod wp = null;
-
 			while (rs.next()) {
 				id = rs.getInt("id");
-
-//				System.out.println("id=" + id);
 			}
 
 		} catch (Exception e) {
@@ -2226,6 +2302,7 @@ public class ConnectionFactory {
 				throw new RuntimeException();
 			}
 		}
+		System.out.println("Office: " + id);
 		return id;
 	}
 
@@ -2278,7 +2355,6 @@ public class ConnectionFactory {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			for (Appointment a : apps) {
-				System.out.println(a.getStartdate());
 				java.util.Date st = dateFormat.parse(a.getStartdate());
 				java.util.Date e = dateFormat.parse(a.getEnddate());
 
@@ -2321,19 +2397,16 @@ public class ConnectionFactory {
 						freeHours += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
 						if (appsThatDay.size() > 1 && i < appsThatDay.size() - 1) {
-							freeHours += " \n\tand from "
-									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
-									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
-							;
+							freeHours += " \n\tand from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
+									+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to ";
 						} else {
-							freeHours += " \n\tand from "
-									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
-									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+							freeHours += " \n\tand from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
+									+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
 									+ " 23:59:00";
 							String aux = res;
 							res2 = freeHours + "\n" + aux;
 						}
-						
+
 //						res2 += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 //								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
 //						String aux = res;
@@ -2343,7 +2416,8 @@ public class ConnectionFactory {
 			} else {
 //				res2 += "14:00";
 //				res2 = "\n" + res;
-				freeHours += "23:59:00";;
+				freeHours += "23:59:00";
+				;
 				String aux = res;
 				res2 = freeHours + "\n" + aux;
 //				res += freeHours;
@@ -2352,6 +2426,44 @@ public class ConnectionFactory {
 
 		}
 		return res2;
+
+	}
+
+	public static int checkIfDoctorIDExists(String id) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		int aux = -1;
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM DOCTOR WHERE personal_id = ?");
+
+			ps.setString(1, id);
+
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				aux = rs.getInt("id");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+		return aux;
 
 	}
 }

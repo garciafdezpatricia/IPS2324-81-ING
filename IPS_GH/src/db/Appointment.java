@@ -5,14 +5,39 @@ import java.math.BigInteger;
 import util.ConnectionFactory;
 
 public class Appointment {
+
 	private BigInteger id;
 	private BigInteger patientid;
 	private BigInteger doctorid, officeId;;
 	private String startdate, enddate, information, checkedin, checkedout, status;
 	private int urgency, attended;
+	private String comments;
 	private String p;
 	private String doctor;
 
+
+
+	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
+			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
+			String status, String comments) throws Exception {
+		super();
+		this.id = id;
+		this.patientid = patientid;
+		this.doctorid = doctorid;
+		this.startdate = startdate;
+		this.enddate = enddate;
+		this.urgency = urgency;
+		this.attended = attended;
+		this.checkedin = checkedin;
+		this.checkedout = checkedout;
+		this.officeId = officeId;
+		this.information = information;
+		this.status = status;
+		this.comments = comments;
+		p = ConnectionFactory.getPatient(patientid);
+		doctor = ConnectionFactory.getDoctor(doctorid);
+	}
+	
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
 			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
 			String status) throws Exception {
@@ -29,10 +54,10 @@ public class Appointment {
 		this.officeId = officeId;
 		this.information = information;
 		this.status = status;
+		this.comments = "";
 		p = ConnectionFactory.getPatient(patientid);
 		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
-
 	public String getStatus() {
 		return status;
 	}
