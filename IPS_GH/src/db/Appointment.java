@@ -10,10 +10,13 @@ public class Appointment {
 	private BigInteger doctorid, officeId;;
 	private String startdate, enddate, information, checkedin, checkedout, status;
 	private int urgency, attended;
+	private String comments;
+
+
 
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
 			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
-			String status) {
+			String status, String comments) {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -27,6 +30,7 @@ public class Appointment {
 		this.officeId = officeId;
 		this.information = information;
 		this.status = status;
+		this.comments = comments;
 	}
 
 	public String getStatus() {
@@ -124,6 +128,15 @@ public class Appointment {
 	public void setInformation(String information) {
 		this.information = information;
 	}
+	
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+	
 
 	@Override
 	public String toString() {

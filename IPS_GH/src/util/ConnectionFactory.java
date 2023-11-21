@@ -583,7 +583,7 @@ public class ConnectionFactory {
 				String status = resultSet.getString("status");
 
 				apps.addElement(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended,
-						checkedin, checkedout, officeid, information, status));
+						checkedin, checkedout, officeid, information, status, ""));
 
 			}
 
@@ -612,7 +612,7 @@ public class ConnectionFactory {
 	}
 
 	public static void createAppointment(BigInteger patientID, BigInteger doctorID, String startDate, String endDate,
-			int urgency, int officeId, String information) throws Exception {
+			int urgency, int officeId, String information, String comments) throws Exception {
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
 
@@ -623,8 +623,8 @@ public class ConnectionFactory {
 			Connection connection = ConnectionFactory.getOracleConnection();
 
 			// Consulta SQL con parámetros
-			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status) "
-					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status, Comments) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 			// Crear un PreparedStatement
 			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
@@ -644,17 +644,51 @@ public class ConnectionFactory {
 			preparedStatement.setInt(9, officeId);
 			preparedStatement.setString(10, information);
 			preparedStatement.setString(11, "Booked");
+			preparedStatement.setString(12, comments);
 
 			// Ejecutar la inserción
 			int filasAfectadas = preparedStatement.executeUpdate();
 
-//			if (filasAfectadas > 0) {
-//				System.out.println("Inserción exitosa.");
-//			} else {
-//				System.out.println("La inserción no se pudo realizar.");
-//			}
+			preparedStatement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void createRequestForAppointment(BigInteger patientID, BigInteger doctorID, String startDate, String endDate,
+			int urgency, int officeId, String information, String comments) throws Exception {
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
 
-			// Cerrar la conexión y el PreparedStatement
+			// Consulta SQL con parámetros
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status, Comments) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+			// Crear un PreparedStatement
+			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+			BigDecimal doc = new BigDecimal(doctorID);
+
+			// Establecer valores para los parámetros
+			preparedStatement.setBigDecimal(1, new BigDecimal(patientID));
+			preparedStatement.setBigDecimal(2, doc);
+			preparedStatement.setString(3, startDate);
+			preparedStatement.setString(4, endDate);
+			preparedStatement.setInt(5, urgency);
+			preparedStatement.setInt(6, 0);
+			preparedStatement.setString(7, "");
+			preparedStatement.setString(8, "");
+			preparedStatement.setInt(8, 0);
+			preparedStatement.setInt(9, officeId);
+			preparedStatement.setString(10, information);
+			preparedStatement.setString(11, "Requested");
+			preparedStatement.setString(12, comments);
+
+			// Ejecutar la inserción
+			int filasAfectadas = preparedStatement.executeUpdate();
+
 			preparedStatement.close();
 			connection.close();
 		} catch (SQLException e) {
@@ -949,7 +983,7 @@ public class ConnectionFactory {
 								resultSet3.getString("enddate"), resultSet3.getInt("urgency"),
 								resultSet3.getInt("attended"), resultSet3.getString("checkedin"),
 								resultSet3.getString("checkedout"), resultSet3.getBigDecimal("officeid").toBigInteger(),
-								resultSet3.getString("information"), resultSet3.getString("status")));
+								resultSet3.getString("information"), resultSet3.getString("status"), resultSet3.getString("comments")));
 
 					}
 
@@ -1107,7 +1141,7 @@ public class ConnectionFactory {
 										resultSet3.getInt("urgency"), resultSet3.getInt("attended"),
 										resultSet3.getString("checkedin"), resultSet3.getString("checkedout"),
 										resultSet3.getBigDecimal("officeid").toBigInteger(),
-										resultSet3.getString("information"), resultSet3.getString("status")));
+										resultSet3.getString("information"), resultSet3.getString("status"), resultSet3.getString("comments")));
 							}
 						}
 
@@ -1217,7 +1251,7 @@ public class ConnectionFactory {
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status));
+						officeid.toBigInteger(), information, status, ""));
 			}
 
 			// Cerrar la conexión
@@ -1270,7 +1304,7 @@ public class ConnectionFactory {
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status));
+						officeid.toBigInteger(), information, status, ""));
 			}
 
 			// Cerrar la conexión
@@ -1322,7 +1356,7 @@ public class ConnectionFactory {
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status));
+						officeid.toBigInteger(), information, status, ""));
 			}
 
 			// Cerrar la conexión
@@ -1430,7 +1464,7 @@ public class ConnectionFactory {
 					// Procesa otros campos según la estructura de tu tabla
 					appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 							doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-							officeid.toBigInteger(), information, status));
+							officeid.toBigInteger(), information, status, ""));
 				}
 				resultSet.close();
 
@@ -1484,7 +1518,7 @@ public class ConnectionFactory {
 				// Procesa otros campos según la estructura de tu tabla
 				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
-						officeid.toBigInteger(), information, status));
+						officeid.toBigInteger(), information, status, ""));
 			}
 
 			// Cerrar la conexión
@@ -2118,7 +2152,7 @@ public class ConnectionFactory {
 				String status = resultSet.getString("status");
 
 				apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended, checkedin,
-						checkedout, new BigInteger(String.valueOf(officeId)), information, status));
+						checkedout, new BigInteger(String.valueOf(officeId)), information, status, ""));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2150,17 +2184,12 @@ public class ConnectionFactory {
 			con = getOracleConnection();
 			ps = con.prepareStatement("SELECT * FROM OFFICE WHERE officecode = ?");
 
-//			System.out.println(code);
 			ps.setString(1, code);
 
 			rs = ps.executeQuery();
 
-			WorkPeriod wp = null;
-
 			while (rs.next()) {
 				id = rs.getInt("id");
-
-//				System.out.println("id=" + id);
 			}
 
 		} catch (Exception e) {
@@ -2178,6 +2207,7 @@ public class ConnectionFactory {
 				throw new RuntimeException();
 			}
 		}
+		System.out.println("Office: " + id);
 		return id;
 	}
 
@@ -2216,7 +2246,7 @@ public class ConnectionFactory {
 			String status = resultSet.getString("status");
 
 			apps.add(new Appointment(id, patientId, doctorId, startdate, endate, urgency, attended, checkedin,
-					checkedout, new BigInteger(String.valueOf(officeId)), information, status));
+					checkedout, new BigInteger(String.valueOf(officeId)), information, status, ""));
 		}
 
 		if (apps.size() == 0) {
@@ -2304,5 +2334,43 @@ public class ConnectionFactory {
 		}
 		return res2;
 
+	}
+
+	public static int checkIfDoctorIDExists(String id) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		int aux = -1;
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM DOCTOR WHERE personal_id = ?");
+
+			ps.setString(1, id);
+
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				aux = rs.getInt("id");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+		return aux;
+		
 	}
 }

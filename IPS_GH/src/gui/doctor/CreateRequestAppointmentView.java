@@ -53,9 +53,12 @@ import javax.swing.event.ListSelectionListener;
 import com.toedter.calendar.JDateChooser;
 
 import db.Doctor;
-import db.Office;
 import db.Patient;
 import util.ConnectionFactory;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 public class CreateRequestAppointmentView extends JFrame {
 
@@ -69,7 +72,6 @@ public class CreateRequestAppointmentView extends JFrame {
 	private JPanel panel_office;
 	private JPanel panel_information;
 	private JPanel panelSouth;
-	private JPanel panel_doctor_filter;
 	private JPanel panel_patient_filter;
 	private JLabel lblIPatientNam;
 	private JTextField textFieldNamePatient;
@@ -87,7 +89,7 @@ public class CreateRequestAppointmentView extends JFrame {
 	private JLabel lblChooseOffice;
 	private JComboBox<String> comboBoxOffices;
 
-	private boolean doctorChoosed = false;
+	private boolean doctorChoosed = true;
 	private boolean patientChoosed = false;
 	private boolean officeChoosed = false;
 
@@ -102,10 +104,9 @@ public class CreateRequestAppointmentView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					CreateRequestAppointmentView frame = new CreateRequestAppointmentView();
+					CreateRequestAppointmentView frame = new CreateRequestAppointmentView(docID);
 					frame.setVisible(true);
 					frame.setLocationRelativeTo(null); // centrar pantalla
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -133,7 +134,6 @@ public class CreateRequestAppointmentView extends JFrame {
 	private JPanel panelSurDoctor;
 	private JRadioButton rdbtnUrgent;
 	private JButton btnReset;
-	private JDateChooser dateChooser;
 	private JTextArea txtContactInfo;
 	private JPanel panelSouthPatient;
 	private JButton btnEdit;
@@ -153,33 +153,23 @@ public class CreateRequestAppointmentView extends JFrame {
 	private JLabel lblDNI;
 	private JTextField textFieldDni;
 	private JButton btnDNI;
-	private JScrollPane scrollPane;
-	private JPanel panelDoctorAvailability;
-	private JPanel panelOfficeAvailability;
-	private JScrollPane scrollPaneDoctorAvailability;
-	private JTextArea textAreaDoctorAvailability;
-	private JPanel panelOfficeButtons;
-	private JPanel panelPrevAndNext;
-	private JButton btnPrev;
-	private JButton btnNext;
-	private JPanel panelHours;
-	private JLabel lblFrom;
-	private JTextField textFieldFromH;
-	private JLabel lblTo;
-	private JTextField textFieldToH;
-	private JScrollPane scrollPaneOfficeAvailability;
-	private JTextArea textAreaOfficeAvailability;
 	private JPanel panelComments;
 	private JTextField txtComments;
 	private JPanel panelSouthButtons;
 	private JButton btnSendRequest;
+
+	private static String docID;
+	private JPanel panelDate;
+	private JDateChooser dateChooser;
+	private JRadioButton rdbtnNoDatePreference;
 
 	/**
 	 * Create the frame.
 	 * 
 	 * @throws Exception
 	 */
-	public CreateRequestAppointmentView() throws Exception {
+	public CreateRequestAppointmentView(String id) throws Exception {
+		CreateRequestAppointmentView.docID = id;
 
 		setTitle("Create request of appointment");
 		setIconImage(Toolkit.getDefaultToolkit()
@@ -203,7 +193,7 @@ public class CreateRequestAppointmentView extends JFrame {
 		}
 		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 1271, 555);
+		setBounds(100, 100, 1003, 555);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -240,13 +230,11 @@ public class CreateRequestAppointmentView extends JFrame {
 	private JPanel getPanelGeneral() {
 		if (panelGeneral == null) {
 			panelGeneral = new JPanel();
-			panelGeneral.setLayout(new GridLayout(0, 3, 0, 0));
+			panelGeneral.setLayout(new GridLayout(0, 2, 0, 0));
 			panelGeneral.add(getPanel_doctor());
 			panelGeneral.add(getPanel_patient());
-			panelGeneral.add(getPanelDoctorAvailability());
 			panelGeneral.add(getPanel_office());
 			panelGeneral.add(getPanel_information());
-			panelGeneral.add(getPanelOfficeAvailability());
 		}
 		return panelGeneral;
 	}
@@ -290,7 +278,7 @@ public class CreateRequestAppointmentView extends JFrame {
 			panel_office
 					.setBorder(new TitledBorder(null, "Office ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panel_office.add(getPanel_office_north(), BorderLayout.NORTH);
-			panel_office.add(getScrollPane(), BorderLayout.CENTER);
+			panel_office.add(getPanelDate(), BorderLayout.CENTER);
 		}
 		return panel_office;
 	}
@@ -326,42 +314,48 @@ public class CreateRequestAppointmentView extends JFrame {
 			// El usuario ha confirmado, realiza la acción
 			// Puedes poner aquí el código que quieras ejecutar después de la confirmación
 			System.out.println("Request sent.");
+			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
 				for (int j = 0; j < listDoctor.getSelectedValuesList().size(); j++) {
 					sendEmail(((Doctor) listDoctor.getSelectedValuesList().get(j)).getEmail());
 				}
-			}
-			Patient p = (Patient) list_patients.getSelectedValue();
-			if (rdbtnUrgent.isSelected()) {
-				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
-						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldFromH().getText()
-								+ ":00",
-						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
-								+ ":00",
-						1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-						newContactInfo);
+				if (getRdbtnNoDatePreference().isSelected()) {
+					// the most distant date is selected as a "provisional date" since there is no
+					// date preference on the part of the doctor
+					Calendar maxDate = Calendar.getInstance();
+					maxDate.set(9999, Calendar.DECEMBER, 31);
+					maxDate.getTime().getTime();
+
+					ConnectionFactory.createRequestForAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00",
+							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00", 1,
+							ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+							newContactInfo, getTxtComments().getText());
+				}
 
 			} else {
-				ConnectionFactory.createAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
-						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldFromH().getText()
-								+ ":00",
-						new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
-								+ ":00",
-						0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-						newContactInfo);
+				if (getRdbtnNoDatePreference().isSelected()) {
+					// the most distant date is selected as a "provisional date" since there is no
+					// date preference on the part of the doctor
+					Calendar maxDate = Calendar.getInstance();
+					maxDate.set(9999, Calendar.DECEMBER, 31);
+					maxDate.getTime().getTime();
+
+					ConnectionFactory.createRequestForAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00",
+							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00", 1,
+							ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+							newContactInfo, getTxtComments().getText());
+				}
+				else {
+				ConnectionFactory.createRequestForAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+						new java.sql.Date(getDateChooser().getDate().getTime()) + " 00:00:00",
+						new java.sql.Date(getDateChooser().getDate().getTime()) + " 00:00:00", 0,
+						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+						newContactInfo, getTxtComments().getText());
+				}
 			}
-//			getTextAreaDoctorAvailability().removeAll();
-//			try {
-//				getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-//						new java.sql.Date(dateChooser.getDate().getTime())));
-//			} catch (Exception e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//
-//			getTextAreaOfficeAvailability().removeAll();
-			
-			showFreeHours(dateChooser.getDate());
+
 		} else {
 			// El usuario ha cancelado la acción
 			System.out.println("Acción cancelada.");
@@ -483,12 +477,10 @@ public class CreateRequestAppointmentView extends JFrame {
 	public JList getListDoctor() {
 		if (listDoctor == null) {
 			listDoctor = new JList<>(doctors);
+			listDoctor.setSelectedValue(getDoctorByID(CreateRequestAppointmentView.docID), true);
 			listDoctor.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
-					getTextAreaDoctorAvailability().removeAll();
 					try {
-						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-								new java.sql.Date(getDateChooser().getDate().getTime())));
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -504,6 +496,16 @@ public class CreateRequestAppointmentView extends JFrame {
 			});
 		}
 		return listDoctor;
+	}
+
+	private Doctor getDoctorByID(String id) {
+		for (int i = 0; i < doctors.getSize(); i++) {
+			if (doctors.get(i).getPersonal_id().equals(id))
+				return doctors.get(i);
+		}
+		// this method is never going to return null because the checking of the doctor
+		// ID was done in the previous window
+		return null;
 	}
 
 	private JScrollPane getScrollPaneDoctor() {
@@ -895,18 +897,9 @@ public class CreateRequestAppointmentView extends JFrame {
 	private JComboBox<String> getComboBoxOffices() {
 		if (comboBoxOffices == null) {
 			comboBoxOffices = new JComboBox<String>();
-			comboBoxOffices.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					officeChoosed = true;
-//					getBtnSeeFreeHours().setEnabled(true);
-
-					checkSendRequestBtnEnabled();
-					showFreeHours(getDateChooser().getDate());
-
-				}
-			});
 			try {
-				comboBoxOffices.setModel(new DefaultComboBoxModel<>(ConnectionFactory.getOfficesCodes()));
+				String[] of = { "SIN-ASIGNAR" };
+				comboBoxOffices.setModel(new DefaultComboBoxModel<>(of));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -918,7 +911,6 @@ public class CreateRequestAppointmentView extends JFrame {
 	private void checkSendRequestBtnEnabled() {
 		if (doctorChoosed && patientChoosed)
 			getBtnSendRequest().setEnabled(true);
-
 	}
 
 	private JTextField getTextFieldFrom() {
@@ -1128,262 +1120,6 @@ public class CreateRequestAppointmentView extends JFrame {
 		return btnDNI;
 	}
 
-	private void showFreeHours(Date d) {
-		int officeId = ConnectionFactory.getOfficeIDFromCode(getComboBoxOffices().getSelectedItem().toString());
-
-		Date tdy = d;
-		java.sql.Date sqlDate = new java.sql.Date(tdy.getTime());
-
-		String date = sqlDate.toString();
-
-		String text = "";
-		try {
-			text = ConnectionFactory.getFreeHours(officeId, date, date);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-
-		getTextAreaOfficeAvailability().setText(text);
-
-	}
-
-	private JScrollPane getScrollPane() {
-		if (scrollPane == null) {
-			scrollPane = new JScrollPane();
-		}
-		return scrollPane;
-	}
-
-	private JPanel getPanelDoctorAvailability() {
-		if (panelDoctorAvailability == null) {
-			panelDoctorAvailability = new JPanel();
-			panelDoctorAvailability.setLayout(new BorderLayout(0, 0));
-			panelDoctorAvailability.add(getDateChooser(), BorderLayout.NORTH);
-			panelDoctorAvailability.add(getScrollPaneDoctorAvailability(), BorderLayout.CENTER);
-		}
-		return panelDoctorAvailability;
-	}
-
-	private JPanel getPanelOfficeAvailability() {
-		if (panelOfficeAvailability == null) {
-			panelOfficeAvailability = new JPanel();
-			panelOfficeAvailability.setLayout(new BorderLayout(0, 0));
-			panelOfficeAvailability.add(getPanelOfficeButtons(), BorderLayout.SOUTH);
-			panelOfficeAvailability.add(getScrollPane_1_1(), BorderLayout.CENTER);
-		}
-		return panelOfficeAvailability;
-	}
-
-	public JDateChooser getDateChooser() {
-		if (dateChooser == null) {
-			dateChooser = new JDateChooser(new Date());
-			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-//					btnNext.setEnabled(true);
-					getTextAreaDoctorAvailability().removeAll();
-					try {
-						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-								new java.sql.Date(getDateChooser().getDate().getTime())));
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-			});
-			dateChooser.setMinSelectableDate(new Date());
-
-		}
-		return dateChooser;
-	}
-
-	private JScrollPane getScrollPaneDoctorAvailability() {
-		if (scrollPaneDoctorAvailability == null) {
-			scrollPaneDoctorAvailability = new JScrollPane();
-			scrollPaneDoctorAvailability.setViewportView(getTextAreaDoctorAvailability());
-		}
-		return scrollPaneDoctorAvailability;
-	}
-
-	private JTextArea getTextAreaDoctorAvailability() {
-		if (textAreaDoctorAvailability == null) {
-			textAreaDoctorAvailability = new JTextArea();
-			textAreaDoctorAvailability.setEditable(false);
-			try {
-				textAreaDoctorAvailability.setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-						new java.sql.Date(dateChooser.getDate().getTime())));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return textAreaDoctorAvailability;
-	}
-
-	private JPanel getPanelOfficeButtons() {
-		if (panelOfficeButtons == null) {
-			panelOfficeButtons = new JPanel();
-			panelOfficeButtons.setLayout(new GridLayout(2, 0, 0, 0));
-			panelOfficeButtons.add(getPanelPrevAndNext());
-			panelOfficeButtons.add(getPanelHours());
-		}
-		return panelOfficeButtons;
-	}
-
-	private JPanel getPanelPrevAndNext() {
-		if (panelPrevAndNext == null) {
-			panelPrevAndNext = new JPanel();
-			panelPrevAndNext.setLayout(new GridLayout(1, 0, 0, 0));
-			panelPrevAndNext.add(getBtnPrev());
-			panelPrevAndNext.add(getBtnNext());
-		}
-		return panelPrevAndNext;
-	}
-
-	private JButton getBtnPrev() {
-		if (btnPrev == null) {
-			btnPrev = new JButton("Previous");
-			btnPrev.setEnabled(false);
-			btnPrev.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					// Obtén la fecha actual seleccionada en el JDateChooser
-					Date currentDate = dateChooser.getDate();
-
-					// Crea un objeto Calendar y configúralo con la fecha actual
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(currentDate);
-
-					// Agrega un día al Calendar
-					calendar.add(Calendar.DAY_OF_MONTH, -1);
-
-					// Obtén la nueva fecha después de agregar un día
-					Date newDate = calendar.getTime();
-
-					// Establece la nueva fecha en el JDateChooser
-					dateChooser.setDate(newDate);
-
-					getTextAreaDoctorAvailability().removeAll();
-					try {
-						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-								new java.sql.Date(getDateChooser().getDate().getTime())));
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					getTextAreaOfficeAvailability().removeAll();
-					showFreeHours(newDate);
-					SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd");
-					System.out.println(getDateChooser().getDate());
-					System.out.println(new Date());
-					if (getDateChooser().getDate().getDay() == new Date().getDay()
-							&& getDateChooser().getDate().getMonth() == new Date().getMonth()
-							&& getDateChooser().getDate().getYear() == new Date().getYear()) {
-						btnPrev.setEnabled(false);
-					}
-				}
-			});
-		}
-		return btnPrev;
-	}
-
-	private JButton getBtnNext() {
-		if (btnNext == null) {
-			btnNext = new JButton("Next");
-			btnNext.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					// Obtén la fecha actual seleccionada en el JDateChooser
-					Date currentDate = dateChooser.getDate();
-
-					// Crea un objeto Calendar y configúralo con la fecha actual
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(currentDate);
-
-					// Agrega un día al Calendar
-					calendar.add(Calendar.DAY_OF_MONTH, 1);
-
-					// Obtén la nueva fecha después de agregar un día
-					Date newDate = calendar.getTime();
-
-					// Establece la nueva fecha en el JDateChooser
-					dateChooser.setDate(newDate);
-					btnPrev.setEnabled(true);
-
-					getTextAreaDoctorAvailability().removeAll();
-					try {
-						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-								new java.sql.Date(newDate.getTime())));
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-
-					getTextAreaOfficeAvailability().removeAll();
-					;
-					showFreeHours(newDate);
-				}
-			});
-		}
-		return btnNext;
-	}
-
-	private JPanel getPanelHours() {
-		if (panelHours == null) {
-			panelHours = new JPanel();
-			panelHours.setLayout(new GridLayout(0, 4, 0, 0));
-			panelHours.add(getLblFrom());
-			panelHours.add(getTextFieldFromH());
-			panelHours.add(getLblTo());
-			panelHours.add(getTextFieldToH());
-		}
-		return panelHours;
-	}
-
-	private JLabel getLblFrom() {
-		if (lblFrom == null) {
-			lblFrom = new JLabel("From");
-		}
-		return lblFrom;
-	}
-
-	private JTextField getTextFieldFromH() {
-		if (textFieldFromH == null) {
-			textFieldFromH = new JTextField();
-			textFieldFromH.setColumns(10);
-		}
-		return textFieldFromH;
-	}
-
-	private JLabel getLblTo() {
-		if (lblTo == null) {
-			lblTo = new JLabel("To");
-		}
-		return lblTo;
-	}
-
-	private JTextField getTextFieldToH() {
-		if (textFieldToH == null) {
-			textFieldToH = new JTextField();
-			textFieldToH.setColumns(10);
-		}
-		return textFieldToH;
-	}
-
-	private JScrollPane getScrollPane_1_1() {
-		if (scrollPaneOfficeAvailability == null) {
-			scrollPaneOfficeAvailability = new JScrollPane();
-			scrollPaneOfficeAvailability.setViewportView(getTextAreaOfficeAvailability());
-		}
-		return scrollPaneOfficeAvailability;
-	}
-
-	private JTextArea getTextAreaOfficeAvailability() {
-		if (textAreaOfficeAvailability == null) {
-			textAreaOfficeAvailability = new JTextArea();
-			textAreaOfficeAvailability.setEditable(false);
-			showFreeHours(getDateChooser().getDate());
-
-		}
-		return textAreaOfficeAvailability;
-	}
-
 	private JPanel getPanelComments() {
 		if (panelComments == null) {
 			panelComments = new JPanel();
@@ -1425,8 +1161,55 @@ public class CreateRequestAppointmentView extends JFrame {
 						ex.printStackTrace();
 					}
 				}
-			});			
+			});
 		}
 		return btnSendRequest;
+	}
+
+	private JPanel getPanelDate() {
+		if (panelDate == null) {
+			panelDate = new JPanel();
+			panelDate.setLayout(new GridLayout(2, 1, 0, 0));
+			panelDate.add(getRdbtnNoDatePreference());
+			panelDate.add(getDateChooser());
+		}
+		return panelDate;
+	}
+
+	public JDateChooser getDateChooser() {
+		if (dateChooser == null) {
+			dateChooser = new JDateChooser(new Date());
+
+			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					try {
+						// TODO
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
+			dateChooser.setMinSelectableDate(new Date());
+
+		}
+		return dateChooser;
+	}
+
+	private JRadioButton getRdbtnNoDatePreference() {
+		if (rdbtnNoDatePreference == null) {
+			rdbtnNoDatePreference = new JRadioButton("No date preference");
+			rdbtnNoDatePreference.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) {
+						getDateChooser().setEnabled(false);
+					} else {
+						getDateChooser().setEnabled(true);
+					}
+				}
+			});
+
+		}
+		return rdbtnNoDatePreference;
 	}
 }
