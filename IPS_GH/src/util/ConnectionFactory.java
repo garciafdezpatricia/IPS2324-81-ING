@@ -20,6 +20,7 @@ import javax.swing.DefaultListModel;
 
 import db.Appointment;
 import db.Diagnosis;
+import db.DiagnosisReport;
 import db.Doctor;
 import db.ICDChapter;
 import db.ICDSubchapter;
@@ -41,6 +42,61 @@ public class ConnectionFactory {
 
 	}
 
+	public static boolean addReportToDiagnosis(int diagnosisID, BigInteger doctorID, String date, String report) {
+		boolean result = false;
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			String insertQuery = "INSERT INTO DIAGNOSIS_TRACKING (DIAGNOSISID, DOCTORID, REPORTDATE, REPORT) "
+					+ "VALUES (?, ?, ?, ?)";
+			// Crear una sentencia SQL
+			PreparedStatement statement = connection.prepareStatement(insertQuery);
+			// Ejecutar una consulta SQL
+
+			statement.setInt(1, diagnosisID);
+			statement.setBigDecimal(2, new BigDecimal(doctorID));
+			statement.setString(3, date);
+			statement.setString(4, report);
+			result = statement.executeUpdate() > 0;
+			// Cerrar la conexión
+			statement.close();
+			connection.close();
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static List<DiagnosisReport> getReportFromDiagnosis(int diagnosisID) {
+		List<DiagnosisReport> result = new ArrayList<DiagnosisReport>();
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM DIAGNOSIS_TRACKING WHERE DIAGNOSISID LIKE '" + diagnosisID + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigInteger doctor = resultSet.getBigDecimal("DOCTORID").toBigInteger();
+				String date = resultSet.getString("REPORTDATE");
+				String report = resultSet.getString("REPORT");
+				DiagnosisReport rep = new DiagnosisReport(report, date, doctor);
+				result.add(rep);
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	
 	public static boolean addVaccinesToAppointment(AppointmentBLDto appointment, List<String> listOfVaccines) {
 		boolean result = false;
 		String vaccines = String.join("||", listOfVaccines);
@@ -67,6 +123,38 @@ public class ConnectionFactory {
 		}
 		return result;
 	}
+	
+	public static List<String> getVaccinesFromAppointment(BigInteger appointmentid) {
+		List<String> result = new ArrayList<String>();
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT VACCINEINFO FROM VACCINES WHERE APPOINTMENTID LIKE '" + appointmentid + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String vaccines = resultSet.getString("VACCINEINFO");
+				if (vaccines.contains("||")) {
+					String[] res = vaccines.split("\\|\\|");
+					for (int i = 0; i < res.length; i++)
+						result.add(res[i]);
+				}
+				else {
+					result.add(vaccines);
+				}
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 
 	public static boolean addPrescriptionsToAppointment(AppointmentBLDto appointment,
 			List<String> listOfPrescriptions) {
@@ -85,11 +173,43 @@ public class ConnectionFactory {
 			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
 			statement.setBigDecimal(3, new BigDecimal(appointment.id));
 			statement.setString(4, prescriptions);
-			result = statement.executeUpdate() > 0 ? true : false;
+			result = statement.executeUpdate() > 0;
 			// Cerrar la conexión
 			statement.close();
 			connection.close();
 			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static List<String> getPrescriptionsFromAppointment(BigInteger appointmentid) {
+		List<String> result = new ArrayList<String>();
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT PRESCRIPTIONINFO FROM PRESCRIPTION WHERE APPOINTMENTID LIKE '" + appointmentid + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String prescr = resultSet.getString("PRESCRIPTIONINFO");
+				if (prescr.contains("||")) {
+					String[] res = prescr.split("\\|\\|");
+					for (int i = 0; i < res.length; i++)
+						result.add(res[i]);
+				}
+				else {
+					result.add(prescr);
+				}
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -227,11 +347,43 @@ public class ConnectionFactory {
 			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
 			statement.setBigDecimal(3, new BigDecimal(appointment.id));
 			statement.setString(4, procedures);
-			result = statement.executeUpdate() > 0 ? true : false;
+			result = statement.executeUpdate() > 0;
 			// Cerrar la conexión
 			statement.close();
 			connection.close();
 			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static List<String> getProceduresFromAppointment(BigInteger appointmentid) {
+		List<String> result = new ArrayList<String>();
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT PROCEDURESINFO FROM PROCEDURES WHERE APPOINTMENTID LIKE '" + appointmentid + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String procedures = resultSet.getString("PROCEDURESINFO");
+				if (procedures.contains("||")) {
+					String[] res = procedures.split("\\|\\|");
+					for (int i = 0; i < res.length; i++)
+						result.add(res[i]);
+				}
+				else {
+					result.add(procedures);
+				}
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -254,11 +406,43 @@ public class ConnectionFactory {
 			statement.setBigDecimal(2, new BigDecimal(appointment.doctorid));
 			statement.setBigDecimal(3, new BigDecimal(appointment.id));
 			statement.setString(4, causes);
-			result = statement.executeUpdate() > 0 ? true : false;
+			result = statement.executeUpdate() > 0;
 			// Cerrar la conexión
 			statement.close();
 			connection.close();
 			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static List<String> getCausesFromAppointment(BigInteger appointmentid) {
+		List<String> result = new ArrayList<String>();
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+			// Ejecutar una consulta SQL
+			String sql = "SELECT CAUSEINFO FROM CAUSES WHERE APPOINTMENTID LIKE '" + appointmentid + "'";
+			ResultSet resultSet = statement.executeQuery(sql);
+			// Procesar los resultados
+			while (resultSet.next()) {
+				String causes = resultSet.getString("CAUSEINFO");
+				if (causes.contains("||")) {
+					String[] res = causes.split("\\|\\|");
+					for (int i = 0; i < res.length; i++)
+						result.add(res[i]);
+				}
+				else {
+					result.add(causes);
+				}
+			}
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
