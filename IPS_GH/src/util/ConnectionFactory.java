@@ -2187,9 +2187,9 @@ public class ConnectionFactory {
 			int filasAfectadas = ps.executeUpdate();
 
 			if (filasAfectadas > 0) {
-				System.out.println("Inserción exitosa.");
+//				System.out.println("Inserción exitosa.");
 			} else {
-				System.out.println("La inserción no se pudo realizar.");
+//				System.out.println("La inserción no se pudo realizar.");
 			}
 
 			// Cerrar la conexión y el PreparedStatement
@@ -2302,7 +2302,7 @@ public class ConnectionFactory {
 				throw new RuntimeException();
 			}
 		}
-		System.out.println("Office: " + id);
+//		System.out.println("Office: " + id);
 		return id;
 	}
 
@@ -2355,7 +2355,6 @@ public class ConnectionFactory {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			for (Appointment a : apps) {
-				System.out.println(a.getStartdate());
 				java.util.Date st = dateFormat.parse(a.getStartdate());
 				java.util.Date e = dateFormat.parse(a.getEnddate());
 
@@ -2424,7 +2423,6 @@ public class ConnectionFactory {
 				String aux = res;
 				res2 = freeHours + "\n" + aux;
 //				res += freeHours;
-//				System.out.println("no tiene más citas");
 			}
 
 		}
