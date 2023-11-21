@@ -112,8 +112,6 @@ public class FilterDayView extends JDialog {
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
-//		patients = ConnectionFactory.getPatients();
-//		patientsReset = ConnectionFactory.getPatients();
 
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout(0, 0));

@@ -447,6 +447,56 @@ public class ConnectionFactory {
 		}
 	}
 
+	public static DefaultListModel<Appointment> getAppointmentsPendingOfAssigning() {
+		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM APPOINTMENT WHERE status = 'Pending of assigning'";
+			ResultSet resultSet = statement.executeQuery(sql);
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigDecimal id = resultSet.getBigDecimal("id");
+				BigDecimal patientid = resultSet.getBigDecimal("patientid");
+				BigDecimal doctorid = resultSet.getBigDecimal("doctorid");
+
+				String startDate = resultSet.getString("startdate");
+				String enddate = resultSet.getString("enddate");
+
+				int urgency = resultSet.getInt("urgency");
+				int attended = resultSet.getInt("attended");
+
+				String checkedin = resultSet.getString("checkedin");
+				String checkedout = resultSet.getString("checkedout");
+				BigDecimal officeid = resultSet.getBigDecimal("officeid");
+				String information = resultSet.getString("information");
+				String status = resultSet.getString("status");
+				String comments = resultSet.getString("comments");
+
+				// Procesa otros campos según la estructura de tu tabla
+				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
+						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
+						officeid.toBigInteger(), information, status, comments));
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return appointments;
+	}
+
 	public static boolean isWorking(Date utilDate, String hourFrom, String hourTo, BigInteger idDoctor)
 			throws Exception {
 		DefaultListModel<WorkPeriod> workperiod = new DefaultListModel<>();
@@ -612,7 +662,7 @@ public class ConnectionFactory {
 	}
 
 	public static void createAppointment(BigInteger patientID, BigInteger doctorID, String startDate, String endDate,
-			int urgency, int officeId, String information) throws Exception {
+			int urgency, int officeId, String information, String status) throws Exception {
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
 
@@ -643,7 +693,11 @@ public class ConnectionFactory {
 			preparedStatement.setInt(8, 0);
 			preparedStatement.setInt(9, officeId);
 			preparedStatement.setString(10, information);
+<<<<<<< HEAD
 			preparedStatement.setString(11, "Booked");
+=======
+			preparedStatement.setString(11, status);
+>>>>>>> branch 'Sprint3_Laura' of https://github.com/garciafdezpatricia/IPS2324-81-ING.git
 			preparedStatement.setString(12, "");
 
 			// Ejecutar la inserción
@@ -655,13 +709,70 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
+<<<<<<< HEAD
 	
 	public static void createRequestForAppointment(BigInteger patientID, BigInteger doctorID, String startDate, String endDate,
 			int urgency, int officeId, String information, String comments) throws Exception {
 		try {
 			// Establecer la conexión
 			Connection connection = ConnectionFactory.getOracleConnection();
+=======
+>>>>>>> branch 'Sprint3_Laura' of https://github.com/garciafdezpatricia/IPS2324-81-ING.git
 
+<<<<<<< HEAD
+=======
+	public static void createAppointmentPendingOfAssigning(BigInteger patientID, BigInteger doctorID, String startDate,
+			String endDate, int urgency, int officeId, String information, String status, String comments) throws Exception {
+		// Datos de conexión a la base de datos (ajusta estos valores según tu
+		// configuración)
+
+		// Datos para la inserción
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL con parámetros
+			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status, Comments) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+			// Crear un PreparedStatement
+			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+			BigDecimal doc = new BigDecimal(doctorID);
+
+			// Establecer valores para los parámetros
+			preparedStatement.setBigDecimal(1, new BigDecimal(patientID));
+			preparedStatement.setBigDecimal(2, doc);
+			preparedStatement.setString(3, startDate);
+			preparedStatement.setString(4, endDate);
+			preparedStatement.setInt(5, urgency);
+			preparedStatement.setInt(6, 0);
+			preparedStatement.setString(7, "");
+			preparedStatement.setString(8, "");
+			preparedStatement.setInt(8, 0);
+			preparedStatement.setInt(9, officeId);
+			preparedStatement.setString(10, information);
+			preparedStatement.setString(11, status);
+			preparedStatement.setString(12, comments);
+
+			// Ejecutar la inserción
+			int filasAfectadas = preparedStatement.executeUpdate();
+
+			preparedStatement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void createRequestForAppointment(BigInteger patientID, BigInteger doctorID, String startDate,
+			String endDate, int urgency, int officeId, String information, String comments) throws Exception {
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+>>>>>>> branch 'Sprint3_Laura' of https://github.com/garciafdezpatricia/IPS2324-81-ING.git
 			// Consulta SQL con parámetros
 			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status, Comments) "
 					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -2302,19 +2413,16 @@ public class ConnectionFactory {
 						freeHours += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
 						if (appsThatDay.size() > 1 && i < appsThatDay.size() - 1) {
-							freeHours += " \n\tand from "
-									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
-									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
-							;
+							freeHours += " \n\tand from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
+									+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to ";
 						} else {
-							freeHours += " \n\tand from "
-									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours() + ":"
-									+ dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
+							freeHours += " \n\tand from " + dateFormat.parse(appsThatDay.get(i).getEnddate()).getHours()
+									+ ":" + dateFormat.parse(appsThatDay.get(i).getEnddate()).getMinutes() + " to "
 									+ " 23:59:00";
 							String aux = res;
 							res2 = freeHours + "\n" + aux;
 						}
-						
+
 //						res2 += dateFormat.parse(appsThatDay.get(i).getStartdate()).getHours() + ":"
 //								+ dateFormat.parse(appsThatDay.get(i).getStartdate()).getMinutes();
 //						String aux = res;
@@ -2324,7 +2432,8 @@ public class ConnectionFactory {
 			} else {
 //				res2 += "14:00";
 //				res2 = "\n" + res;
-				freeHours += "23:59:00";;
+				freeHours += "23:59:00";
+				;
 				String aux = res;
 				res2 = freeHours + "\n" + aux;
 //				res += freeHours;
@@ -2371,6 +2480,10 @@ public class ConnectionFactory {
 			}
 		}
 		return aux;
+<<<<<<< HEAD
 		
+=======
+
+>>>>>>> branch 'Sprint3_Laura' of https://github.com/garciafdezpatricia/IPS2324-81-ING.git
 	}
 }

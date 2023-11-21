@@ -5,12 +5,15 @@ import java.math.BigInteger;
 import util.ConnectionFactory;
 
 public class Appointment {
+
 	private BigInteger id;
 	private BigInteger patientid;
 	private BigInteger doctorid, officeId;;
 	private String startdate, enddate, information, checkedin, checkedout, status;
 	private int urgency, attended;
 	private String comments;
+	private String p;
+	private String doctor;
 
 
 
@@ -31,11 +34,13 @@ public class Appointment {
 		this.information = information;
 		this.status = status;
 		this.comments = comments;
+		p = ConnectionFactory.getPatient(patientid);
+		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
 	
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
 			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
-			String status) {
+			String status, String comments) throws Exception {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -51,7 +56,27 @@ public class Appointment {
 		this.status = status;
 		this.comments = "";
 	}
-
+	
+	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
+			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
+			String status) throws Exception {
+		super();
+		this.id = id;
+		this.patientid = patientid;
+		this.doctorid = doctorid;
+		this.startdate = startdate;
+		this.enddate = enddate;
+		this.urgency = urgency;
+		this.attended = attended;
+		this.checkedin = checkedin;
+		this.checkedout = checkedout;
+		this.officeId = officeId;
+		this.information = information;
+		this.status = status;
+		this.comments = "";
+		p = ConnectionFactory.getPatient(patientid);
+		doctor = ConnectionFactory.getDoctor(doctorid);
+	}
 	public String getStatus() {
 		return status;
 	}
@@ -159,16 +184,6 @@ public class Appointment {
 
 	@Override
 	public String toString() {
-		String p = "";
-		String doctor = "";
-		try {
-			p = ConnectionFactory.getPatient(patientid);
-			doctor = ConnectionFactory.getDoctor(doctorid);
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		if (urgency == 1) {
 			if (getStatus() != null) {
 				if (getStatus().toLowerCase().equals("cancelled")) {
@@ -176,16 +191,22 @@ public class Appointment {
 						return " (cancelled) [URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: "
 								+ startdate + "; \n\tTo: " + enddate;
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 
 					}
-				} else {
+				} else if ( getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
 								+ "; \n\tTo: " + enddate;
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
+					try {
+						return "[URGENT] \n\tPatient: " + p +  "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
+					} catch (Exception e) {
 						e.printStackTrace();
 
 					}
@@ -202,16 +223,22 @@ public class Appointment {
 						return " (cancelled) \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
 								+ "; \n\tTo: " + enddate;
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 
 					}
-				} else {
+				}else if ( getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
 								+ enddate;
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+				}else if (getStatus().toLowerCase().equals("pending of assigning")) {
+					try {
+						return "\n\tPatient: " + p +  "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
+					} catch (Exception e) {
 						e.printStackTrace();
 
 					}

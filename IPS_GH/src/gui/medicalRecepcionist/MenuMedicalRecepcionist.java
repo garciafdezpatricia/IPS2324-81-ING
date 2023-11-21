@@ -181,16 +181,16 @@ public class MenuMedicalRecepcionist extends JFrame {
 			btnEditWp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 
-//					EditWorkPeriodView editWp;
-//					try {
-//						editWp = new EditWorkPeriodView();
-//						editWp.setVisible(true);
-//						editWp.setLocationRelativeTo(null);
-//
-//					} catch (Exception e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
+					EditWorkPeriodView editWp;
+					try {
+						editWp = new EditWorkPeriodView();
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 		}
@@ -221,6 +221,20 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JButton getBtnBandejaDeEntrada() {
 		if (btnBandejaDeEntrada == null) {
 			btnBandejaDeEntrada = new JButton("InBox");
+			btnBandejaDeEntrada.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					InBoxView editWp;
+					try {
+						editWp = new InBoxView();
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
 		}
 		return btnBandejaDeEntrada;
 	}

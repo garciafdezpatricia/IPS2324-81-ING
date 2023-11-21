@@ -56,9 +56,9 @@ public class EditAndCancelView extends JFrame {
 	private JLabel lblOffice;
 	private JPanel panelButtonsReset;
 	private JButton btnResetFilters;
-	private DefaultListModel<Appointment> appointments = new DefaultListModel<>();
+	private DefaultListModel<Appointment> appointments = ConnectionFactory.getAppointments();;
 
-	private DefaultListModel<Appointment> appointmentsReset = new DefaultListModel<>();
+	private DefaultListModel<Appointment> appointmentsReset = ConnectionFactory.getAppointments();
 	private JButton btnFilterPatient;
 
 	private FilterPatientView filterPatient;
@@ -97,7 +97,6 @@ public class EditAndCancelView extends JFrame {
 	 * @throws Exception
 	 */
 	public EditAndCancelView() throws Exception {
-		appointments = ConnectionFactory.getAppointments();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -105,12 +104,6 @@ public class EditAndCancelView extends JFrame {
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		setTitle("Edit or cancel appointment");
-//		try {
-//			appointments = ConnectionFactory.getAppointments();
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
@@ -370,7 +363,7 @@ public class EditAndCancelView extends JFrame {
 			btnResetFilters.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					try {
-						getListAppointments().setModel(ConnectionFactory.getAppointments());
+						getListAppointments().setModel(appointmentsReset);
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

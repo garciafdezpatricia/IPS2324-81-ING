@@ -94,6 +94,7 @@ public class EditAppointmentView extends JFrame {
 	private static String information;
 	private static String startDate;
 	private static String endDate;
+	private String[] offices = ConnectionFactory.getOfficesCodes();
 
 	/**
 	 * Launch the application.
@@ -331,7 +332,7 @@ public class EditAppointmentView extends JFrame {
 ////												"Confirmation", JOptionPane.YES_NO_OPTION);
 //
 //									} else {
-										areYouSureJOP();
+								areYouSureJOP();
 //								} catch (Exception e1) {
 //									e1.printStackTrace();
 //								}
@@ -354,7 +355,7 @@ public class EditAppointmentView extends JFrame {
 		int opcion = JOptionPane.showConfirmDialog(EditAppointmentView.this,
 				"Are you sure you want to edit the appointment " + id + " between the doctor(s) "
 						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
-						+ " on  " +  selectDate.getDay().getDate() + " at " + selectDate.getFrom() + " in the office "
+						+ " on  " + selectDate.getDay().getDate() + " at " + selectDate.getFrom() + " in the office "
 						+ getComboBoxOffices().getSelectedItem() + "?",
 				"Confirmation", JOptionPane.YES_NO_OPTION);
 
@@ -370,24 +371,24 @@ public class EditAppointmentView extends JFrame {
 			}
 			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
-				ConnectionFactory.updateAppointment(id, listDoctor.getSelectedValue().getId(), p.getId(), 
-						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom() + ":00",
-						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo() + ":00", 1,
-						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-						newContactInfo);
+				update(p, 1);
 
 			} else {
-				ConnectionFactory.updateAppointment(id,  listDoctor.getSelectedValue().getId(),p.getId(),
-						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom() + ":00",
-						new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo() + ":00", 0,
-						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-						newContactInfo);
+				update(p, 0);
 			}
 		} else {
 			// El usuario ha cancelado la acción
 			System.out.println("Acción cancelada.");
 		}
 
+	}
+
+	private void update(Patient p, int urgency) throws Exception {
+		int officeIdFrom = ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString());
+		ConnectionFactory.updateAppointment(id, listDoctor.getSelectedValue().getId(), p.getId(),
+				new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom() + ":00",
+				new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo() + ":00", urgency,
+				officeIdFrom, newContactInfo);
 	}
 
 	// TODO: poner más datos
@@ -903,6 +904,8 @@ public class EditAppointmentView extends JFrame {
 	private JComboBox<String> getComboBoxOffices() {
 		if (comboBoxOffices == null) {
 			comboBoxOffices = new JComboBox<String>();
+			comboBoxOffices.setModel(new DefaultComboBoxModel<>(offices));
+
 			comboBoxOffices.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					officeChoosed = true;
@@ -911,13 +914,11 @@ public class EditAppointmentView extends JFrame {
 				}
 			});
 			try {
-				String[] offices = ConnectionFactory.getOfficesCodes();
+				String office = ConnectionFactory.getOffice(officeid);
 
-				comboBoxOffices.setModel(new DefaultComboBoxModel<>(offices));
 				for (int i = 0; i < offices.length; i++) {
-					if (offices[i].equals(ConnectionFactory.getOffice(officeid))) {
+					if (offices[i].equals(office)) {
 						comboBoxOffices.setSelectedIndex(i);
-						;
 					}
 				}
 			} catch (Exception e) {
