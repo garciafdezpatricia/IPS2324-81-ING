@@ -419,6 +419,13 @@ public class MedicalRecordView extends JFrame {
 						boolean result = ConnectionFactory.updateDiagnosis(selected);
 						if (result) {
 							JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis closed", "Success", JOptionPane.INFORMATION_MESSAGE);
+							String report = "Diagnosis closed";
+							// TODO: poner el id del doctor que este logged in
+							BigInteger doctorId = new BigInteger("4");
+							Diagnosis selected = (Diagnosis) list.getSelectedValue();
+							String currentDate = LocalDate.now().toString(); 
+							ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);
+							cargarReports(selected);
 							cargarDiagnosticosPaciente();
 						}
 						else
@@ -442,6 +449,13 @@ public class MedicalRecordView extends JFrame {
 						boolean result = ConnectionFactory.updateDiagnosis(selected);
 						if (result) {
 							JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis opened", "Success", JOptionPane.INFORMATION_MESSAGE);
+							String report = "Diagnosis opened";
+							// TODO: poner el id del doctor que este logged in
+							BigInteger doctorId = new BigInteger("4");
+							Diagnosis selected = (Diagnosis) list.getSelectedValue();
+							String currentDate = LocalDate.now().toString(); 
+							ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);
+							cargarReports(selected);
 							cargarDiagnosticosPaciente();
 						}
 						else
