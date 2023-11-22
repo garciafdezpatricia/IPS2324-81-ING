@@ -437,6 +437,7 @@ public class MedicalRecepcionistView extends JFrame {
 							for (int i = 0; i < listSpecialization.getSelectedValuesList().size(); i++) {
 								comments = listSpecialization.getSelectedValuesList().get(i) + "\n";
 								Patient p = (Patient) list_patients.getSelectedValue();
+								System.out.println(i);
 								if (rdbtnUrgent.isSelected()) {
 									try {
 										ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
@@ -484,6 +485,7 @@ public class MedicalRecepcionistView extends JFrame {
 								showFreeHours(dateChooser.getDate());
 
 							}
+							System.out.println("done");
 						} else {
 							// El usuario ha cancelado la acción
 							System.out.println("Acción cancelada.");
@@ -975,7 +977,8 @@ public class MedicalRecepcionistView extends JFrame {
 					textRegNumber.setText("");
 					textFieldFrom.setEnabled(false);
 					textFieldTo.setEnabled(false);
-					btnFinish.setEnabled(false);
+					textFieldSurnameDoctor.setText("");
+
 					btnFinish.setEnabled(false);
 
 				}
@@ -1251,8 +1254,8 @@ public class MedicalRecepcionistView extends JFrame {
 					DefaultListModel<Doctor> filteredBySurname = new DefaultListModel<>();
 					if (!getTextFieldSurnameDoctor().getText().isBlank()
 							&& !getTextFieldSurnameDoctor().getText().isEmpty()) {
-						for (int i = 0; i < patients.getSize(); i++) {
-							if ((doctors.get(i).getSurname().contains(getTextFieldSurname().getText()))) {
+						for (int i = 0; i < doctors.getSize(); i++) {
+							if ((doctors.get(i).getSurname().contains(getTextFieldSurnameDoctor().getText()))) {
 								filteredBySurname.addElement(doctors.get(i));
 							}
 						}

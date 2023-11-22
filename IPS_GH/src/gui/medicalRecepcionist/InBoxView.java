@@ -1,24 +1,23 @@
 package gui.medicalRecepcionist;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import db.Appointment;
 import util.ConnectionFactory;
-
-import java.awt.BorderLayout;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import java.awt.GridLayout;
-import javax.swing.JButton;
-import javax.swing.JTabbedPane;
-import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class InBoxView extends JFrame {
 
@@ -127,7 +126,17 @@ public class InBoxView extends JFrame {
 			btnAssignDoctor = new JButton("Assign doctor");
 			btnAssignDoctor.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					
+					SelectionOfDoctorView editWp;
+					try {
+						Appointment app = (Appointment) getListAppointments().getSelectedValue();
+						editWp = new SelectionOfDoctorView(app, app.getComments().trim());
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 		}

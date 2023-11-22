@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ListModel;
 
 import db.Appointment;
 import db.Diagnosis;
@@ -2429,4 +2430,77 @@ public class ConnectionFactory {
 		return res2;
 
 	}
+
+	public static DefaultListModel<Doctor> getDoctorBySpecialization(String specialization) {
+		DefaultListModel<Doctor> doctors = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM DOCTOR WHERE specialization = ?";
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setString(1, specialization);
+			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigDecimal id = resultSet.getBigDecimal("id");
+				BigInteger aux = id.toBigInteger();
+
+				String numcolegiado = resultSet.getString("numcolegiado");
+				String name = resultSet.getString("name");
+				String surname = resultSet.getString("surname");
+				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization2 = resultSet.getString("specialization");
+				// Procesa otros campos según la estructura de tu tabla
+				doctors.addElement(new Doctor(aux, numcolegiado, name, surname, email, personal_id, specialization2));
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return doctors;
+	}
+
+	public static void updateDoctorAppointment(BigInteger appId, BigInteger doctorId) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			// TODO: falta por añadir las causas
+			con = getOracleConnection();
+			ps = con.prepareStatement(
+					"UPDATE APPOINTMENT SET doctorid = ?, status = 'Booked' WHERE id = ?");
+			ps.setBigDecimal(1, new BigDecimal(doctorId));
+			ps.setBigDecimal(2, new BigDecimal(appId));
+			ps.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+		
+	}
+
+	
 }

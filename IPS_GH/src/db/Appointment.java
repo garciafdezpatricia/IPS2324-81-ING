@@ -15,8 +15,6 @@ public class Appointment {
 	private String p;
 	private String doctor;
 
-
-
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
 			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
 			String status, String comments) throws Exception {
@@ -37,7 +35,7 @@ public class Appointment {
 		p = ConnectionFactory.getPatient(patientid);
 		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
-	
+
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
 			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
 			String status) throws Exception {
@@ -58,6 +56,7 @@ public class Appointment {
 		p = ConnectionFactory.getPatient(patientid);
 		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -154,6 +153,14 @@ public class Appointment {
 		this.information = information;
 	}
 
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+
 	@Override
 	public String toString() {
 		if (urgency == 1) {
@@ -166,7 +173,7 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				} else if ( getStatus().toLowerCase().equals("booked")) {
+				} else if (getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
 								+ "; \n\tTo: " + enddate;
@@ -176,8 +183,8 @@ public class Appointment {
 					}
 				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
 					try {
-						return "[URGENT] \n\tPatient: " + p +  "; \n\tFrom: " + startdate
-								+ "; \n\tTo: " + enddate + "Specialization: " + comments;
+						return "[URGENT] \n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate
+								+ "; Specialization: " + comments;
 					} catch (Exception e) {
 						e.printStackTrace();
 
@@ -198,7 +205,7 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				}else if ( getStatus().toLowerCase().equals("booked")) {
+				} else if (getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
 								+ enddate;
@@ -206,10 +213,10 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				}else if (getStatus().toLowerCase().equals("pending of assigning")) {
+				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
 					try {
-						return "\n\tPatient: " + p +  "; \n\tFrom: " + startdate
-								+ "; \n\tTo: " + enddate + "Specialization: " + comments;
+						return "\n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate
+								+ "; Specialization: " + comments;
 					} catch (Exception e) {
 						e.printStackTrace();
 
