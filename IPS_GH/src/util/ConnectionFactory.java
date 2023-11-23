@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -449,6 +450,7 @@ public class ConnectionFactory {
 	}
 
 	public static DefaultListModel<Appointment> getAppointmentsPendingOfAssigning() {
+		List<Appointment> app = new ArrayList<Appointment>();
 		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
 
 		try {
@@ -482,10 +484,21 @@ public class ConnectionFactory {
 				String comments = resultSet.getString("comments");
 
 				// Procesa otros campos según la estructura de tu tabla
-				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
+				app.add(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
 						doctorid.toBigInteger(), startDate, enddate, urgency, attended, checkedin, checkedout,
 						officeid.toBigInteger(), information, status, comments));
 			}
+
+			// Define un comparador para ordenar por fecha
+			Comparator<Appointment> comparadorFecha = Comparator.comparing(Appointment::getStartdate);
+
+			// Ordena la lista usando el comparador
+			Collections.sort(app, comparadorFecha);
+			
+			for(int i = 0; i < app.size();i++) {
+				appointments.addElement(app.get(i));
+			}
+			
 
 			// Cerrar la conexión
 			resultSet.close();
@@ -498,6 +511,7 @@ public class ConnectionFactory {
 		return appointments;
 	}
 
+	
 	public static boolean isWorking(Date utilDate, String hourFrom, String hourTo, BigInteger idDoctor)
 			throws Exception {
 		DefaultListModel<WorkPeriod> workperiod = new DefaultListModel<>();
