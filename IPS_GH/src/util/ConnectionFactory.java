@@ -2127,8 +2127,8 @@ public class ConnectionFactory {
 		return id;
 
 	}
-
-	public static String getDoctor(BigInteger id) {
+	
+	public static String getDoctorNameSurname(BigInteger id) {
 
 		String name = "";
 
@@ -2148,6 +2148,41 @@ public class ConnectionFactory {
 			while (resultSet.next()) {
 
 				name = resultSet.getString("name") + " " + resultSet.getString("surname");
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return name;
+
+	}
+
+
+	public static String getDoctor(BigInteger id) {
+
+		String name = "";
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT name FROM doctor where id = ?";
+
+			PreparedStatement statement = connection.prepareStatement(sql);
+
+			statement.setBigDecimal(1, new BigDecimal(id));
+			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+
+				name = resultSet.getString("name");
 			}
 
 			// Cerrar la conexión

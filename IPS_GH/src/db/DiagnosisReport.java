@@ -18,7 +18,7 @@ public class DiagnosisReport {
 	}
 	
 	private String getDoctorName() {
-		return ConnectionFactory.getDoctor(doctorID);
+		return ConnectionFactory.getDoctorNameSurname(doctorID);
 	}
 	
 	public String toString() {
