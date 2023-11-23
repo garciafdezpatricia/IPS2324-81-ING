@@ -60,6 +60,7 @@ import util.ConnectionFactory;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.JSpinner;
 
 public class MedicalRecepcionistView extends JFrame {
 
@@ -101,6 +102,7 @@ public class MedicalRecepcionistView extends JFrame {
 	private SelectDate selectDate;
 
 	private DefaultListModel<String> specializations = new DefaultListModel<String>();
+	private DefaultListModel<String> finalSpecializations = new DefaultListModel<String>();
 
 	/**
 	 * Launch the application.
@@ -177,9 +179,17 @@ public class MedicalRecepcionistView extends JFrame {
 	private JScrollPane scrollPaneOfficeAvailability;
 	private JTextArea textAreaOfficeAvailability;
 	private JTabbedPane tabbedPane;
+	protected int selectedIndex = 0;
+	private JPanel panelSpecialization;
 	private JScrollPane scrollPaneSpecialization;
 	private JList listSpecialization;
-	protected int selectedIndex = 0;
+	private JScrollPane scrollPaneSp;
+	private JList listSp;
+	private JPanel pnButtons;
+	private JButton btnPass;
+	private JButton btnBack;
+	private JLabel lblAllSpecializations;
+	private JLabel lblSelectedSpecialzations;
 
 	/**
 	 * Create the frame.
@@ -424,7 +434,7 @@ public class MedicalRecepcionistView extends JFrame {
 					if (selectedIndex == 1) {
 						int opcion = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
 								"Are you sure you want to reserve the appointment between an  "
-										+ listSpecialization.getSelectedValuesList() + " and the patient "
+										+ listSpecialization.getModel() + " and the patient "
 										+ list_patients.getSelectedValue() + " on  " + dateChooser.getDate().getDay()
 										+ "/" + dateChooser.getDate().getMonth() + "/" + dateChooser.getDate().getYear()
 										+ " at " + getTextFieldFrom().getText() + " in the office "
@@ -434,8 +444,8 @@ public class MedicalRecepcionistView extends JFrame {
 						// Verificar la respuesta del usuario
 						if (opcion == JOptionPane.YES_OPTION) {
 							String comments = "";
-							for (int i = 0; i < listSpecialization.getSelectedValuesList().size(); i++) {
-								comments = listSpecialization.getSelectedValuesList().get(i) + "\n";
+							for (int i = 0; i < listSpecialization.getModel().getSize(); i++) {
+								comments = listSpecialization.getModel().getElementAt(i) + "\n";
 								Patient p = (Patient) list_patients.getSelectedValue();
 								System.out.println(i);
 								if (rdbtnUrgent.isSelected()) {
@@ -1588,23 +1598,115 @@ public class MedicalRecepcionistView extends JFrame {
 				}
 			});
 			tabbedPane.addTab("Doctor", null, getPanel_doctor(), null);
-			tabbedPane.addTab("Specialization", null, getScrollPaneSpecialization(), null);
+			tabbedPane.addTab("Specialization", null, getPanelSpecialization(), null);
 		}
 		return tabbedPane;
+	}
+
+	/*
+	 * private JScrollPane getScrollPaneSpecialization() { if
+	 * (scrollPaneSpecialization == null) { scrollPaneSpecialization = new
+	 * JScrollPane();
+	 * scrollPaneSpecialization.setViewportView(getListSpecialization()); } return
+	 * scrollPaneSpecialization; }
+	 * 
+	 * private JList<String> getListSpecialization() { if (listSpecialization ==
+	 * null) { listSpecialization = new JList<String>(specializations); } return
+	 * listSpecialization; }
+	 */
+	private JPanel getPanelSpecialization() {
+		if (panelSpecialization == null) {
+			panelSpecialization = new JPanel();
+			panelSpecialization.setLayout(new GridLayout(0, 3, 0, 0));
+			panelSpecialization.add(getScrollPaneSp());
+			panelSpecialization.add(getPnButtons());
+			panelSpecialization.add(getScrollPaneSpecialization());
+		}
+		return panelSpecialization;
 	}
 
 	private JScrollPane getScrollPaneSpecialization() {
 		if (scrollPaneSpecialization == null) {
 			scrollPaneSpecialization = new JScrollPane();
 			scrollPaneSpecialization.setViewportView(getListSpecialization());
+			scrollPaneSpecialization.setColumnHeaderView(getLblSelectedSpecialzations());
+
 		}
 		return scrollPaneSpecialization;
 	}
 
 	private JList<String> getListSpecialization() {
 		if (listSpecialization == null) {
-			listSpecialization = new JList<String>(specializations);
+			listSpecialization = new JList<String>(finalSpecializations);
 		}
 		return listSpecialization;
+	}
+
+	private JScrollPane getScrollPaneSp() {
+		if (scrollPaneSp == null) {
+			scrollPaneSp = new JScrollPane();
+			scrollPaneSp.setViewportView(getListSp());
+			scrollPaneSp.setColumnHeaderView(getLblAllSpecializations());
+		}
+		return scrollPaneSp;
+	}
+
+	private JList getListSp() {
+		if (listSp == null) {
+			listSp = new JList(specializations);
+		}
+		return listSp;
+	}
+
+	private JPanel getPnButtons() {
+		if (pnButtons == null) {
+			pnButtons = new JPanel();
+			pnButtons.setLayout(new GridLayout(0, 1, 0, 0));
+			pnButtons.add(getBtnPass());
+			pnButtons.add(getBtnBack());
+		}
+		return pnButtons;
+	}
+
+	private JButton getBtnPass() {
+		if (btnPass == null) {
+			btnPass = new JButton("->");
+			btnPass.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					List<String> causesSelected = getListSp().getSelectedValuesList();
+					for (String cause : causesSelected) {
+						finalSpecializations.addElement(cause);
+					}
+				}
+			});
+		}
+		return btnPass;
+	}
+
+	private JButton getBtnBack() {
+		if (btnBack == null) {
+			btnBack = new JButton("<-");
+			btnBack.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					List<String> selectedItems = getListSpecialization().getSelectedValuesList();
+					for (String item : selectedItems) {
+						finalSpecializations.removeElement(item);
+					}
+				}
+			});
+		}
+		return btnBack;
+	}
+	private JLabel getLblAllSpecializations() {
+		if (lblAllSpecializations == null) {
+			lblAllSpecializations = new JLabel("All specializations");
+		}
+		return lblAllSpecializations;
+	}
+	private JLabel getLblSelectedSpecialzations() {
+		if (lblSelectedSpecialzations == null) {
+			lblSelectedSpecialzations = new JLabel("Selected specializations");
+		}
+		return lblSelectedSpecialzations;
 	}
 }

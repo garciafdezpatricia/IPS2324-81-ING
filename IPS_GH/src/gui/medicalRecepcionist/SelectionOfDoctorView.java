@@ -1,10 +1,12 @@
 package gui.medicalRecepcionist;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
@@ -34,6 +36,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -44,6 +49,7 @@ import com.toedter.calendar.JDateChooser;
 import db.Appointment;
 import db.Doctor;
 import util.ConnectionFactory;
+import javax.swing.ListSelectionModel;
 
 public class SelectionOfDoctorView extends JFrame {
 
@@ -104,6 +110,20 @@ public class SelectionOfDoctorView extends JFrame {
 	public SelectionOfDoctorView(Appointment app, String specialization) {
 		this.specialization = specialization;
 		this.app = app;
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 747, 300);
 		contentPane = new JPanel();
@@ -539,6 +559,7 @@ public class SelectionOfDoctorView extends JFrame {
 	private JList<Doctor> getListDoctor() {
 		if (listDoctor == null) {
 			listDoctor = new JList<Doctor>(ConnectionFactory.getDoctorBySpecialization(specialization));
+			listDoctor.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			listDoctor.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					getTextAreaDoctorAvailability().removeAll();
