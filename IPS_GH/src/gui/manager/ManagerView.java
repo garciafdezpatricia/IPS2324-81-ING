@@ -206,12 +206,16 @@ public class ManagerView extends JFrame {
 		newPatient = new JPanel();
 
 		if (a.checkIn == null || a.checkIn.equals("1")) {
+			//verde
 			newPatient.setBackground(new Color(159, 234, 124));
 			if (a.checkOut != null && a.checkOut.equals("0")) {
+				//verde claro
 				newPatient.setBackground(new Color(172, 245, 142));
 			} else
+				//azul claro
 				newPatient.setBackground(new Color(159, 234, 124));
 		} else
+			//morado
 			newPatient.setBackground(new Color(241, 116, 245));
 
 		newPatient.setLayout(new GridLayout(0, 2, 0, 0));
