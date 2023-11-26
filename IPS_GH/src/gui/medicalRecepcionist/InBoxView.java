@@ -23,6 +23,8 @@ import javax.swing.event.ChangeListener;
 
 import db.Appointment;
 import util.ConnectionFactory;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
 public class InBoxView extends JFrame {
 
@@ -130,7 +132,7 @@ public class InBoxView extends JFrame {
 		if (panelAppointments == null) {
 			panelAppointments = new JPanel();
 			panelAppointments.setLayout(new BorderLayout(0, 0));
-			panelAppointments.add(getListAppointments(), BorderLayout.NORTH);
+			panelAppointments.add(getListAppointments(), BorderLayout.CENTER);
 		}
 		return panelAppointments;
 	}
@@ -145,6 +147,7 @@ public class InBoxView extends JFrame {
 	private JButton getBtnAssignDoctor() {
 		if (btnAssignDoctor == null) {
 			btnAssignDoctor = new JButton("Assign doctor");
+			btnAssignDoctor.setEnabled(false);
 			btnAssignDoctor.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					SelectionOfDoctorView editWp;
@@ -166,6 +169,11 @@ public class InBoxView extends JFrame {
 	private JList getListAppointments() {
 		if (listAppointments == null) {
 			listAppointments = new JList(ConnectionFactory.getAppointmentsPendingOfAssigning());
+			listAppointments.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					btnAssignDoctor.setEnabled(true);
+				}
+			});
 		}
 		return listAppointments;
 	}

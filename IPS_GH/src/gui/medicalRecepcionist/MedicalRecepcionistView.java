@@ -84,10 +84,10 @@ public class MedicalRecepcionistView extends JFrame {
 	private JScrollPane scrollPaneDoctor;
 	private JLabel lblSSNumber;
 	private JTextField textFieldSSNumber;
-	private DefaultListModel<Doctor> doctors = new DefaultListModel<>();
-	private DefaultListModel<Doctor> doctorsReset = new DefaultListModel<>();
-	private DefaultListModel<Patient> patients = new DefaultListModel<>();
-	private DefaultListModel<Patient> patientsReset = new DefaultListModel<>();
+	private DefaultListModel<Doctor> doctors = ConnectionFactory.getDoctors();
+	private DefaultListModel<Doctor> doctorsReset = ConnectionFactory.getDoctors();
+	private DefaultListModel<Patient> patients = ConnectionFactory.getPatients();
+	private DefaultListModel<Patient> patientsReset = ConnectionFactory.getPatients();
 
 	private JPanel panel_office_north;
 	private JLabel lblChooseOffice;
@@ -122,9 +122,6 @@ public class MedicalRecepcionistView extends JFrame {
 		});
 	}
 
-	public static final String url = "jdbc:oracle:thin:@";
-	public static final String usuario = "Admin";
-	public static final String contraseña = "LyQmZ7HwG4edJ2";
 	private JPanel panelNameAndNumber;
 	private JLabel lblTypeDoctor;
 	private JTextField textNameDoctor;
@@ -202,11 +199,7 @@ public class MedicalRecepcionistView extends JFrame {
 		setTitle("Reservation of appointment");
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
-		doctors = ConnectionFactory.getDoctors();
-		doctorsReset = ConnectionFactory.getDoctors();
-
-		patients = ConnectionFactory.getPatients();
-		patientsReset = ConnectionFactory.getPatients();
+		
 
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {

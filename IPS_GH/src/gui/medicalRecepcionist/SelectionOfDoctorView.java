@@ -82,8 +82,6 @@ public class SelectionOfDoctorView extends JFrame {
 	private JScrollPane scrollPaneDoctorAvailability;
 	private JTextArea textAreaDoctorAvailability;
 	private JPanel panelButtonsDate;
-	private JButton btnPrev;
-	private JButton btnNext;
 	private static String specialization;
 	private DefaultListModel<Doctor> doctors = ConnectionFactory.getDoctorBySpecialization(specialization);
 	private static Appointment app;
@@ -422,8 +420,8 @@ public class SelectionOfDoctorView extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					if (!getTextNameDoctor().getText().isBlank() && !getTextNameDoctor().getText().isEmpty()) {
 						for (int i = 0; i < doctors.getSize(); i++) {
-							if (getTextNameDoctor().getText().toLowerCase()
-									.equals(doctors.get(i).getName().toLowerCase())) {
+								if (doctors.get(i).getName().toLowerCase()
+										.contains(getTextNameDoctor().getText().toLowerCase())) {
 								filteredByName.addElement(doctors.get(i));
 							}
 						}
@@ -595,11 +593,16 @@ public class SelectionOfDoctorView extends JFrame {
 	}
 
 	private JDateChooser getDateChooser() {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+
 		if (dateChooser == null) {
-			dateChooser = new JDateChooser(new Date());
+			try {
+				dateChooser = new JDateChooser(dateFormat.parse(app.getStartdate()));
+			} catch (ParseException e) {
+			}
+			dateChooser.disable();
 			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					btnNext.setEnabled(true);
 					getTextAreaDoctorAvailability().removeAll();
 					try {
 						getTextAreaDoctorAvailability()
@@ -611,7 +614,6 @@ public class SelectionOfDoctorView extends JFrame {
 					}
 				}
 			});
-			dateChooser.setMinSelectableDate(new Date());
 		}
 		return dateChooser;
 	}
@@ -637,89 +639,7 @@ public class SelectionOfDoctorView extends JFrame {
 		if (panelButtonsDate == null) {
 			panelButtonsDate = new JPanel();
 			panelButtonsDate.setLayout(new GridLayout(0, 2, 0, 0));
-			panelButtonsDate.add(getBtnPrev());
-			panelButtonsDate.add(getBtnNext());
 		}
 		return panelButtonsDate;
-	}
-
-	private JButton getBtnPrev() {
-		if (btnPrev == null) {
-			btnPrev = new JButton("Previous");
-			btnPrev.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					// Obtén la fecha actual seleccionada en el JDateChooser
-					Date currentDate = dateChooser.getDate();
-
-					// Crea un objeto Calendar y configúralo con la fecha actual
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(currentDate);
-
-					// Agrega un día al Calendar
-					calendar.add(Calendar.DAY_OF_MONTH, -1);
-
-					// Obtén la nueva fecha después de agregar un día
-					Date newDate = calendar.getTime();
-
-					// Establece la nueva fecha en el JDateChooser
-					dateChooser.setDate(newDate);
-
-					getTextAreaDoctorAvailability().removeAll();
-					try {
-						getTextAreaDoctorAvailability()
-								.setText(ConnectionFactory.getFreeHours(getListDoctor().getSelectedValuesList(),
-										new java.sql.Date(getDateChooser().getDate().getTime())));
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					if (getDateChooser().getDate().getDay() == new Date().getDay()
-							&& getDateChooser().getDate().getMonth() == new Date().getMonth()
-							&& getDateChooser().getDate().getYear() == new Date().getYear()) {
-						btnPrev.setEnabled(false);
-					}
-				}
-			});
-			btnPrev.setEnabled(false);
-		}
-		return btnPrev;
-	}
-
-	private JButton getBtnNext() {
-		if (btnNext == null) {
-			btnNext = new JButton("Next");
-			btnNext.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					// Obtén la fecha actual seleccionada en el JDateChooser
-					Date currentDate = dateChooser.getDate();
-
-					// Crea un objeto Calendar y configúralo con la fecha actual
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(currentDate);
-
-					// Agrega un día al Calendar
-					calendar.add(Calendar.DAY_OF_MONTH, 1);
-
-					// Obtén la nueva fecha después de agregar un día
-					Date newDate = calendar.getTime();
-
-					// Establece la nueva fecha en el JDateChooser
-					dateChooser.setDate(newDate);
-					btnPrev.setEnabled(true);
-
-					getTextAreaDoctorAvailability().removeAll();
-					try {
-						getTextAreaDoctorAvailability()
-								.setText(ConnectionFactory.getFreeHours(getListDoctor().getSelectedValuesList(),
-										new java.sql.Date(getDateChooser().getDate().getTime())));
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-
-				}
-			});
-		}
-		return btnNext;
 	}
 }
