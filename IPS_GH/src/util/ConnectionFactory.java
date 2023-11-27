@@ -205,7 +205,7 @@ public class ConnectionFactory {
 			Statement statement = connection.createStatement();
 
 			// Ejecutar una consulta SQL
-			String sql = "SELECT * FROM DOCTOR";
+			String sql = "SELECT * FROM DOCTOR where id != 62";
 			ResultSet resultSet = statement.executeQuery(sql);
 
 			// Procesar los resultados
@@ -2813,22 +2813,10 @@ public class ConnectionFactory {
 		try {
 			// TODO: falta por añadir las causas
 			con = getOracleConnection();
-<<<<<<< HEAD
-			ps = con.prepareStatement("SELECT * FROM DOCTOR WHERE personal_id = ?");
-
-			ps.setString(1, id.toUpperCase());
-
-			rs = ps.executeQuery();
-
-			while (rs.next()) {
-				aux = rs.getInt("id");
-			}
-=======
 			ps = con.prepareStatement("UPDATE APPOINTMENT SET doctorid = ?, status = 'Booked' WHERE id = ?");
 			ps.setBigDecimal(1, new BigDecimal(doctorId));
 			ps.setBigDecimal(2, new BigDecimal(appId));
 			ps.executeUpdate();
->>>>>>> refs/remotes/origin/Sprint3_Laura
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2845,8 +2833,7 @@ public class ConnectionFactory {
 				throw new RuntimeException();
 			}
 		}
-<<<<<<< HEAD
-		return aux;
+
 	}
 
 	public static DefaultListModel<Appointment> getAppointmentsRequested() {
@@ -2902,9 +2889,44 @@ public class ConnectionFactory {
 //		System.out.println(appointments.toString());
 
 		return appointments;
-=======
->>>>>>> refs/remotes/origin/Sprint3_Laura
 
+	}
+
+	public static int checkIfDoctorIDExists(String id) {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		int aux = -1;
+
+		try {
+			con = getOracleConnection();
+			ps = con.prepareStatement("SELECT * FROM DOCTOR WHERE personal_id = ?");
+
+			ps.setString(1, id.toUpperCase());
+
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				aux = rs.getInt("id");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} finally {
+			try {
+				if (con != null)
+					con.close();
+				if (ps != null)
+					ps.close();
+				if (rs != null)
+					rs.close();
+			} catch (SQLException e) {
+				throw new RuntimeException();
+			}
+		}
+		return aux;
 	}
 
 }

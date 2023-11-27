@@ -201,13 +201,6 @@ public class MedicalRecepcionistView extends JFrame {
 		setTitle("Reservation of appointment");
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
-		doctors = ConnectionFactory.getDoctors();
-		doctors.removeElement(ConnectionFactory.getDoctor(BigInteger.valueOf(62)));
-
-		doctorsReset = ConnectionFactory.getDoctors();
-
-		patients = ConnectionFactory.getPatients();
-		patientsReset = ConnectionFactory.getPatients();
 
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
