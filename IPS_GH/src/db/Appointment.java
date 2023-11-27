@@ -9,35 +9,9 @@ public class Appointment {
 	private BigInteger id;
 	private BigInteger patientid;
 	private BigInteger doctorid, officeId;;
-	private String startdate, enddate, information, checkedin, checkedout, status;
+	private String startdate, enddate, information, checkedin, checkedout, status, comments, p, doctor;
 	private int urgency, attended;
-	private String comments;
-	private String p;
-	private String doctor;
 
-
-
-	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
-			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
-			String status, String comments) {
-		super();
-		this.id = id;
-		this.patientid = patientid;
-		this.doctorid = doctorid;
-		this.startdate = startdate;
-		this.enddate = enddate;
-		this.urgency = urgency;
-		this.attended = attended;
-		this.checkedin = checkedin;
-		this.checkedout = checkedout;
-		this.officeId = officeId;
-		this.information = information;
-		this.status = status;
-		this.comments = comments;
-		p = ConnectionFactory.getPatient(patientid);
-		doctor = ConnectionFactory.getDoctor(doctorid);
-	}
-	
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
 			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
 			String status, String comments) throws Exception {
@@ -49,14 +23,22 @@ public class Appointment {
 		this.enddate = enddate;
 		this.urgency = urgency;
 		this.attended = attended;
-		this.checkedin = checkedin;
-		this.checkedout = checkedout;
+		if (checkedin == "null" || checkedout == "null") {
+			this.checkedin = "";
+			this.checkedout = "";
+		} else {
+			this.checkedin = checkedin;
+			this.checkedout = checkedout;
+		}
+
 		this.officeId = officeId;
 		this.information = information;
 		this.status = status;
-		this.comments = "";
+		this.comments = comments;
+		p = ConnectionFactory.getPatient(patientid);
+		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
-	
+
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
 			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
 			String status) throws Exception {
@@ -77,6 +59,7 @@ public class Appointment {
 		p = ConnectionFactory.getPatient(patientid);
 		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -172,7 +155,7 @@ public class Appointment {
 	public void setInformation(String information) {
 		this.information = information;
 	}
-	
+
 	public String getComments() {
 		return comments;
 	}
@@ -180,7 +163,6 @@ public class Appointment {
 	public void setComments(String comments) {
 		this.comments = comments;
 	}
-	
 
 	@Override
 	public String toString() {
@@ -194,7 +176,7 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				} else if ( getStatus().toLowerCase().equals("booked")) {
+				} else if (getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
 								+ "; \n\tTo: " + enddate;
@@ -204,8 +186,15 @@ public class Appointment {
 					}
 				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
 					try {
-						return "[URGENT] \n\tPatient: " + p +  "; \n\tFrom: " + startdate
-								+ "; \n\tTo: " + enddate;
+						return "[URGENT] \n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						e.printStackTrace();
+
+					}
+
+				} else if (getStatus().toLowerCase().equals("requested")) {
+					try {
+						return "\n\tPatient: " + p + "; \n\t Doctor: " + doctor;
 					} catch (Exception e) {
 						e.printStackTrace();
 
@@ -226,7 +215,7 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				}else if ( getStatus().toLowerCase().equals("booked")) {
+				} else if (getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
 								+ enddate;
@@ -234,10 +223,16 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				}else if (getStatus().toLowerCase().equals("pending of assigning")) {
+				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
 					try {
-						return "\n\tPatient: " + p +  "; \n\tFrom: " + startdate
-								+ "; \n\tTo: " + enddate;
+						return "\n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						e.printStackTrace();
+
+					}
+				} else if (getStatus().toLowerCase().equals("requested")) {
+					try {
+						return "\n\tPatient: " + p + "; \n\t Doctor: " + doctor;
 					} catch (Exception e) {
 						e.printStackTrace();
 

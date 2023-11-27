@@ -1,24 +1,23 @@
 package gui.medicalRecepcionist;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import db.Appointment;
 import util.ConnectionFactory;
-
-import java.awt.BorderLayout;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import java.awt.GridLayout;
-import javax.swing.JButton;
-import javax.swing.JTabbedPane;
-import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class InBoxView extends JFrame {
 
@@ -33,6 +32,13 @@ public class InBoxView extends JFrame {
 	private JButton btnAssignDoctor;
 	private JList listAppointments;
 	private int selectedIndex;
+	private JPanel panelPendingOfBooking;
+	private JPanel panelAppointmentsRequested;
+	private JList listAppointmentsRequested;
+	private JPanel panelButtonsRequested;
+	private JButton btnSeeRequest;
+	private JPanel panelTitleRequested;
+	private JLabel lblRequestedAppointments;
 
 	/**
 	 * Launch the application.
@@ -63,6 +69,7 @@ public class InBoxView extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getTabbedPane());
 	}
+
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -80,9 +87,11 @@ public class InBoxView extends JFrame {
 				}
 			});
 			tabbedPane.addTab("Pending of assigning doctor", null, getPanelPendingOfAssigning(), null);
+			tabbedPane.addTab("Requested", null, getPanelPendingOfBooking(), null);
 		}
 		return tabbedPane;
 	}
+
 	private JPanel getPanelPendingOfAssigning() {
 		if (panelPendingOfAssigning == null) {
 			panelPendingOfAssigning = new JPanel();
@@ -93,6 +102,7 @@ public class InBoxView extends JFrame {
 		}
 		return panelPendingOfAssigning;
 	}
+
 	private JPanel getPanelTitle() {
 		if (panelTitle == null) {
 			panelTitle = new JPanel();
@@ -100,12 +110,14 @@ public class InBoxView extends JFrame {
 		}
 		return panelTitle;
 	}
+
 	private JLabel getLblTitle() {
 		if (lblTitle == null) {
 			lblTitle = new JLabel("Pending appointments");
 		}
 		return lblTitle;
 	}
+
 	private JPanel getPanelAppointments() {
 		if (panelAppointments == null) {
 			panelAppointments = new JPanel();
@@ -114,6 +126,7 @@ public class InBoxView extends JFrame {
 		}
 		return panelAppointments;
 	}
+
 	private JPanel getPanelButtons() {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
@@ -122,21 +135,88 @@ public class InBoxView extends JFrame {
 		}
 		return panelButtons;
 	}
+
 	private JButton getBtnAssignDoctor() {
 		if (btnAssignDoctor == null) {
 			btnAssignDoctor = new JButton("Assign doctor");
 			btnAssignDoctor.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					
+
 				}
 			});
 		}
 		return btnAssignDoctor;
 	}
+
 	private JList getListAppointments() {
 		if (listAppointments == null) {
 			listAppointments = new JList(ConnectionFactory.getAppointmentsPendingOfAssigning());
 		}
 		return listAppointments;
+	}
+	private JPanel getPanelPendingOfBooking() {
+		if (panelPendingOfBooking == null) {
+			panelPendingOfBooking = new JPanel();
+			panelPendingOfBooking.setLayout(new BorderLayout(0, 0));
+			panelPendingOfBooking.add(getPanelAppointmentsRequested());
+			panelPendingOfBooking.add(getPanelButtonsRequested(), BorderLayout.SOUTH);
+			panelPendingOfBooking.add(getPanelTitleRequested(), BorderLayout.NORTH);
+		}
+		return panelPendingOfBooking;
+	}
+	private JPanel getPanelAppointmentsRequested() {
+		if (panelAppointmentsRequested == null) {
+			panelAppointmentsRequested = new JPanel();
+			panelAppointmentsRequested.setLayout(new BorderLayout(0, 0));
+			panelAppointmentsRequested.add(getListAppointmentsRequested(), BorderLayout.NORTH);
+		}
+		return panelAppointmentsRequested;
+	}
+	private JList getListAppointmentsRequested() {
+		if (listAppointmentsRequested == null) {
+			listAppointmentsRequested = new JList(ConnectionFactory.getAppointmentsRequested());
+		}
+		return listAppointmentsRequested;
+	}
+	private JPanel getPanelButtonsRequested() {
+		if (panelButtonsRequested == null) {
+			panelButtonsRequested = new JPanel();
+			panelButtonsRequested.setLayout(new GridLayout(1, 0, 0, 0));
+			panelButtonsRequested.add(getBtnSeeRequest());
+		}
+		return panelButtonsRequested;
+	}
+	private JButton getBtnSeeRequest() {
+		if (btnSeeRequest == null) {
+			btnSeeRequest = new JButton("See request");
+			btnSeeRequest.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					Appointment a = (Appointment) getListAppointmentsRequested().getSelectedValue();
+					try {
+						MedicalRecepcionistView mrv = new MedicalRecepcionistView(a);
+						mrv.setVisible(true);
+						mrv.setLocationRelativeTo(null);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+				}
+			});
+		}
+		return btnSeeRequest;
+	}
+	private JPanel getPanelTitleRequested() {
+		if (panelTitleRequested == null) {
+			panelTitleRequested = new JPanel();
+			panelTitleRequested.add(getLblRequestedAppointments());
+		}
+		return panelTitleRequested;
+	}
+	private JLabel getLblRequestedAppointments() {
+		if (lblRequestedAppointments == null) {
+			lblRequestedAppointments = new JLabel("Requested appointments");
+		}
+		return lblRequestedAppointments;
 	}
 }

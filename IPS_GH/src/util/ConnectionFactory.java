@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ListModel;
 
 import db.Appointment;
 import db.Diagnosis;
@@ -693,11 +694,7 @@ public class ConnectionFactory {
 			preparedStatement.setInt(8, 0);
 			preparedStatement.setInt(9, officeId);
 			preparedStatement.setString(10, information);
-<<<<<<< HEAD
-			preparedStatement.setString(11, "Booked");
-=======
 			preparedStatement.setString(11, status);
->>>>>>> branch 'Sprint3_Laura' of https://github.com/garciafdezpatricia/IPS2324-81-ING.git
 			preparedStatement.setString(12, "");
 
 			// Ejecutar la inserción
@@ -709,20 +706,10 @@ public class ConnectionFactory {
 			e.printStackTrace();
 		}
 	}
-<<<<<<< HEAD
-	
-	public static void createRequestForAppointment(BigInteger patientID, BigInteger doctorID, String startDate, String endDate,
-			int urgency, int officeId, String information, String comments) throws Exception {
-		try {
-			// Establecer la conexión
-			Connection connection = ConnectionFactory.getOracleConnection();
-=======
->>>>>>> branch 'Sprint3_Laura' of https://github.com/garciafdezpatricia/IPS2324-81-ING.git
 
-<<<<<<< HEAD
-=======
 	public static void createAppointmentPendingOfAssigning(BigInteger patientID, BigInteger doctorID, String startDate,
-			String endDate, int urgency, int officeId, String information, String status, String comments) throws Exception {
+			String endDate, int urgency, int officeId, String information, String status, String comments)
+			throws Exception {
 		// Datos de conexión a la base de datos (ajusta estos valores según tu
 		// configuración)
 
@@ -772,8 +759,6 @@ public class ConnectionFactory {
 			// Establecer la conexión
 			Connection connection = ConnectionFactory.getOracleConnection();
 
->>>>>>> branch 'Sprint3_Laura' of https://github.com/garciafdezpatricia/IPS2324-81-ING.git
-			// Consulta SQL con parámetros
 			String insertQuery = "INSERT INTO Appointment (PatientID, DoctorID, StartDate, EndDate, Urgency, Attended, CheckedIn, CheckedOut, OfficeId, Information, Status, Comments) "
 					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -1677,6 +1662,46 @@ public class ConnectionFactory {
 		return name;
 
 	}
+	
+	public static Patient getPatientFromId(BigInteger id) throws Exception {
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM PATIENT where id = ?";
+
+			PreparedStatement statement = connection.prepareStatement(sql);
+
+			statement.setBigDecimal(1, new BigDecimal(id));
+			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+
+				String contactinfo = resultSet.getString("contactinfo");
+				String name = resultSet.getString("firstname");
+				String surname = resultSet.getString("surname");
+				String dni = resultSet.getString("dni");
+				int ssnumber = resultSet.getInt("ssnumber");
+
+				Patient p = new Patient(id, name, surname, dni, contactinfo, ssnumber);
+				return p;
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+
+	}
+
 
 	public static BigInteger getPatientId(String name) throws Exception {
 
@@ -2026,6 +2051,44 @@ public class ConnectionFactory {
 		}
 
 		return docs;
+	}
+	
+	public static Doctor doctorFromID(BigInteger id) throws Exception {
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Consulta SQL para buscar el doctor
+			String sql = "SELECT * FROM Doctor WHERE UPPER(id) = UPPER(?)";
+
+			// Crear una sentencia preparada
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setObject(1, id);
+
+			// Ejecutar la consulta
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				// Extraer datos del resultado
+				String numcolegiado = resultSet.getString("numcolegiado");
+				String name = resultSet.getString("name");
+				String surname = resultSet.getString("surname");
+				String email = resultSet.getString("email");
+				String personal_id = resultSet.getString("personal_id");
+				String specialization = resultSet.getString("specialization");
+
+				// Crear un objeto Doctor
+				Doctor doc = new Doctor(id, numcolegiado, name, surname, email, personal_id, specialization);
+				return doc;
+			} else {
+				System.out.println("Doctor not found.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	public static boolean doctorHasWorkPeriod(BigInteger doctorId) {
@@ -2456,7 +2519,7 @@ public class ConnectionFactory {
 			con = getOracleConnection();
 			ps = con.prepareStatement("SELECT * FROM DOCTOR WHERE personal_id = ?");
 
-			ps.setString(1, id);
+			ps.setString(1, id.toUpperCase());
 
 			rs = ps.executeQuery();
 
@@ -2480,10 +2543,61 @@ public class ConnectionFactory {
 			}
 		}
 		return aux;
-<<<<<<< HEAD
-		
-=======
+	}
 
->>>>>>> branch 'Sprint3_Laura' of https://github.com/garciafdezpatricia/IPS2324-81-ING.git
+	public static DefaultListModel<Appointment> getAppointmentsRequested() {
+		DefaultListModel<Appointment> appointments = new DefaultListModel<>();
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Crear una sentencia SQL
+			Statement statement = connection.createStatement();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM APPOINTMENT WHERE status = 'Requested'";
+			ResultSet resultSet = statement.executeQuery(sql);
+
+			if (!resultSet.next()) {
+				System.out.println("Appointments with status 'Requested' not found.");
+			}
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigDecimal id = resultSet.getBigDecimal("id");
+				BigDecimal patientid = resultSet.getBigDecimal("patientid");
+				BigDecimal doctorid = resultSet.getBigDecimal("doctorid");
+
+				String startDate = resultSet.getString("startdate");
+				String enddate = resultSet.getString("enddate");
+
+				int urgency = resultSet.getInt("urgency");
+				int attended = resultSet.getInt("attended");
+
+				String checkedin = resultSet.getString("checkedin");
+				String checkedout = resultSet.getString("checkedout");
+				BigDecimal officeid = resultSet.getBigDecimal("officeid");
+				String information = resultSet.getString("information");
+				String status = resultSet.getString("status");
+				String comments = resultSet.getString("comments");
+
+				// Procesa otros campos según la estructura de tu tabla
+				appointments.addElement(new Appointment(id.toBigInteger(), patientid.toBigInteger(),
+						doctorid.toBigInteger(), startDate, enddate, urgency, attended, "", "",
+						officeid.toBigInteger(), information, status, comments));
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+//		System.out.println(appointments.toString());
+
+		return appointments;
+
 	}
 }

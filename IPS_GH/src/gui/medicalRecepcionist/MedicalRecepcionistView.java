@@ -39,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
@@ -48,18 +49,17 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.toedter.calendar.JDateChooser;
 
+import db.Appointment;
 import db.Doctor;
-import db.Office;
 import db.Patient;
 import util.ConnectionFactory;
-import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 public class MedicalRecepcionistView extends JFrame {
 
@@ -181,6 +181,9 @@ public class MedicalRecepcionistView extends JFrame {
 	private JList listSpecialization;
 	protected int selectedIndex = 0;
 
+	private boolean requestedApp = false;
+	private Appointment a;
+
 	/**
 	 * Create the frame.
 	 * 
@@ -193,6 +196,8 @@ public class MedicalRecepcionistView extends JFrame {
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		doctors = ConnectionFactory.getDoctors();
+		doctors.removeElement(ConnectionFactory.getDoctor(BigInteger.valueOf(62)));
+
 		doctorsReset = ConnectionFactory.getDoctors();
 
 		patients = ConnectionFactory.getPatients();
@@ -225,6 +230,56 @@ public class MedicalRecepcionistView extends JFrame {
 
 		// patient
 		panel_patient_center.add(scrollPane_patients, BorderLayout.CENTER);
+
+	}
+
+	public MedicalRecepcionistView(Appointment a) throws Exception {
+		this.a = a;
+		requestedApp = true;
+
+		fulfillSpecializations();
+
+		setTitle("Request for an appointment");
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+		doctors = new DefaultListModel<Doctor>();
+		doctors.addElement(ConnectionFactory.doctorFromID(a.getDoctorid()));
+		doctorsReset = doctors;
+
+		patients = new DefaultListModel<Patient>();
+		patients.addElement(ConnectionFactory.getPatientFromId(a.getPatientid()));
+		patientsReset = patients;
+
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setBounds(100, 100, 1271, 553);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(new BorderLayout(0, 0));
+		contentPane.add(getPanel_title(), BorderLayout.NORTH);
+		contentPane.add(getPanelGeneral(), BorderLayout.CENTER);
+		contentPane.add(getPanel_buttons(), BorderLayout.SOUTH);
+
+		// doctors
+		panel_doctor_Center.add(scrollPaneDoctor, BorderLayout.CENTER);
+
+		// patient
+		panel_patient_center.add(scrollPane_patients, BorderLayout.CENTER);
+
+		getListDoctor().setSelectedValue(ConnectionFactory.getDoctor(a.getDoctorid()), true);
+		getList_patients().setSelectedValue(ConnectionFactory.getPatient(a.getPatientid()), true);
 
 	}
 
@@ -420,21 +475,22 @@ public class MedicalRecepcionistView extends JFrame {
 						}
 
 					}
-					//si se elige especializacion
-					if(selectedIndex == 1) {
+					// si se elige especializacion
+					if (selectedIndex == 1) {
 						int opcion = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
 								"Are you sure you want to reserve the appointment between an  "
-										+ listSpecialization.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
-										+ " on  " + dateChooser.getDate().getDay() + "/" + dateChooser.getDate().getMonth() + "/"
-										+ dateChooser.getDate().getYear() + " at " + getTextFieldFrom().getText() + " in the office "
+										+ listSpecialization.getSelectedValuesList() + " and the patient "
+										+ list_patients.getSelectedValue() + " on  " + dateChooser.getDate().getDay()
+										+ "/" + dateChooser.getDate().getMonth() + "/" + dateChooser.getDate().getYear()
+										+ " at " + getTextFieldFrom().getText() + " in the office "
 										+ getComboBoxOffices().getSelectedItem() + "?",
 								"Confirmation", JOptionPane.YES_NO_OPTION);
 
 						// Verificar la respuesta del usuario
 						if (opcion == JOptionPane.YES_OPTION) {
 							String comments = "";
-							for(int i = 0; i<listSpecialization.getSelectedValuesList().size(); i++){
-								comments+= listSpecialization.getSelectedValuesList().get(i) + "\n";
+							for (int i = 0; i < listSpecialization.getSelectedValuesList().size(); i++) {
+								comments += listSpecialization.getSelectedValuesList().get(i) + "\n";
 							}
 							// El usuario ha confirmado, realiza la acción
 							// Puedes poner aquí el código que quieras ejecutar después de la confirmación
@@ -447,12 +503,15 @@ public class MedicalRecepcionistView extends JFrame {
 							Patient p = (Patient) list_patients.getSelectedValue();
 							if (rdbtnUrgent.isSelected()) {
 								try {
-									ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(), new BigInteger(String.valueOf(62)),
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldFromH().getText()
-													+ ":00",
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
-													+ ":00",
-											1, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+									ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
+											new BigInteger(String.valueOf(62)),
+											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+													+ getTextFieldFromH().getText() + ":00",
+											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+													+ getTextFieldToH().getText() + ":00",
+											1,
+											ConnectionFactory
+													.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 											newContactInfo, "Pending of assigning", comments);
 								} catch (Exception e1) {
 									// TODO Auto-generated catch block
@@ -461,12 +520,15 @@ public class MedicalRecepcionistView extends JFrame {
 
 							} else {
 								try {
-									ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(), new BigInteger(String.valueOf(62)),
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldFromH().getText()
-													+ ":00",
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " " + getTextFieldToH().getText()
-													+ ":00",
-											0, ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+									ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
+											new BigInteger(String.valueOf(62)),
+											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+													+ getTextFieldFromH().getText() + ":00",
+											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+													+ getTextFieldToH().getText() + ":00",
+											0,
+											ConnectionFactory
+													.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 											newContactInfo, "Pending of assigning", comments);
 								} catch (Exception e1) {
 									// TODO Auto-generated catch block
@@ -475,8 +537,8 @@ public class MedicalRecepcionistView extends JFrame {
 							}
 							getTextAreaDoctorAvailability().removeAll();
 							try {
-								getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-										new java.sql.Date(dateChooser.getDate().getTime())));
+								getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(
+										getSelectedDoctors(), new java.sql.Date(dateChooser.getDate().getTime())));
 							} catch (Exception e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
@@ -661,6 +723,14 @@ public class MedicalRecepcionistView extends JFrame {
 				}
 
 			});
+//			if (requestedApp) {
+//				try {
+//					list_patients.setSelectedValue(ConnectionFactory.getPatientFromId(a.getPatientid()), true);
+//				} catch (Exception e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}
 		}
 		return list_patients;
 	}
@@ -678,15 +748,23 @@ public class MedicalRecepcionistView extends JFrame {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+
 					if (!listDoctor.getSelectedValuesList().isEmpty()) {
 						doctorChoosed = true;
-
 					} else {
 						doctorChoosed = false;
 					}
 
 				}
 			});
+//			if (requestedApp) {
+//				try {
+//					listDoctor.setSelectedValue(ConnectionFactory.getDoctor(a.getDoctorid()), true);
+//				} catch (Exception e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}
 		}
 		return listDoctor;
 	}
@@ -1080,6 +1158,12 @@ public class MedicalRecepcionistView extends JFrame {
 	private JComboBox<String> getComboBoxOffices() {
 		if (comboBoxOffices == null) {
 			comboBoxOffices = new JComboBox<String>();
+			try {
+				comboBoxOffices.setModel(new DefaultComboBoxModel<>(getOfficesCodes()));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			comboBoxOffices.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					officeChoosed = true;
@@ -1087,17 +1171,36 @@ public class MedicalRecepcionistView extends JFrame {
 
 					checkFinishBtnEnabled();
 					showFreeHours(getDateChooser().getDate());
-
 				}
 			});
-			try {
-				comboBoxOffices.setModel(new DefaultComboBoxModel<>(ConnectionFactory.getOfficesCodes()));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 		return comboBoxOffices;
+	}
+
+	private String[] getOfficesCodes() {
+		String[] os;
+		String[] aux = null;
+		try {
+			os = ConnectionFactory.getOfficesCodes();
+			int count = 0;
+			for (String o : os) {
+				if (!o.equals("NOT-ASSIGNED")) {
+					count++;
+				}
+			}
+			aux = new String[count];
+			int index = 0;
+			for (String o : os) {
+				if (!o.equals("NOT-ASSIGNED")) {
+					aux[index] = o;
+					index++;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return aux;
 	}
 
 	private void checkFinishBtnEnabled() {

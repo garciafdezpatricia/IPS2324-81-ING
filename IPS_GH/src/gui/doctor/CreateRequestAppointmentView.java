@@ -58,6 +58,7 @@ import util.ConnectionFactory;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.ItemListener;
+import java.math.BigInteger;
 import java.awt.event.ItemEvent;
 
 public class CreateRequestAppointmentView extends JFrame {
@@ -313,7 +314,7 @@ public class CreateRequestAppointmentView extends JFrame {
 		if (opcion == JOptionPane.YES_OPTION) {
 			// El usuario ha confirmado, realiza la acción
 			// Puedes poner aquí el código que quieras ejecutar después de la confirmación
-			System.out.println("Request sent.");
+			BigInteger id = BigInteger.valueOf(Long.valueOf(CreateRequestAppointmentView.docID));
 			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
 				for (int j = 0; j < listDoctor.getSelectedValuesList().size(); j++) {
@@ -323,7 +324,7 @@ public class CreateRequestAppointmentView extends JFrame {
 					// the most distant date is selected as a "provisional date" since there is no
 					// date preference on the part of the doctor
 					Calendar maxDate = Calendar.getInstance();
-					maxDate.set(9999, Calendar.DECEMBER, 31);
+					maxDate.set(2037, Calendar.DECEMBER, 31); // WARNING: the max date supported by java.sql.Date is jan 19, 2038
 					maxDate.getTime().getTime();
 
 					ConnectionFactory.createRequestForAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
@@ -331,6 +332,7 @@ public class CreateRequestAppointmentView extends JFrame {
 							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00", 1,
 							ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 							newContactInfo, getTxtComments().getText());
+					System.out.println("Request sent.");
 				}
 
 			} else {
@@ -340,19 +342,22 @@ public class CreateRequestAppointmentView extends JFrame {
 					Calendar maxDate = Calendar.getInstance();
 					maxDate.set(9999, Calendar.DECEMBER, 31);
 					maxDate.getTime().getTime();
-
-					ConnectionFactory.createRequestForAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+					
+					ConnectionFactory.createRequestForAppointment(p.getId(), id,
 							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00",
 							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00", 1,
 							ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 							newContactInfo, getTxtComments().getText());
+					System.out.println("Request sent.");
+					
 				}
 				else {
-				ConnectionFactory.createRequestForAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+				ConnectionFactory.createRequestForAppointment(p.getId(), id,
 						new java.sql.Date(getDateChooser().getDate().getTime()) + " 00:00:00",
 						new java.sql.Date(getDateChooser().getDate().getTime()) + " 00:00:00", 0,
 						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
 						newContactInfo, getTxtComments().getText());
+				System.out.println("Request sent.");
 				}
 			}
 
@@ -478,6 +483,9 @@ public class CreateRequestAppointmentView extends JFrame {
 		if (listDoctor == null) {
 			listDoctor = new JList<>(doctors);
 			listDoctor.setSelectedValue(getDoctorByID(CreateRequestAppointmentView.docID), true);
+//			int index = listDoctor.getSelectedIndex();
+//			listDoctor.ensureIndexIsVisible(index);
+			
 			listDoctor.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					try {
@@ -500,7 +508,7 @@ public class CreateRequestAppointmentView extends JFrame {
 
 	private Doctor getDoctorByID(String id) {
 		for (int i = 0; i < doctors.getSize(); i++) {
-			if (doctors.get(i).getPersonal_id().equals(id))
+			if (doctors.get(i).getPersonal_id().toLowerCase().equals(id.toLowerCase()))
 				return doctors.get(i);
 		}
 		// this method is never going to return null because the checking of the doctor
