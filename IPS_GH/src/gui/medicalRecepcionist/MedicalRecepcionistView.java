@@ -83,10 +83,10 @@ public class MedicalRecepcionistView extends JFrame {
 	private JScrollPane scrollPaneDoctor;
 	private JLabel lblSSNumber;
 	private JTextField textFieldSSNumber;
-	private DefaultListModel<Doctor> doctors = new DefaultListModel<>();
-	private DefaultListModel<Doctor> doctorsReset = new DefaultListModel<>();
-	private DefaultListModel<Patient> patients = new DefaultListModel<>();
-	private DefaultListModel<Patient> patientsReset = new DefaultListModel<>();
+	private DefaultListModel<Doctor> doctors = ConnectionFactory.getDoctors();
+	private DefaultListModel<Doctor> doctorsReset = ConnectionFactory.getDoctors();
+	private DefaultListModel<Patient> patients = ConnectionFactory.getPatients();
+	private DefaultListModel<Patient> patientsReset = ConnectionFactory.getPatients();
 
 	private JPanel panel_office_north;
 	private JLabel lblChooseOffice;
@@ -101,6 +101,7 @@ public class MedicalRecepcionistView extends JFrame {
 	private SelectDate selectDate;
 
 	private DefaultListModel<String> specializations = new DefaultListModel<String>();
+	private DefaultListModel<String> finalSpecializations = new DefaultListModel<String>();
 
 	/**
 	 * Launch the application.
@@ -120,9 +121,6 @@ public class MedicalRecepcionistView extends JFrame {
 		});
 	}
 
-	public static final String url = "jdbc:oracle:thin:@";
-	public static final String usuario = "Admin";
-	public static final String contraseña = "LyQmZ7HwG4edJ2";
 	private JPanel panelNameAndNumber;
 	private JLabel lblTypeDoctor;
 	private JTextField textNameDoctor;
@@ -177,9 +175,17 @@ public class MedicalRecepcionistView extends JFrame {
 	private JScrollPane scrollPaneOfficeAvailability;
 	private JTextArea textAreaOfficeAvailability;
 	private JTabbedPane tabbedPane;
+	protected int selectedIndex = 0;
+	private JPanel panelSpecialization;
 	private JScrollPane scrollPaneSpecialization;
 	private JList listSpecialization;
-	protected int selectedIndex = 0;
+	private JScrollPane scrollPaneSp;
+	private JList listSp;
+	private JPanel pnButtons;
+	private JButton btnPass;
+	private JButton btnBack;
+	private JLabel lblAllSpecializations;
+	private JLabel lblSelectedSpecialzations;
 
 	private boolean requestedApp = false;
 	private Appointment a;
@@ -479,7 +485,7 @@ public class MedicalRecepcionistView extends JFrame {
 					if (selectedIndex == 1) {
 						int opcion = JOptionPane.showConfirmDialog(MedicalRecepcionistView.this,
 								"Are you sure you want to reserve the appointment between an  "
-										+ listSpecialization.getSelectedValuesList() + " and the patient "
+										+ listSpecialization.getModel() + " and the patient "
 										+ list_patients.getSelectedValue() + " on  " + dateChooser.getDate().getDay()
 										+ "/" + dateChooser.getDate().getMonth() + "/" + dateChooser.getDate().getYear()
 										+ " at " + getTextFieldFrom().getText() + " in the office "
@@ -489,64 +495,58 @@ public class MedicalRecepcionistView extends JFrame {
 						// Verificar la respuesta del usuario
 						if (opcion == JOptionPane.YES_OPTION) {
 							String comments = "";
-							for (int i = 0; i < listSpecialization.getSelectedValuesList().size(); i++) {
-								comments += listSpecialization.getSelectedValuesList().get(i) + "\n";
-							}
-							// El usuario ha confirmado, realiza la acción
-							// Puedes poner aquí el código que quieras ejecutar después de la confirmación
-							System.out.println("Acción realizada.");
-							if (rdbtnUrgent.isSelected()) {
-								for (int j = 0; j < listSpecialization.getSelectedValuesList().size(); j++) {
-									sendEmail(((Doctor) listSpecialization.getSelectedValuesList().get(j)).getEmail());
+							for (int i = 0; i < listSpecialization.getModel().getSize(); i++) {
+								comments = listSpecialization.getModel().getElementAt(i) + "\n";
+								Patient p = (Patient) list_patients.getSelectedValue();
+								System.out.println(i);
+								if (rdbtnUrgent.isSelected()) {
+									try {
+										ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
+												new BigInteger(String.valueOf(62)),
+												new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+														+ getTextFieldFromH().getText() + ":00",
+												new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+														+ getTextFieldToH().getText() + ":00",
+												1,
+												ConnectionFactory.officeIdFrom(
+														getComboBoxOffices().getSelectedItem().toString()),
+												newContactInfo, "Pending of assigning", comments);
+									} catch (Exception e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+
+								} else {
+									try {
+										ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
+												new BigInteger(String.valueOf(62)),
+												new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+														+ getTextFieldFromH().getText() + ":00",
+												new java.sql.Date(getDateChooser().getDate().getTime()) + " "
+														+ getTextFieldToH().getText() + ":00",
+												0,
+												ConnectionFactory.officeIdFrom(
+														getComboBoxOffices().getSelectedItem().toString()),
+												newContactInfo, "Pending of assigning", comments);
+									} catch (Exception e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
 								}
-							}
-							Patient p = (Patient) list_patients.getSelectedValue();
-							if (rdbtnUrgent.isSelected()) {
+								getTextAreaDoctorAvailability().removeAll();
 								try {
-									ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
-											new BigInteger(String.valueOf(62)),
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
-													+ getTextFieldFromH().getText() + ":00",
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
-													+ getTextFieldToH().getText() + ":00",
-											1,
-											ConnectionFactory
-													.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-											newContactInfo, "Pending of assigning", comments);
+									getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(
+											getSelectedDoctors(), new java.sql.Date(dateChooser.getDate().getTime())));
 								} catch (Exception e1) {
 									// TODO Auto-generated catch block
 									e1.printStackTrace();
 								}
 
-							} else {
-								try {
-									ConnectionFactory.createAppointmentPendingOfAssigning(p.getId(),
-											new BigInteger(String.valueOf(62)),
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
-													+ getTextFieldFromH().getText() + ":00",
-											new java.sql.Date(getDateChooser().getDate().getTime()) + " "
-													+ getTextFieldToH().getText() + ":00",
-											0,
-											ConnectionFactory
-													.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
-											newContactInfo, "Pending of assigning", comments);
-								} catch (Exception e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-							}
-							getTextAreaDoctorAvailability().removeAll();
-							try {
-								getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(
-										getSelectedDoctors(), new java.sql.Date(dateChooser.getDate().getTime())));
-							} catch (Exception e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
+								getTextAreaOfficeAvailability().removeAll();
+								showFreeHours(dateChooser.getDate());
 
-							getTextAreaOfficeAvailability().removeAll();
-							;
-							showFreeHours(dateChooser.getDate());
+							}
+							System.out.println("done");
 						} else {
 							// El usuario ha cancelado la acción
 							System.out.println("Acción cancelada.");
@@ -1054,7 +1054,8 @@ public class MedicalRecepcionistView extends JFrame {
 					textRegNumber.setText("");
 					textFieldFrom.setEnabled(false);
 					textFieldTo.setEnabled(false);
-					btnFinish.setEnabled(false);
+					textFieldSurnameDoctor.setText("");
+
 					btnFinish.setEnabled(false);
 
 				}
@@ -1355,8 +1356,8 @@ public class MedicalRecepcionistView extends JFrame {
 					DefaultListModel<Doctor> filteredBySurname = new DefaultListModel<>();
 					if (!getTextFieldSurnameDoctor().getText().isBlank()
 							&& !getTextFieldSurnameDoctor().getText().isEmpty()) {
-						for (int i = 0; i < patients.getSize(); i++) {
-							if ((doctors.get(i).getSurname().contains(getTextFieldSurname().getText()))) {
+						for (int i = 0; i < doctors.getSize(); i++) {
+							if ((doctors.get(i).getSurname().contains(getTextFieldSurnameDoctor().getText()))) {
 								filteredBySurname.addElement(doctors.get(i));
 							}
 						}
@@ -1689,23 +1690,115 @@ public class MedicalRecepcionistView extends JFrame {
 				}
 			});
 			tabbedPane.addTab("Doctor", null, getPanel_doctor(), null);
-			tabbedPane.addTab("Specialization", null, getScrollPaneSpecialization(), null);
+			tabbedPane.addTab("Specialization", null, getPanelSpecialization(), null);
 		}
 		return tabbedPane;
+	}
+
+	/*
+	 * private JScrollPane getScrollPaneSpecialization() { if
+	 * (scrollPaneSpecialization == null) { scrollPaneSpecialization = new
+	 * JScrollPane();
+	 * scrollPaneSpecialization.setViewportView(getListSpecialization()); } return
+	 * scrollPaneSpecialization; }
+	 * 
+	 * private JList<String> getListSpecialization() { if (listSpecialization ==
+	 * null) { listSpecialization = new JList<String>(specializations); } return
+	 * listSpecialization; }
+	 */
+	private JPanel getPanelSpecialization() {
+		if (panelSpecialization == null) {
+			panelSpecialization = new JPanel();
+			panelSpecialization.setLayout(new GridLayout(0, 3, 0, 0));
+			panelSpecialization.add(getScrollPaneSp());
+			panelSpecialization.add(getPnButtons());
+			panelSpecialization.add(getScrollPaneSpecialization());
+		}
+		return panelSpecialization;
 	}
 
 	private JScrollPane getScrollPaneSpecialization() {
 		if (scrollPaneSpecialization == null) {
 			scrollPaneSpecialization = new JScrollPane();
 			scrollPaneSpecialization.setViewportView(getListSpecialization());
+			scrollPaneSpecialization.setColumnHeaderView(getLblSelectedSpecialzations());
+
 		}
 		return scrollPaneSpecialization;
 	}
 
 	private JList<String> getListSpecialization() {
 		if (listSpecialization == null) {
-			listSpecialization = new JList<String>(specializations);
+			listSpecialization = new JList<String>(finalSpecializations);
 		}
 		return listSpecialization;
+	}
+
+	private JScrollPane getScrollPaneSp() {
+		if (scrollPaneSp == null) {
+			scrollPaneSp = new JScrollPane();
+			scrollPaneSp.setViewportView(getListSp());
+			scrollPaneSp.setColumnHeaderView(getLblAllSpecializations());
+		}
+		return scrollPaneSp;
+	}
+
+	private JList getListSp() {
+		if (listSp == null) {
+			listSp = new JList(specializations);
+		}
+		return listSp;
+	}
+
+	private JPanel getPnButtons() {
+		if (pnButtons == null) {
+			pnButtons = new JPanel();
+			pnButtons.setLayout(new GridLayout(0, 1, 0, 0));
+			pnButtons.add(getBtnPass());
+			pnButtons.add(getBtnBack());
+		}
+		return pnButtons;
+	}
+
+	private JButton getBtnPass() {
+		if (btnPass == null) {
+			btnPass = new JButton("->");
+			btnPass.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					List<String> causesSelected = getListSp().getSelectedValuesList();
+					for (String cause : causesSelected) {
+						finalSpecializations.addElement(cause);
+					}
+				}
+			});
+		}
+		return btnPass;
+	}
+
+	private JButton getBtnBack() {
+		if (btnBack == null) {
+			btnBack = new JButton("<-");
+			btnBack.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					List<String> selectedItems = getListSpecialization().getSelectedValuesList();
+					for (String item : selectedItems) {
+						finalSpecializations.removeElement(item);
+					}
+				}
+			});
+		}
+		return btnBack;
+	}
+	private JLabel getLblAllSpecializations() {
+		if (lblAllSpecializations == null) {
+			lblAllSpecializations = new JLabel("All specializations");
+		}
+		return lblAllSpecializations;
+	}
+	private JLabel getLblSelectedSpecialzations() {
+		if (lblSelectedSpecialzations == null) {
+			lblSelectedSpecialzations = new JLabel("Selected specializations");
+		}
+		return lblSelectedSpecialzations;
 	}
 }

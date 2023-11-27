@@ -60,6 +60,22 @@ public class InBoxView extends JFrame {
 	 * Create the frame.
 	 */
 	public InBoxView() {
+
+		setTitle("Inbox");
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -122,7 +138,7 @@ public class InBoxView extends JFrame {
 		if (panelAppointments == null) {
 			panelAppointments = new JPanel();
 			panelAppointments.setLayout(new BorderLayout(0, 0));
-			panelAppointments.add(getListAppointments(), BorderLayout.NORTH);
+			panelAppointments.add(getListAppointments(), BorderLayout.CENTER);
 		}
 		return panelAppointments;
 	}
@@ -139,9 +155,20 @@ public class InBoxView extends JFrame {
 	private JButton getBtnAssignDoctor() {
 		if (btnAssignDoctor == null) {
 			btnAssignDoctor = new JButton("Assign doctor");
+			btnAssignDoctor.setEnabled(false);
 			btnAssignDoctor.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					SelectionOfDoctorView editWp;
+					try {
+						Appointment app = (Appointment) getListAppointments().getSelectedValue();
+						editWp = new SelectionOfDoctorView(app, app.getComments().trim());
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
 
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 		}
@@ -151,6 +178,11 @@ public class InBoxView extends JFrame {
 	private JList getListAppointments() {
 		if (listAppointments == null) {
 			listAppointments = new JList(ConnectionFactory.getAppointmentsPendingOfAssigning());
+			listAppointments.addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					btnAssignDoctor.setEnabled(true);
+				}
+			});
 		}
 		return listAppointments;
 	}
