@@ -28,6 +28,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -53,9 +54,14 @@ import creator.CausesCreator;
 import db.Diagnosis;
 import db.ICDChapter;
 import db.ICDSubchapter;
+import db.Procedure;
 import gui.medicalRecord.MedicalRecordView;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
+import javax.swing.border.LineBorder;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.BevelBorder;
 
 public class DoctorAppointmentView extends JFrame {
 
@@ -63,16 +69,20 @@ public class DoctorAppointmentView extends JFrame {
 	private JPanel contentPane;
 	private JPanel patientInfoPanel;
 	private JPanel buttonsPanel;
-	private JButton btnExit;
+	private JButton btnBack;
 	private JButton btnSave;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private CausesCreator causesCreator;
 	private Map<String, List<String>> causes;
 	private DefaultListModel<String> finalCauses = new DefaultListModel<String>();
 	private DefaultListModel<String> finalPrescription = new DefaultListModel<String>();
-	private String[] vaccines = new String[] {"Covid-19 vaccine", "Tetanos vaccine", "Spanish flu vaccine", "Viruela vaccine", "Other..."};
+	private String[] vaccines = new String[] { "Covid-19 vaccine", "Tetanos vaccine", "Spanish flu vaccine",
+			"Viruela vaccine", "Other..." };
 	private List<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
+	private List<Procedure> procedures = new ArrayList<Procedure>();
 	private List<ICDChapter> chapters;
+	private List<ICDChapter> procedureChapters;
+	private List<ICDSubchapter> procedureSubchapters = new ArrayList<ICDSubchapter>();
 	private List<ICDSubchapter> subchapters = new ArrayList<ICDSubchapter>();
 	private AppointmentBLDto appointment;
 	private JTabbedPane tabbedPane;
@@ -151,6 +161,27 @@ public class DoctorAppointmentView extends JFrame {
 	private JTextField txtDiagnosisCode;
 	private JButton btnSearch;
 	private JLabel lblNoDiagnosis;
+	private JPanel pnProcedures;
+	private JTree procedureTree;
+	private JScrollPane scrollPane_10;
+	private JList selectedProceduresList;
+	private JScrollPane scrollPane_11;
+	private JLabel lblFinalProcedures;
+	private JButton btnAddProcedure;
+	private JButton btnRemoveProcedure;
+	private JTextArea txtAreaProcedureDescription;
+	private JLabel lblNoProcedureResults;
+	private JScrollPane scrollPane_12;
+	private JTextField txtFieldSearchProcedure;
+	private JButton btnSearchProcedure;
+	private JLabel lblSearchProcedure;
+	private JPanel pnAtenzzioneDiagnosis;
+	private JButton btnAtenzzione;
+	private JPanel pnButtons;
+	private JTextArea txtAreaProcedureComments;
+	private JScrollPane scrollPane_13;
+	private JLabel lblProcedureComments;
+
 	/**
 	 * Launch the application.
 	 */
@@ -160,6 +191,7 @@ public class DoctorAppointmentView extends JFrame {
 				try {
 					DoctorAppointmentView frame = new DoctorAppointmentView(null);
 					frame.setVisible(true);
+					frame.setLocationRelativeTo(null);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -171,7 +203,8 @@ public class DoctorAppointmentView extends JFrame {
 	 * Create the frame.
 	 */
 	public DoctorAppointmentView(AppointmentBLDto appointment) {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(DoctorAppointmentView.class.getResource("/img/descarga.jpg")));
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(DoctorAppointmentView.class.getResource("/img/descarga.jpg")));
 		setTitle("Appointment");
 		addComponentListener(new ComponentAdapter() {
 			@Override
@@ -183,13 +216,13 @@ public class DoctorAppointmentView extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				//TODO: make confirmation message
+				// TODO: make confirmation message
 				setVisible(false);
 			}
 		});
 		this.appointment = appointment;
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 668, 626);
+		setBounds(100, 100, 668, 656);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		try {
@@ -224,19 +257,24 @@ public class DoctorAppointmentView extends JFrame {
 	private JPanel getButtonsPanel() {
 		if (buttonsPanel == null) {
 			buttonsPanel = new JPanel();
-			FlowLayout flowLayout = (FlowLayout) buttonsPanel.getLayout();
-			flowLayout.setAlignment(FlowLayout.RIGHT);
-			buttonsPanel.add(getBtnExit());
-			buttonsPanel.add(getBtnSave());
+			buttonsPanel.setBorder(null);
+			buttonsPanel.setLayout(new BorderLayout(0, 0));
+			buttonsPanel.add(getPnAtenzzioneDiagnosis(), BorderLayout.WEST);
+			buttonsPanel.add(getPnButtons(), BorderLayout.EAST);
 		}
 		return buttonsPanel;
 	}
 
 	private JButton getBtnExit() {
-		if (btnExit == null) {
-			btnExit = new JButton("Exit");
+		if (btnBack == null) {
+			btnBack = new JButton("Back");
+			btnBack.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
 		}
-		return btnExit;
+		return btnBack;
 	}
 
 	private JButton getBtnSave() {
@@ -252,23 +290,99 @@ public class DoctorAppointmentView extends JFrame {
 						appointment.attended = 2;
 					appointment.checkIn = txtCheckinTime.getText();
 					appointment.checkOut = txtCheckoutTime.getText();
-					//TODO: add causes to DB
+					List<String> causes = getFinalCauses();
+					List<String> procedures = getFinalProcedures();
+					List<String> diagnosis = getFinalDiagnosis();
+					List<String> prescriptions = getFinalPrescriptions();
+					List<String> vaccines = getFinalVaccines();
+					// save causes, procedures, diagnosis, prescriptions and vaccines into the db
 					ConnectionFactory.updateAppointment(appointment);
+					boolean causesSaved = true;
+					boolean procSaved = true;
+					boolean diagnSaved = true;
+					boolean prescrSaved = true;
+					boolean vaccinesSaved = true;
+					if (!causes.isEmpty())
+						causesSaved = ConnectionFactory.addCausesToAppointment(appointment, causes);
+					if (!procedures.isEmpty())
+						procSaved = ConnectionFactory.addProceduresToAppointment(appointment, procedures);
+					if (!diagnosis.isEmpty())
+						diagnSaved = ConnectionFactory.addDiagnosisToAppointment(appointment, diagnosis);
+					if (!prescriptions.isEmpty())
+						prescrSaved = ConnectionFactory.addPrescriptionsToAppointment(appointment, prescriptions);
+					if (!vaccines.isEmpty())
+						vaccinesSaved = ConnectionFactory.addVaccinesToAppointment(appointment, vaccines);
+
+					if (causesSaved && procSaved && diagnSaved && prescrSaved && vaccinesSaved)
+						JOptionPane.showMessageDialog(DoctorAppointmentView.this, "Data correctly saved", "Success",
+								JOptionPane.INFORMATION_MESSAGE);
+					else
+						JOptionPane.showMessageDialog(DoctorAppointmentView.this, "Some data could not be saved",
+								"Warning", JOptionPane.INFORMATION_MESSAGE);
 				}
 			});
 		}
 		return btnSave;
 	}
 
+	private List<String> getFinalVaccines() {
+		List<String> vaccines = new ArrayList<String>();
+		for (int i = 0; i < finalPrescription.getSize(); i++) {
+			String item = finalPrescription.getElementAt(i);
+			if (item.contains("vaccine"))
+				vaccines.add(item);
+		}
+		return vaccines;
+	}
+
+	private List<String> getFinalPrescriptions() {
+		List<String> prescriptions = new ArrayList<String>();
+		for (int i = 0; i < finalPrescription.getSize(); i++) {
+			String item = finalPrescription.getElementAt(i);
+			if (!item.contains("vaccine"))
+				prescriptions.add(item);
+		}
+		return prescriptions;
+	}
+
+	private List<String> getFinalDiagnosis() {
+		DefaultListModel<String> model = (DefaultListModel<String>) this.selectedDiagnosisList.getModel();
+		List<String> diagnosis = new ArrayList<String>();
+		for (int i = 0; i < model.getSize(); i++) {
+			diagnosis.add(model.getElementAt(i));
+		}
+		return diagnosis;
+	}
+
+	private List<String> getFinalProcedures() {
+		DefaultListModel<String> model = (DefaultListModel<String>) selectedProceduresList.getModel();
+		List<String> procedures = new ArrayList<String>();
+		for (int i = 0; i < model.getSize(); i++) {
+			procedures.add(model.getElementAt(i));
+		}
+		return procedures;
+	}
+
+	private List<String> getFinalCauses() {
+		DefaultListModel<String> model = (DefaultListModel<String>) listSelectedCauses.getModel();
+		List<String> causes = new ArrayList<String>();
+		for (int i = 0; i < model.getSize(); i++) {
+			causes.add(model.getElementAt(i));
+		}
+		return causes;
+	}
+
 	private JTabbedPane getTabbedPane() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			tabbedPane.addTab("Appointment causes", null, getAppointmentOptionsPanel_1(), null);
+			tabbedPane.addTab("Procedures", null, getPnProcedures(), null);
 			tabbedPane.addTab("Diagnosis", null, getPnDiagnosis(), null);
 			tabbedPane.addTab("Prescription", null, getPnPrescription(), null);
 		}
 		return tabbedPane;
 	}
+
 	private JPanel getAppointmentOptionsPanel_1() {
 		if (appointmentOptionsPanel == null) {
 			appointmentOptionsPanel = new JPanel();
@@ -288,6 +402,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return appointmentOptionsPanel;
 	}
+
 	private JLabel getLblListCauses_1() {
 		if (lblListCauses == null) {
 			lblListCauses = new JLabel("Select appointment cause(s):");
@@ -296,6 +411,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblListCauses;
 	}
+
 	private JButton getBtnAddCause_1() {
 		if (btnAddCause == null) {
 			btnAddCause = new JButton(">>");
@@ -313,6 +429,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnAddCause;
 	}
+
 	private JLabel getLblCustomCause_1() {
 		if (lblCustomCause == null) {
 			lblCustomCause = new JLabel("Other cause(s):");
@@ -320,6 +437,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblCustomCause;
 	}
+
 	private JScrollPane getScrollPane_1_1() {
 		if (scrollPane_1 == null) {
 			scrollPane_1 = new JScrollPane();
@@ -327,6 +445,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane_1;
 	}
+
 	private JButton getBtnAddCustomCause_1() {
 		if (btnAddCustomCause == null) {
 			btnAddCustomCause = new JButton("Add");
@@ -339,13 +458,15 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnAddCustomCause;
 	}
+
 	private JLabel getLblSelectedCauses_1() {
 		if (lblSelectedCauses == null) {
-			lblSelectedCauses = new JLabel("Selected cause(s):");
+			lblSelectedCauses = new JLabel("Final cause(s):");
 			lblSelectedCauses.setBounds(380, 41, 217, 14);
 		}
 		return lblSelectedCauses;
 	}
+
 	private JButton getBtnRemoveCause_1() {
 		if (btnRemoveCause == null) {
 			btnRemoveCause = new JButton("<<");
@@ -361,6 +482,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnRemoveCause;
 	}
+
 	private JPanel getPnHeader() {
 		if (pnHeader == null) {
 			pnHeader = new JPanel();
@@ -372,24 +494,28 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return pnHeader;
 	}
+
 	private JLabel getLblAppointmentPatient_1() {
 		if (lblAppointmentPatient == null) {
-			//lblAppointmentPatient = new JLabel("PAQUITA SALAS");
-			lblAppointmentPatient = new JLabel(appointment.patientName.toUpperCase() + " " + appointment.patientSurname.toUpperCase());
+			// lblAppointmentPatient = new JLabel("PAQUITA SALAS");
+			lblAppointmentPatient = new JLabel(
+					appointment.patientName.toUpperCase() + " " + appointment.patientSurname.toUpperCase());
 			lblAppointmentPatient.setFont(new Font("Tahoma", Font.PLAIN, 16));
-			
+
 		}
 		return lblAppointmentPatient;
 	}
+
 	private JLabel getLblAppointmentDate_1() {
 		if (lblAppointmentDate == null) {
-			//lblAppointmentPatient = new JLabel("2023-11-15");
+			// lblAppointmentPatient = new JLabel("2023-11-15");
 			lblAppointmentDate = new JLabel(this.appointment.startDate);
 			lblAppointmentDate.setFont(new Font("Tahoma", Font.PLAIN, 14));
-	
+
 		}
 		return lblAppointmentDate;
 	}
+
 	private JPanel getPnBody() {
 		if (pnBody == null) {
 			pnBody = new JPanel();
@@ -410,12 +536,14 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return pnBody;
 	}
+
 	private JLabel getLblCheckInTime() {
 		if (lblCheckInTime == null) {
 			lblCheckInTime = new JLabel("Check-in:");
 		}
 		return lblCheckInTime;
 	}
+
 	private JTextField getTextField_2() {
 		if (txtCheckinTime == null) {
 			txtCheckinTime = new JTextField();
@@ -423,12 +551,14 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return txtCheckinTime;
 	}
+
 	private JLabel getLblCheckOutTime() {
 		if (lblCheckOutTime == null) {
 			lblCheckOutTime = new JLabel("Check-out:");
 		}
 		return lblCheckOutTime;
 	}
+
 	private JTextField getTextField_1_1() {
 		if (txtCheckoutTime == null) {
 			txtCheckoutTime = new JTextField();
@@ -436,6 +566,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return txtCheckoutTime;
 	}
+
 	private JButton getBtnCheckInTime() {
 		if (btnCheckInTime == null) {
 			btnCheckInTime = new JButton("Auto-fill in time");
@@ -451,6 +582,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnCheckInTime;
 	}
+
 	private JButton getBtnCheckOutTime() {
 		if (btnCheckOutTime == null) {
 			btnCheckOutTime = new JButton("Auto-fill out time");
@@ -466,12 +598,14 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnCheckOutTime;
 	}
+
 	private JLabel getLblAttendance() {
 		if (lblAttendance == null) {
 			lblAttendance = new JLabel("Did the patient attend the appointment?");
 		}
 		return lblAttendance;
 	}
+
 	private JRadioButton getRdbtnYes() {
 		if (rdbtnYes == null) {
 			rdbtnYes = new JRadioButton("Attended");
@@ -480,6 +614,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return rdbtnYes;
 	}
+
 	private JRadioButton getRdbtnNo() {
 		if (rdbtnNo == null) {
 			rdbtnNo = new JRadioButton("Not attended");
@@ -487,6 +622,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return rdbtnNo;
 	}
+
 	private JRadioButton getRdbtnDontAnswer() {
 		if (rdbtnDontAnswer == null) {
 			rdbtnDontAnswer = new JRadioButton("Don't answer");
@@ -494,12 +630,14 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return rdbtnDontAnswer;
 	}
+
 	private JTextArea getTxtAreaOtherCauses() {
 		if (txtAreaOtherCauses == null) {
 			txtAreaOtherCauses = new JTextArea();
 		}
 		return txtAreaOtherCauses;
 	}
+
 	private JPanel getPnDiagnosis() {
 		if (pnDiagnosis == null) {
 			pnDiagnosis = new JPanel();
@@ -517,6 +655,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return pnDiagnosis;
 	}
+
 	private JPanel getPnPrescription() {
 		if (pnPrescription == null) {
 			pnPrescription = new JPanel();
@@ -547,144 +686,143 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return pnPrescription;
 	}
+
 	private JTree getTree() {
 		if (tree == null) {
 			tree = new JTree();
 			loadTreeData();
 			tree.addTreeSelectionListener(new TreeSelectionListener() {
 				public void valueChanged(TreeSelectionEvent e) {
-	                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-	                getTxtAreaDiagnosisDescription().setText("");
-	                if (selectedNode != null && selectedNode.isLeaf()) {
-	                	if (selectedNode.getLevel() ==1) { // if is chapter then expand subchapters
-	                		String from = "", to = "";
-	                		for (ICDChapter chapter : chapters) {
-	                			if (chapter.description.equals(selectedNode.getUserObject())) {
-	                				from = chapter.from;
-	                				to = chapter.to;
-	                				getTxtAreaDiagnosisDescription().setText("Chapter: " +chapter.cardinality + "\n"
-	                						+ "Description: " + chapter.description.toLowerCase() + "\n"
-	                						+ "From codes " + chapter.from + " to " + chapter.to
-	                						);
-	                				break;
-	                			}
-	                		}
-	                		List<ICDSubchapter> newsubchapters = ConnectionFactory.getSubchapters(from, to);
-	                		subchapters.addAll(newsubchapters);
-	                		for (ICDSubchapter item : newsubchapters) {
-	                			DefaultMutableTreeNode subnode = new 
-	                					DefaultMutableTreeNode(item.description);
-	                			selectedNode.add(subnode);
-	                			// Notificar al modelo del árbol que la estructura ha cambiado
-		                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-		                        model.nodeStructureChanged(selectedNode);
-		                        // Expandir el nodo seleccionado
-		                        tree.expandPath(new TreePath(selectedNode.getPath()));
-	                		}
-	                	}
-	                	// contiene unos diagnosticos -> ENFERMEDADES NO SE QUE (B99)
-	                	else if (((String)selectedNode.getUserObject()).indexOf("(") != -1){
-	                		// contiene rango -> ENFERMEDADES NO SE QUE (B99-C34)
-	                		if (((String)selectedNode.getUserObject()).indexOf("-") != -1) {
-	                			String input = (String) selectedNode.getUserObject();
-		                		int indexOfHyphen = ((String)selectedNode.getUserObject()).indexOf("-");
-		                		// Encuentra la posición del primer paréntesis "("
-		                        int indexOfOpeningParenthesis = input.indexOf("(");
-		                        // Encuentra la posición del último paréntesis ")"
-		                        int indexOfClosingParenthesis = input.lastIndexOf(")");
-		                     // Extrae la parte izquierda entre "(" y "-"
-	                            String from = input.substring(indexOfOpeningParenthesis + 1, indexOfHyphen);
-	                            // Extrae la parte derecha entre "-" y ")"
-	                            String to = input.substring(indexOfHyphen + 1, indexOfClosingParenthesis);
-	                            getTxtAreaDiagnosisDescription().setText("Subchapter: " + input + "\n"
-	                            		+ "From codes " + from + " to " + to);
-	                            List<Diagnosis> newdiagnosis = ConnectionFactory.getDiagnosis(from, to);
-	                            diagnosis.addAll(newdiagnosis);
-		                		for (Diagnosis item : newdiagnosis) {
-		                			DefaultMutableTreeNode subnode = new 
-		                					DefaultMutableTreeNode(item.code + "\t " + item.description);
-		                			selectedNode.add(subnode);
-		                			// Notificar al modelo del árbol que la estructura ha cambiado
-			                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-			                        model.nodeStructureChanged(selectedNode);
-			                        // Expandir el nodo seleccionado
-			                        tree.expandPath(new TreePath(selectedNode.getPath()));
-		                		}
-	                		}
-	                		// no contiene rango -> ENFERMEDADES NO SE QUE (B99)
-	                		else {
-	                			String input = (String) selectedNode.getUserObject();
-		                		// Encuentra la posición del primer paréntesis "("
-		                        int indexOfOpeningParenthesis = input.indexOf("(");
-		                        // Encuentra la posición del último paréntesis ")"
-		                        int indexOfClosingParenthesis = input.lastIndexOf(")");
-		                     // Extrae la parte entre "(" y ")"
-	                            String from = input.substring(indexOfOpeningParenthesis + 1, indexOfClosingParenthesis);
-	                            
-	                            getTxtAreaDiagnosisDescription().setText("Subchapter: " + input + "\n"
-	                            		+ "From code " + from);
-	                            Diagnosis newdiagnosis = ConnectionFactory.getDiagnosis(from);
-	                            diagnosis.add(newdiagnosis);
-	                			DefaultMutableTreeNode subnode = new 
-	                					DefaultMutableTreeNode(newdiagnosis.code + "\t " + newdiagnosis.description);
-	                			selectedNode.add(subnode);
-	                			// Notificar al modelo del árbol que la estructura ha cambiado
-		                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-		                        model.nodeStructureChanged(selectedNode);
-		                        // Expandir el nodo seleccionado
-		                        tree.expandPath(new TreePath(selectedNode.getPath()));
-	                		}
-	                	}
-	                	// es un diagnostico en si -> A00 Cholera
-	                	else {
-	                		// coger el código
-	                		String code = ((String) selectedNode.getUserObject()).split("\t")[0];
-	                		Diagnosis selectedDiag = ConnectionFactory.getDiagnosis(code);
-	                		getTxtAreaDiagnosisDescription().setText("Code: " + selectedDiag.code + "\n"
-	                				+ "Name: " + selectedDiag.description.toLowerCase() + "\n"
-	                				+ "Description: " + selectedDiag.longDescription.toLowerCase());
-	                		List<Diagnosis> childDiagnosis = ConnectionFactory.getDiagnosis(code, code.length()+1);
-	                		if (childDiagnosis.size() > 0) {
-	                			diagnosis.addAll(childDiagnosis);
-                				for (Diagnosis item : childDiagnosis) {
-		                			DefaultMutableTreeNode subnode = new 
-		                					DefaultMutableTreeNode(item.code + "\t " + item.description);
-		                			selectedNode.add(subnode);
-		                			// Notificar al modelo del árbol que la estructura ha cambiado
-			                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-			                        model.nodeStructureChanged(selectedNode);
-			                        // Expandir el nodo seleccionado
-			                        tree.expandPath(new TreePath(selectedNode.getPath()));
-		                		}
-	                		}
-	                		// no tiene un descendiente con su numero de digitos + 1, si no que tiene mas cifras 
-	                		else {
-	                			for (int i = 0; i < 3; i++) {
-	                				childDiagnosis = ConnectionFactory.getDiagnosis(code, code.length()+1+i);
-	                				if (childDiagnosis.size() > 0)
-	                					break;
-	                			}
-	                			if (childDiagnosis.size() > 0) {
-	                				diagnosis.addAll(childDiagnosis);
-	                				for (Diagnosis item : childDiagnosis) {
-			                			DefaultMutableTreeNode subnode = new 
-			                					DefaultMutableTreeNode(item.code + "\t " + item.description);
-			                			selectedNode.add(subnode);
-			                			// Notificar al modelo del árbol que la estructura ha cambiado
-				                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-				                        model.nodeStructureChanged(selectedNode);
-				                        // Expandir el nodo seleccionado
-				                        tree.expandPath(new TreePath(selectedNode.getPath()));
-			                		}
-	                			}
-	                		}
-	                	}
-	                }
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+					getTxtAreaDiagnosisDescription().setText("");
+					if (selectedNode != null && selectedNode.isLeaf()) {
+						if (selectedNode.getLevel() == 1) { // if is chapter then expand subchapters
+							String from = "", to = "";
+							for (ICDChapter chapter : chapters) {
+								if (chapter.description.equals(selectedNode.getUserObject())) {
+									from = chapter.from;
+									to = chapter.to;
+									getTxtAreaDiagnosisDescription()
+											.setText(chapter.cardinality + "\n" + chapter.description.toLowerCase()
+													+ "\n" + chapter.from + " " + chapter.to);
+									break;
+								}
+							}
+							List<ICDSubchapter> newsubchapters = ConnectionFactory.getSubchapters(from, to);
+							subchapters.addAll(newsubchapters);
+							for (ICDSubchapter item : newsubchapters) {
+								DefaultMutableTreeNode subnode = new DefaultMutableTreeNode(item.description);
+								selectedNode.add(subnode);
+								// Notificar al modelo del árbol que la estructura ha cambiado
+								DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+								model.nodeStructureChanged(selectedNode);
+								// Expandir el nodo seleccionado
+								tree.expandPath(new TreePath(selectedNode.getPath()));
+							}
+						}
+						// contiene unos diagnosticos -> ENFERMEDADES NO SE QUE (B99)
+						else if (((String) selectedNode.getUserObject()).indexOf("(") != -1) {
+							// contiene rango -> ENFERMEDADES NO SE QUE (B99-C34)
+							if (((String) selectedNode.getUserObject()).indexOf("-") != -1) {
+								String input = (String) selectedNode.getUserObject();
+								int indexOfHyphen = ((String) selectedNode.getUserObject()).indexOf("-");
+								// Encuentra la posición del primer paréntesis "("
+								int indexOfOpeningParenthesis = input.indexOf("(");
+								// Encuentra la posición del último paréntesis ")"
+								int indexOfClosingParenthesis = input.lastIndexOf(")");
+								// Extrae la parte izquierda entre "(" y "-"
+								String from = input.substring(indexOfOpeningParenthesis + 1, indexOfHyphen);
+								// Extrae la parte derecha entre "-" y ")"
+								String to = input.substring(indexOfHyphen + 1, indexOfClosingParenthesis);
+								getTxtAreaDiagnosisDescription().setText(input + "\n" + from + " " + to);
+								List<Diagnosis> newdiagnosis = ConnectionFactory.getDiagnosis(from, to);
+								diagnosis.addAll(newdiagnosis);
+								for (Diagnosis item : newdiagnosis) {
+									DefaultMutableTreeNode subnode = new DefaultMutableTreeNode(
+											item.code + "\t " + item.description);
+									selectedNode.add(subnode);
+									// Notificar al modelo del árbol que la estructura ha cambiado
+									DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+									model.nodeStructureChanged(selectedNode);
+									// Expandir el nodo seleccionado
+									tree.expandPath(new TreePath(selectedNode.getPath()));
+								}
+							}
+							// no contiene rango -> ENFERMEDADES NO SE QUE (B99)
+							else {
+								String input = (String) selectedNode.getUserObject();
+								// Encuentra la posición del primer paréntesis "("
+								int indexOfOpeningParenthesis = input.indexOf("(");
+								// Encuentra la posición del último paréntesis ")"
+								int indexOfClosingParenthesis = input.lastIndexOf(")");
+								// Extrae la parte entre "(" y ")"
+								String from = input.substring(indexOfOpeningParenthesis + 1, indexOfClosingParenthesis);
+
+								getTxtAreaDiagnosisDescription().setText(input + "\n" + from);
+								Diagnosis newdiagnosis = ConnectionFactory.getDiagnosis(from);
+								diagnosis.add(newdiagnosis);
+								DefaultMutableTreeNode subnode = new DefaultMutableTreeNode(
+										newdiagnosis.code + "\t " + newdiagnosis.description);
+								selectedNode.add(subnode);
+								// Notificar al modelo del árbol que la estructura ha cambiado
+								DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+								model.nodeStructureChanged(selectedNode);
+								// Expandir el nodo seleccionado
+								tree.expandPath(new TreePath(selectedNode.getPath()));
+							}
+						}
+						// es un diagnostico en si -> A00 Cholera
+						else {
+							// coger el código
+							String code = ((String) selectedNode.getUserObject()).split("\t")[0];
+							Diagnosis selectedDiag = ConnectionFactory.getDiagnosis(code);
+							getTxtAreaDiagnosisDescription()
+									.setText(selectedDiag.code + "\n" + selectedDiag.description.toLowerCase() + "\n"
+											+ selectedDiag.longDescription.toLowerCase());
+							List<Diagnosis> childDiagnosis = ConnectionFactory.getDiagnosis(code, code.length() + 1);
+							if (childDiagnosis.size() > 0) {
+								diagnosis.addAll(childDiagnosis);
+								for (Diagnosis item : childDiagnosis) {
+									DefaultMutableTreeNode subnode = new DefaultMutableTreeNode(
+											item.code + "\t " + item.description);
+									selectedNode.add(subnode);
+									// Notificar al modelo del árbol que la estructura ha cambiado
+									DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+									model.nodeStructureChanged(selectedNode);
+									// Expandir el nodo seleccionado
+									tree.expandPath(new TreePath(selectedNode.getPath()));
+								}
+							}
+							// no tiene un descendiente con su numero de digitos + 1, si no que tiene mas
+							// cifras
+							else {
+								for (int i = 0; i < 3; i++) {
+									childDiagnosis = ConnectionFactory.getDiagnosis(code, code.length() + 1 + i);
+									if (childDiagnosis.size() > 0)
+										break;
+								}
+								if (childDiagnosis.size() > 0) {
+									diagnosis.addAll(childDiagnosis);
+									for (Diagnosis item : childDiagnosis) {
+										DefaultMutableTreeNode subnode = new DefaultMutableTreeNode(
+												item.code + "\t " + item.description);
+										selectedNode.add(subnode);
+										// Notificar al modelo del árbol que la estructura ha cambiado
+										DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+										model.nodeStructureChanged(selectedNode);
+										// Expandir el nodo seleccionado
+										tree.expandPath(new TreePath(selectedNode.getPath()));
+									}
+								}
+							}
+						}
+					}
 				}
 			});
 		}
 		return tree;
 	}
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -693,24 +831,33 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane;
 	}
-	
-	private void loadTreeData() {
-	    DefaultMutableTreeNode root = new DefaultMutableTreeNode("ICD10 Diagnosis"); // Nodo raíz
-	    DefaultTreeModel model = new DefaultTreeModel(root);
-	    tree.setModel(model);
-	    
-	    chapters = ConnectionFactory.getChapters();
-	    
-	    for (ICDChapter item : chapters) {
-	    	DefaultMutableTreeNode node = new DefaultMutableTreeNode(item.description);
-	    	root.add(node);
-	    }
-    }
 
-    private boolean consultaBaseDeDatosParaExpansion(DefaultMutableTreeNode node) {
-        // TODO
-        return false;
-    }
+	private void loadTreeData() {
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("ICD10 Diagnosis"); // Nodo raíz
+		DefaultTreeModel model = new DefaultTreeModel(root);
+		tree.setModel(model);
+
+		chapters = ConnectionFactory.getChapters();
+
+		for (ICDChapter item : chapters) {
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(item.description);
+			root.add(node);
+		}
+	}
+
+	private void loadProcedure() {
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("ICD10 Procedures"); // Nodo raíz
+		DefaultTreeModel model = new DefaultTreeModel(root);
+		procedureTree.setModel(model);
+
+		procedureChapters = ConnectionFactory.getProcedureChapters();
+
+		for (ICDChapter item : procedureChapters) {
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(item.description);
+			root.add(node);
+		}
+	}
+
 	private JLabel getLblMedication() {
 		if (lblMedication == null) {
 			lblMedication = new JLabel("Medication:");
@@ -719,29 +866,30 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblMedication;
 	}
+
 	private JComboBox getComboBoxMedication() {
 		if (comboBoxMedication == null) {
 			comboBoxMedication = new JComboBox();
 			comboBoxMedication.setBounds(23, 51, 94, 22);
-			var data = new String[] {"Algidol", "Ibuprofeno", "Antibiotics", "Thrombocid", "Other..."};
+			var data = new String[] { "Algidol", "Ibuprofeno", "Antibiotics", "Thrombocid", "Other..." };
 			comboBoxMedication.setModel(new DefaultComboBoxModel(data));
 			comboBoxMedication.setSelectedIndex(0);
 		}
 		return comboBoxMedication;
 	}
+
 	private JButton getBtnAddMedication() {
 		if (btnAddMedication == null) {
 			btnAddMedication = new JButton("Add");
 			btnAddMedication.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					String selMed = (String) getComboBoxMedication().getModel().
-							getElementAt(getComboBoxMedication().getSelectedIndex());
+					String selMed = (String) getComboBoxMedication().getModel()
+							.getElementAt(getComboBoxMedication().getSelectedIndex());
 					String quantity = getTxtQuantity().getText();
 					String interval = getTxtInterval().getText();
 					String duration = getTextField_2_1().getText();
 					String comments = getTxtAreaComments().getText();
-					String medication = "Medication: " + selMed + ". Quantity: " + quantity +
-							". Interval: " + interval + ". Duration: " + duration + ". Comments: "
+					String medication = selMed + ": " + quantity + " " + interval + " " + duration + ". Comments: "
 							+ comments;
 					finalPrescription.addElement(medication);
 				}
@@ -750,6 +898,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnAddMedication;
 	}
+
 	private JLabel getLblQuantity() {
 		if (lblQuantity == null) {
 			lblQuantity = new JLabel("Quantity:");
@@ -757,6 +906,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblQuantity;
 	}
+
 	private JLabel getLblInterval() {
 		if (lblInterval == null) {
 			lblInterval = new JLabel("Interval:");
@@ -764,6 +914,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblInterval;
 	}
+
 	private JLabel getLblDurationday() {
 		if (lblDurationday == null) {
 			lblDurationday = new JLabel("Duration:");
@@ -771,6 +922,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblDurationday;
 	}
+
 	private JTextField getTxtQuantity() {
 		if (txtQuantity == null) {
 			txtQuantity = new JTextField();
@@ -779,6 +931,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return txtQuantity;
 	}
+
 	private JTextField getTxtInterval() {
 		if (txtInterval == null) {
 			txtInterval = new JTextField();
@@ -787,6 +940,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return txtInterval;
 	}
+
 	private JTextField getTextField_2_1() {
 		if (txtDuration == null) {
 			txtDuration = new JTextField();
@@ -795,6 +949,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return txtDuration;
 	}
+
 	private JLabel getLblComments() {
 		if (lblComments == null) {
 			lblComments = new JLabel("Comments:");
@@ -802,12 +957,14 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblComments;
 	}
+
 	private JTextArea getTxtAreaComments() {
 		if (txtAreaComments == null) {
 			txtAreaComments = new JTextArea();
 		}
 		return txtAreaComments;
 	}
+
 	private JScrollPane getScrollPane_2() {
 		if (scrollPane_2 == null) {
 			scrollPane_2 = new JScrollPane();
@@ -816,6 +973,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane_2;
 	}
+
 	private JLabel getLblVaccines() {
 		if (lblVaccines == null) {
 			lblVaccines = new JLabel("Vaccines:");
@@ -824,6 +982,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblVaccines;
 	}
+
 	private JComboBox getComboBoxVaccines() {
 		if (comboBoxVaccines == null) {
 			comboBoxVaccines = new JComboBox(vaccines);
@@ -831,6 +990,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return comboBoxVaccines;
 	}
+
 	private JButton getBtnAddVaccine() {
 		if (btnAddVaccine == null) {
 			btnAddVaccine = new JButton("Add");
@@ -844,6 +1004,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnAddVaccine;
 	}
+
 	private JSeparator getSeparator() {
 		if (separator == null) {
 			separator = new JSeparator();
@@ -852,6 +1013,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return separator;
 	}
+
 	private JSeparator getSeparator_1() {
 		if (separator_1 == null) {
 			separator_1 = new JSeparator();
@@ -860,6 +1022,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return separator_1;
 	}
+
 	private JLabel getLblOther() {
 		if (lblOther == null) {
 			lblOther = new JLabel("Other:");
@@ -868,12 +1031,14 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblOther;
 	}
+
 	private JTextArea getTxtAreaOther() {
 		if (txtAreaOther == null) {
 			txtAreaOther = new JTextArea();
 		}
 		return txtAreaOther;
 	}
+
 	private JScrollPane getScrollPane_3() {
 		if (scrollPane_3 == null) {
 			scrollPane_3 = new JScrollPane();
@@ -882,6 +1047,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane_3;
 	}
+
 	private JLabel getLblPrescriptionState() {
 		if (lblPrescriptionState == null) {
 			lblPrescriptionState = new JLabel("Prescription state:");
@@ -890,12 +1056,14 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblPrescriptionState;
 	}
+
 	private JList getListPrescription() {
 		if (listPrescription == null) {
 			listPrescription = new JList(finalPrescription);
 		}
 		return listPrescription;
 	}
+
 	private JScrollPane getScrollPane_4() {
 		if (scrollPane_4 == null) {
 			scrollPane_4 = new JScrollPane();
@@ -904,6 +1072,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane_4;
 	}
+
 	private JButton getBtnAddOther() {
 		if (btnAddOther == null) {
 			btnAddOther = new JButton("Add");
@@ -916,12 +1085,13 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnAddOther;
 	}
+
 	private JButton getBtnRemove() {
 		if (btnRemove == null) {
 			btnRemove = new JButton("Remove");
 			btnRemove.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					List<String> selItems = getListPrescription().getSelectedValuesList(); 
+					List<String> selItems = getListPrescription().getSelectedValuesList();
 					for (String item : selItems) {
 						if (finalPrescription.contains(item))
 							finalPrescription.removeElement(item);
@@ -932,6 +1102,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnRemove;
 	}
+
 	private JButton getBtnClearAll() {
 		if (btnClearAll == null) {
 			btnClearAll = new JButton("Clear all");
@@ -944,6 +1115,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnClearAll;
 	}
+
 	private JScrollPane getScrollPane_5() {
 		if (scrollPane_5 == null) {
 			scrollPane_5 = new JScrollPane();
@@ -959,6 +1131,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return listSelectedCauses;
 	}
+
 	private JScrollPane getScrollPane_7() {
 		if (scrollPane_7 == null) {
 			scrollPane_7 = new JScrollPane();
@@ -967,6 +1140,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane_7;
 	}
+
 	private JList getCausesList() {
 		DefaultListModel<String> model = new DefaultListModel();
 		this.causesCreator = new CausesCreator();
@@ -975,7 +1149,7 @@ public class DoctorAppointmentView extends JFrame {
 		for (List<String> list : this.causes.values())
 			for (String item : list) {
 				model.addElement(item);
-		}	
+			}
 
 		if (causesList == null) {
 			causesList = new JList(model);
@@ -983,6 +1157,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return causesList;
 	}
+
 	private JScrollPane getScrollPane_6() {
 		if (scrollPane_6 == null) {
 			scrollPane_6 = new JScrollPane();
@@ -991,6 +1166,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane_6;
 	}
+
 	private JList getSelectedDiagnosisList() {
 		if (selectedDiagnosisList == null) {
 			DefaultListModel<String> model = new DefaultListModel<String>();
@@ -998,6 +1174,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return selectedDiagnosisList;
 	}
+
 	private JScrollPane getScrollPane_8() {
 		if (scrollPane_8 == null) {
 			scrollPane_8 = new JScrollPane();
@@ -1006,16 +1183,20 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane_8;
 	}
+
 	private JButton getBtnAddDiagnosis() {
 		if (btnAddDiagnosis == null) {
 			btnAddDiagnosis = new JButton("Add");
 			btnAddDiagnosis.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-					if (selectedNode != null) {
-						String title = (String) selectedNode.getUserObject();
-						DefaultListModel m =(DefaultListModel) getSelectedDiagnosisList().getModel();
-						m.addElement(title);
+					if (!getTxtAreaDiagnosisDescription().getText().equals("")) {
+						String[] portions = getTxtAreaDiagnosisDescription().getText().split("\n");
+						String diagnosis = "";
+						for (String item : portions) {
+							diagnosis += item + " ";
+						}
+						DefaultListModel m = (DefaultListModel) getSelectedDiagnosisList().getModel();
+						m.addElement(diagnosis);
 						getSelectedDiagnosisList().setModel(m);
 					}
 				}
@@ -1024,6 +1205,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnAddDiagnosis;
 	}
+
 	private JButton getBtnRemoveDiagnosis() {
 		if (btnRemoveDiagnosis == null) {
 			btnRemoveDiagnosis = new JButton("Remove");
@@ -1044,6 +1226,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnRemoveDiagnosis;
 	}
+
 	private JLabel getLblFinalDiagnosis() {
 		if (lblFinalDiagnosis == null) {
 			lblFinalDiagnosis = new JLabel("Final diagnosis:");
@@ -1051,6 +1234,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblFinalDiagnosis;
 	}
+
 	private JTextArea getTxtAreaDiagnosisDescription() {
 		if (txtAreaDiagnosisDescription == null) {
 			txtAreaDiagnosisDescription = new JTextArea();
@@ -1058,6 +1242,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return txtAreaDiagnosisDescription;
 	}
+
 	private JScrollPane getScrollPane_9() {
 		if (scrollPane_9 == null) {
 			scrollPane_9 = new JScrollPane();
@@ -1067,48 +1252,51 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return scrollPane_9;
 	}
+
 	private JTextField getTxtFilterCauses() {
 		if (txtFilterCauses == null) {
 			txtFilterCauses = new JTextField();
 			txtFilterCauses.getDocument().addDocumentListener(new DocumentListener() {
-	            @Override
-	            public void insertUpdate(DocumentEvent e) {
-	                filterElements();
-	            }
-	            @Override
-	            public void removeUpdate(DocumentEvent e) {
-	                filterElements();
-	            }
-	            @Override
-	            public void changedUpdate(DocumentEvent e) {
-	                // Cambios en estilos, no se utiliza en este ejemplo
-	            }
-	        });
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					filterElements();
+				}
+
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					filterElements();
+				}
+
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					// Cambios en estilos, no se utiliza en este ejemplo
+				}
+			});
 			txtFilterCauses.setBounds(63, 40, 148, 31);
 			txtFilterCauses.setColumns(10);
 		}
 		return txtFilterCauses;
 	}
-	
+
 	private void filterElements() {
 		DefaultListModel<String> model = new DefaultListModel();
 		List<String> elements = new ArrayList<String>();
 		for (List<String> list : this.causes.values())
 			for (String item : list) {
 				elements.add(item);
-		}	
+			}
 		String searchText = getTxtFilterCauses().getText().toLowerCase();
 
-        List<String> filteredElements = elements.stream()
-                .filter(element -> element.toLowerCase().contains(searchText))
-                .collect(Collectors.toList());
+		List<String> filteredElements = elements.stream().filter(element -> element.toLowerCase().contains(searchText))
+				.collect(Collectors.toList());
 
-        for (String element : filteredElements) {
-            model.addElement(element);
-        }
-        
-        getCausesList().setModel(model);
-    }
+		for (String element : filteredElements) {
+			model.addElement(element);
+		}
+
+		getCausesList().setModel(model);
+	}
+
 	private JLabel getLblSearch() {
 		if (lblSearch == null) {
 			lblSearch = new JLabel("Search:");
@@ -1116,6 +1304,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblSearch;
 	}
+
 	private JPanel getPnMedicalRecord() {
 		if (pnMedicalRecord == null) {
 			pnMedicalRecord = new JPanel();
@@ -1123,11 +1312,11 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return pnMedicalRecord;
 	}
+
 	private JButton getBtnMedicalRecord() {
 		if (btnMedicalRecord == null) {
 			btnMedicalRecord = new JButton("Open MedicalRecord");
 			btnMedicalRecord.addActionListener(new ActionListener() {
-				
 
 				public void actionPerformed(ActionEvent e) {
 					medicalRecord = new MedicalRecordView(appointment.patientid);
@@ -1137,6 +1326,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return btnMedicalRecord;
 	}
+
 	private JLabel getLblSearchCode() {
 		if (lblSearchCode == null) {
 			lblSearchCode = new JLabel("Search diagnosis code:");
@@ -1144,6 +1334,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return lblSearchCode;
 	}
+
 	private JTextField getTxtDiagnosisCode() {
 		if (txtDiagnosisCode == null) {
 			txtDiagnosisCode = new JTextField();
@@ -1152,6 +1343,7 @@ public class DoctorAppointmentView extends JFrame {
 		}
 		return txtDiagnosisCode;
 	}
+
 	private JButton getBtnSearch() {
 		if (btnSearch == null) {
 			btnSearch = new JButton("Search");
@@ -1160,28 +1352,28 @@ public class DoctorAppointmentView extends JFrame {
 					// get the diagnosis code from the txt field
 					String code = getTxtDiagnosisCode().getText();
 					// search for the diagnosis in the db
-					
+
 					Diagnosis search = ConnectionFactory.getDiagnosis(code);
 					// if there is a result show it
 					if (search.code != null) {
-						// remove warning 
+						// remove warning
 						getLblNoDiagnosis().setVisible(false);
 						// show it in the description area
-						getTxtAreaDiagnosisDescription().setText("Code: " + search.code + "\n"
-                				+ "Name: " + search.description.toLowerCase() + "\n"
-                				+ "Description: " + search.longDescription.toLowerCase());
+						getTxtAreaDiagnosisDescription().setText(search.code + "\n" + search.description.toLowerCase()
+								+ "\n" + search.longDescription.toLowerCase());
 					}
 					// else show label "no results for this search"
 					else {
 						getLblNoDiagnosis().setVisible(true);
 						getTxtAreaDiagnosisDescription().setText("");
-					}					
+					}
 				}
 			});
 			btnSearch.setBounds(487, 39, 89, 23);
 		}
 		return btnSearch;
 	}
+
 	private JLabel getLblNoDiagnosis() {
 		if (lblNoDiagnosis == null) {
 			lblNoDiagnosis = new JLabel("No diagnosis found for this code!");
@@ -1190,5 +1382,310 @@ public class DoctorAppointmentView extends JFrame {
 			lblNoDiagnosis.setVisible(false);
 		}
 		return lblNoDiagnosis;
+	}
+
+	private JPanel getPnProcedures() {
+		if (pnProcedures == null) {
+			pnProcedures = new JPanel();
+			pnProcedures.setLayout(null);
+			pnProcedures.add(getScrollPane_10());
+			pnProcedures.add(getScrollPane_11());
+			pnProcedures.add(getLblFinalProcedures());
+			pnProcedures.add(getBtnAddProcedure());
+			pnProcedures.add(getBtnRemoveProcedure());
+			pnProcedures.add(getScrollPane_12());
+			pnProcedures.add(getLblNoProcedureResults());
+			pnProcedures.add(getTxtFieldSearchProcedure());
+			pnProcedures.add(getBtnSearchProcedure());
+			pnProcedures.add(getLblSearchProcedure());
+			pnProcedures.add(getScrollPane_13());
+			pnProcedures.add(getLblProcedureComments());
+		}
+		return pnProcedures;
+	}
+
+	private JTree getProcedureTree() {
+		if (procedureTree == null) {
+			procedureTree = new JTree();
+			loadProcedure();
+			procedureTree.addTreeSelectionListener(new TreeSelectionListener() {
+				public void valueChanged(TreeSelectionEvent e) {
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) procedureTree
+							.getLastSelectedPathComponent();
+					// getTxtAreaDiagnosisDescription().setText("");
+					if (selectedNode != null && selectedNode.isLeaf()) {
+						if (selectedNode.getLevel() == 1) { // if is chapter then expand subchapters
+							String from = "", to = "";
+							for (ICDChapter chapter : procedureChapters) {
+								if (chapter.description.equals(selectedNode.getUserObject())) {
+									from = chapter.from;
+									to = chapter.to;
+									getTxtAreaProcedureDescription().setText(chapter.cardinality + "\n"
+											+ chapter.description + "\n" + chapter.from + " " + chapter.to);
+									break;
+								}
+							}
+							List<ICDSubchapter> newsubchapters = ConnectionFactory.getProcedureSubchapters(from, to);
+							procedureSubchapters.addAll(newsubchapters);
+							for (ICDSubchapter item : newsubchapters) {
+								DefaultMutableTreeNode subnode = new DefaultMutableTreeNode(item.description);
+								selectedNode.add(subnode);
+								// Notificar al modelo del árbol que la estructura ha cambiado
+								DefaultTreeModel model = (DefaultTreeModel) procedureTree.getModel();
+								model.nodeStructureChanged(selectedNode);
+								// Expandir el nodo seleccionado
+								procedureTree.expandPath(new TreePath(selectedNode.getPath()));
+							}
+						}
+						// if it is subchapter expand procedures
+						else if (selectedNode.getLevel() == 2) {
+							String from = "", to = "";
+							for (ICDSubchapter subchapter : procedureSubchapters) {
+								if (subchapter.description.equals(selectedNode.getUserObject())) {
+									from = subchapter.from;
+									to = subchapter.to;
+									getTxtAreaProcedureDescription().setText(subchapter.sections + "\n"
+											+ subchapter.description + "\n" + subchapter.from + " " + subchapter.to);
+									break;
+								}
+							}
+							List<Procedure> nprocedures = ConnectionFactory.getProcedures(from, to);
+							procedures.addAll(nprocedures);
+							for (Procedure item : nprocedures) {
+								DefaultMutableTreeNode subnode = new DefaultMutableTreeNode(item.description);
+								selectedNode.add(subnode);
+								// Notificar al modelo del árbol que la estructura ha cambiado
+								DefaultTreeModel model = (DefaultTreeModel) procedureTree.getModel();
+								model.nodeStructureChanged(selectedNode);
+								// Expandir el nodo seleccionado
+								procedureTree.expandPath(new TreePath(selectedNode.getPath()));
+							}
+						} else if (selectedNode.getLevel() == 3) {
+							for (Procedure p : procedures) {
+								if (p.description.equals(selectedNode.getUserObject())) {
+									getTxtAreaProcedureDescription().setText(p.code + "\n" + p.description);
+									break;
+								}
+							}
+						}
+					}
+				}
+			});
+		}
+		return procedureTree;
+	}
+
+	private JScrollPane getScrollPane_10() {
+		if (scrollPane_10 == null) {
+			scrollPane_10 = new JScrollPane();
+			scrollPane_10.setBounds(10, 11, 325, 246);
+			scrollPane_10.setViewportView(getProcedureTree());
+		}
+		return scrollPane_10;
+	}
+
+	private JList getSelectedProceduresList() {
+		if (selectedProceduresList == null) {
+			DefaultListModel<String> model = new DefaultListModel<String>();
+			selectedProceduresList = new JList(model);
+		}
+		return selectedProceduresList;
+	}
+
+	private JScrollPane getScrollPane_11() {
+		if (scrollPane_11 == null) {
+			scrollPane_11 = new JScrollPane();
+			scrollPane_11.setBounds(10, 293, 617, 95);
+			scrollPane_11.setViewportView(getSelectedProceduresList());
+		}
+		return scrollPane_11;
+	}
+
+	private JLabel getLblFinalProcedures() {
+		if (lblFinalProcedures == null) {
+			lblFinalProcedures = new JLabel("Final procedures:");
+			lblFinalProcedures.setBounds(10, 268, 131, 14);
+		}
+		return lblFinalProcedures;
+	}
+
+	private JButton getBtnAddProcedure() {
+		if (btnAddProcedure == null) {
+			btnAddProcedure = new JButton("Add");
+			btnAddProcedure.setBounds(538, 259, 89, 23);
+			btnAddProcedure.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (!getTxtAreaProcedureDescription().getText().equals("")) {
+						String[] portions = getTxtAreaProcedureDescription().getText().split("\n");
+						String procedure = "";
+						for (String item : portions) {
+							procedure += item + " ";
+						}
+						procedure += getTxtAreaProcedureComments().getText().isEmpty() ? ""
+								: getTxtAreaProcedureComments().getText();
+						DefaultListModel m = (DefaultListModel) getSelectedProceduresList().getModel();
+						m.addElement(procedure);
+						getSelectedProceduresList().setModel(m);
+					}
+				}
+			});
+		}
+		return btnAddProcedure;
+	}
+
+	private JButton getBtnRemoveProcedure() {
+		if (btnRemoveProcedure == null) {
+			btnRemoveProcedure = new JButton("Remove");
+			btnRemoveProcedure.setBounds(439, 259, 89, 23);
+			btnRemoveProcedure.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (getSelectedProceduresList().getSelectedValuesList().size() > 0) {
+						DefaultListModel model = (DefaultListModel) getSelectedProceduresList().getModel();
+						List<String> sels = getSelectedProceduresList().getSelectedValuesList();
+						for (String item : sels) {
+							if (model.contains(item))
+								model.removeElement(item);
+						}
+						getSelectedProceduresList().setModel(model);
+					}
+				}
+			});
+		}
+		return btnRemoveProcedure;
+	}
+
+	private JTextArea getTxtAreaProcedureDescription() {
+		if (txtAreaProcedureDescription == null) {
+			txtAreaProcedureDescription = new JTextArea();
+			txtAreaProcedureDescription.setEditable(false);
+		}
+		return txtAreaProcedureDescription;
+	}
+
+	private JLabel getLblNoProcedureResults() {
+		if (lblNoProcedureResults == null) {
+			lblNoProcedureResults = new JLabel("No procedures found for this code!");
+			lblNoProcedureResults.setForeground(Color.RED);
+			lblNoProcedureResults.setBounds(345, 73, 234, 14);
+			lblNoProcedureResults.setVisible(false);
+		}
+		return lblNoProcedureResults;
+	}
+
+	private JScrollPane getScrollPane_12() {
+		if (scrollPane_12 == null) {
+			scrollPane_12 = new JScrollPane();
+			scrollPane_12.setBounds(345, 98, 282, 61);
+			scrollPane_12.setViewportView(getTxtAreaProcedureDescription());
+		}
+		return scrollPane_12;
+	}
+
+	private JTextField getTxtFieldSearchProcedure() {
+		if (txtFieldSearchProcedure == null) {
+			txtFieldSearchProcedure = new JTextField();
+			txtFieldSearchProcedure.setBounds(345, 35, 114, 30);
+			txtFieldSearchProcedure.setColumns(10);
+		}
+		return txtFieldSearchProcedure;
+	}
+
+	private JButton getBtnSearchProcedure() {
+		if (btnSearchProcedure == null) {
+			btnSearchProcedure = new JButton("Search");
+			btnSearchProcedure.setBounds(494, 39, 89, 23);
+			btnSearchProcedure.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					// get the procedure code from the txt field
+					String code = getTxtFieldSearchProcedure().getText();
+					// search for the diagnosis in the db
+
+					Procedure search = ConnectionFactory.getProcedure(code);
+					// if there is a result show it
+					if (search.code != null) {
+						// remove warning
+						getLblNoProcedureResults().setVisible(false);
+						// show it in the description area
+						getTxtAreaProcedureDescription().setText(search.code + "\n" + search.description);
+					}
+					// else show label "no results for this search"
+					else {
+						getLblNoProcedureResults().setVisible(true);
+						getTxtAreaProcedureDescription().setText("");
+					}
+				}
+			});
+		}
+		return btnSearchProcedure;
+	}
+
+	private JLabel getLblSearchProcedure() {
+		if (lblSearchProcedure == null) {
+			lblSearchProcedure = new JLabel("Search procedure:");
+			lblSearchProcedure.setBounds(345, 13, 131, 14);
+		}
+		return lblSearchProcedure;
+	}
+
+	private JPanel getPnAtenzzioneDiagnosis() {
+		if (pnAtenzzioneDiagnosis == null) {
+			pnAtenzzioneDiagnosis = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) pnAtenzzioneDiagnosis.getLayout();
+			flowLayout.setAlignment(FlowLayout.LEADING);
+			pnAtenzzioneDiagnosis.add(getBtnAtenzzione());
+		}
+		return pnAtenzzioneDiagnosis;
+	}
+
+	private JButton getBtnAtenzzione() {
+		if (btnAtenzzione == null) {
+			btnAtenzzione = new JButton("Report dangerous diagnosis");
+			btnAtenzzione.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					NotifiableDiseasesReportView ndrv = new NotifiableDiseasesReportView(appointment);
+					ndrv.setVisible(true);
+					ndrv.setLocationRelativeTo(null);
+				}
+			});
+			btnAtenzzione.setPreferredSize(new Dimension(167, 27));
+			btnAtenzzione.setBorder(new CompoundBorder(null, new LineBorder(new Color(255, 255, 153))));
+		}
+		return btnAtenzzione;
+	}
+
+	private JPanel getPnButtons() {
+		if (pnButtons == null) {
+			pnButtons = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) pnButtons.getLayout();
+			flowLayout.setHgap(10);
+			flowLayout.setAlignment(FlowLayout.RIGHT);
+			pnButtons.add(getBtnExit());
+			pnButtons.add(getBtnSave());
+		}
+		return pnButtons;
+	}
+
+	private JTextArea getTxtAreaProcedureComments() {
+		if (txtAreaProcedureComments == null) {
+			txtAreaProcedureComments = new JTextArea();
+		}
+		return txtAreaProcedureComments;
+	}
+
+	private JScrollPane getScrollPane_13() {
+		if (scrollPane_13 == null) {
+			scrollPane_13 = new JScrollPane();
+			scrollPane_13.setBounds(345, 196, 282, 61);
+			scrollPane_13.setViewportView(getTxtAreaProcedureComments());
+		}
+		return scrollPane_13;
+	}
+
+	private JLabel getLblProcedureComments() {
+		if (lblProcedureComments == null) {
+			lblProcedureComments = new JLabel("Comments:");
+			lblProcedureComments.setBounds(345, 174, 103, 14);
+		}
+		return lblProcedureComments;
 	}
 }

@@ -24,6 +24,7 @@ import com.toedter.calendar.JDateChooser;
 
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
+import java.awt.Toolkit;
 
 public class ManagerView extends JFrame {
 
@@ -65,6 +66,8 @@ public class ManagerView extends JFrame {
 	 * Create the frame.
 	 */
 	public ManagerView() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(ManagerView.class.getResource("/img/descarga.jpg")));
+		setTitle("Manager view");
 		try {
 			this.patients = new ArrayList<>();
 			appointments = ConnectionFactory.getAppointmentsList();

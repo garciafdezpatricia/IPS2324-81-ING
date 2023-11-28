@@ -278,7 +278,7 @@ public class MedicalRecepcionistView extends JFrame {
 		panel_patient_center.add(scrollPane_patients, BorderLayout.CENTER);
 
 		getListDoctor().setSelectedValue(ConnectionFactory.getDoctor(a.getDoctorid()), true);
-		getList_patients().setSelectedValue(ConnectionFactory.getPatient(a.getPatientid()), true);
+		getList_patients().setSelectedValue(ConnectionFactory.getPatientName(a.getPatientid()), true);
 
 	}
 

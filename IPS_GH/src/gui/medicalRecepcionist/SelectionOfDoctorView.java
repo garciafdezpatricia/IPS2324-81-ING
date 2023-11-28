@@ -275,7 +275,7 @@ public class SelectionOfDoctorView extends JFrame {
 		String mensaje = "";
 		try {
 			mensaje = "You have a new urgent appointment with the patient "
-					+ ConnectionFactory.getPatient(app.getPatientid()) + " at " + app.getStartdate();
+					+ ConnectionFactory.getPatientName(app.getPatientid()) + " at " + app.getStartdate();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

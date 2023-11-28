@@ -35,7 +35,7 @@ public class Appointment {
 		this.information = information;
 		this.status = status;
 		this.comments = comments;
-		p = ConnectionFactory.getPatient(patientid);
+		p = ConnectionFactory.getPatientName(patientid);
 		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
 
@@ -56,7 +56,7 @@ public class Appointment {
 		this.information = information;
 		this.status = status;
 		this.comments = "";
-		p = ConnectionFactory.getPatient(patientid);
+		p = ConnectionFactory.getPatientName(patientid);
 		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
 

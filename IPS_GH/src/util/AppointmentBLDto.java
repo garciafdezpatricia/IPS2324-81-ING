@@ -22,6 +22,11 @@ public class AppointmentBLDto {
 
 	public int id;
 	public int patientid;
+
+	public int getPatientid() {
+		return patientid;
+	}
+
 	public int doctorid;
 	public int officeid;
 	public String startDate;
@@ -31,18 +36,22 @@ public class AppointmentBLDto {
 	public String checkIn;
 	public String checkOut;
 	public String information;
+
+	public String getInformation() {
+		return information;
+	}
+
 	public String officeCode;
 	public String patientName;
 	public String patientSurname;
 	public String doctorSurname;
 	public String doctorName;
-	
+
 	public String toString() {
-		String aux = "Info:"+ information+" - ";
-		
-		aux+= "Starts at "+startDate +" and finishes at "+endDate.split(" ")[1]+" in office: "+officeCode;
+		String aux = "Info:" + information + " - ";
+
+		aux += "Starts at " + startDate + " and finishes at " + endDate.split(" ")[1] + " in office: " + officeCode;
 		return aux;
 	}
 
-	
 }
