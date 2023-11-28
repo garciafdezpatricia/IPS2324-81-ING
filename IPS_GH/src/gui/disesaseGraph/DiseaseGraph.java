@@ -55,6 +55,7 @@ public class DiseaseGraph extends JFrame {
 	private Date minDate = new Date(0);
 	private Date maxDate = new Date();
 	private JPanel pnChart;
+	
 
 	/**
 	 * Launch the application.
