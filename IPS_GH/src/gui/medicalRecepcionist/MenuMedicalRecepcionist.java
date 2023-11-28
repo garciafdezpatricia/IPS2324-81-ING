@@ -34,6 +34,7 @@ public class MenuMedicalRecepcionist extends JFrame {
 	private JButton btnAssignWorkPeriod;
 	private JButton btnEditWp;
 	private JButton btnEditAndCancel;
+	private JButton btnBandejaDeEntrada;
 
 	/**
 	 * Launch the application.
@@ -96,12 +97,13 @@ public class MenuMedicalRecepcionist extends JFrame {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
 
-			panelButtons.setLayout(new GridLayout(0, 2, 0, 0));
+			panelButtons.setLayout(new GridLayout(0, 3, 0, 0));
 			panelButtons.add(getBtnEditAndCancel());
 
 			panelButtons.add(getBtnCreateApp());
 			panelButtons.add(getBtnAssignWorkPeriod());
 			panelButtons.add(getBtnEditWp());
+			panelButtons.add(getBtnBandejaDeEntrada());
 		}
 		return panelButtons;
 	}
@@ -179,16 +181,16 @@ public class MenuMedicalRecepcionist extends JFrame {
 			btnEditWp.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 
-//					EditWorkPeriodView editWp;
-//					try {
-//						editWp = new EditWorkPeriodView();
-//						editWp.setVisible(true);
-//						editWp.setLocationRelativeTo(null);
-//
-//					} catch (Exception e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
+					EditWorkPeriodView editWp;
+					try {
+						editWp = new EditWorkPeriodView();
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 		}
@@ -216,4 +218,24 @@ public class MenuMedicalRecepcionist extends JFrame {
 		return btnEditAndCancel;
 	}
 
+	private JButton getBtnBandejaDeEntrada() {
+		if (btnBandejaDeEntrada == null) {
+			btnBandejaDeEntrada = new JButton("InBox");
+			btnBandejaDeEntrada.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					InBoxView editWp;
+					try {
+						editWp = new InBoxView();
+						editWp.setVisible(true);
+						editWp.setLocationRelativeTo(null);
+
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
+		}
+		return btnBandejaDeEntrada;
+	}
 }

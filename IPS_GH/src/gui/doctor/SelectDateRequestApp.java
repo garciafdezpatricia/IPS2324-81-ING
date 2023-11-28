@@ -1,4 +1,4 @@
-package gui.medicalRecepcionist;
+package gui.doctor;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -29,9 +29,10 @@ import javax.swing.border.EmptyBorder;
 import com.toedter.calendar.JDateChooser;
 
 import db.Doctor;
+import gui.medicalRecepcionist.MedicalRecepcionistView;
 import util.ConnectionFactory;
 
-public class SelectDate extends JDialog {
+public class SelectDateRequestApp extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
@@ -63,7 +64,7 @@ public class SelectDate extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public SelectDate(List<Doctor> s) {
+	public SelectDateRequestApp(List<Doctor> s) {
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
 		try {
@@ -92,7 +93,7 @@ public class SelectDate extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			SelectDate dialog = new SelectDate(selectedDoctors);
+			SelectDateRequestApp dialog = new SelectDateRequestApp(selectedDoctors);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 			dialog.setLocationRelativeTo(null);

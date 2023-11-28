@@ -1,4 +1,4 @@
-package gui.medicalRecepcionist;
+package gui.doctor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -6,11 +6,17 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -44,12 +50,18 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import db.Appointment;
+import com.toedter.calendar.JDateChooser;
+
 import db.Doctor;
 import db.Patient;
 import util.ConnectionFactory;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import java.awt.event.ItemListener;
+import java.math.BigInteger;
+import java.awt.event.ItemEvent;
 
-public class EditAppointmentView extends JFrame {
+public class CreateRequestAppointmentView extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -60,9 +72,7 @@ public class EditAppointmentView extends JFrame {
 	private JPanel panel_patient;
 	private JPanel panel_office;
 	private JPanel panel_information;
-	private JPanel panel_buttons;
-	private JButton btnFinish;
-	private JPanel panel_doctor_filter;
+	private JPanel panelSouth;
 	private JPanel panel_patient_filter;
 	private JLabel lblIPatientNam;
 	private JTextField textFieldNamePatient;
@@ -80,21 +90,13 @@ public class EditAppointmentView extends JFrame {
 	private JLabel lblChooseOffice;
 	private JComboBox<String> comboBoxOffices;
 
-	private boolean doctorChoosed = false;
+	private boolean doctorChoosed = true;
 	private boolean patientChoosed = false;
 	private boolean officeChoosed = false;
-	private boolean fromDateChoosed = false;
-	private boolean toDateChoosed = false;
-	private SelectDateForEdition selectDate;
 
-	private static BigInteger doctorid, id;
-	private static BigInteger patientid;
-	private static BigInteger officeid;
-	private static int urgency;
-	private static String information;
-	private static String startDate;
-	private static String endDate;
-	private String[] offices = ConnectionFactory.getOfficesCodes();
+	private boolean dateChoosed = false;
+
+	private SelectDateRequestApp selectDate;
 
 	/**
 	 * Launch the application.
@@ -103,11 +105,9 @@ public class EditAppointmentView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					EditAppointmentView frame = new EditAppointmentView(id, doctorid, patientid, officeid, urgency,
-							information, startDate, endDate);
+					CreateRequestAppointmentView frame = new CreateRequestAppointmentView(docID);
 					frame.setVisible(true);
 					frame.setLocationRelativeTo(null); // centrar pantalla
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -142,38 +142,44 @@ public class EditAppointmentView extends JFrame {
 	private String newContactInfo = "";
 	private JTextField textFieldFrom;
 	private JTextField textFieldTo;
+
 	private JPanel panel_patient_center;
 	private JPanel panel_doctor_Center;
-	private JButton btnSelectDate;
-	private JLabel lblSurname;
+	private JLabel lblsurname;
 	private JTextField textFieldSurname;
 	private JButton btnFilterSurname;
-	private DefaultListModel<Doctor> d = ConnectionFactory.getDoctors();
-	private DefaultListModel<Patient> p = ConnectionFactory.getPatients();
+	private JLabel lblSurnameDoctor;
+	private JTextField textFieldSurnameDoctor;
+	private JButton btnSurnameDoctor;
+	private JLabel lblDNI;
+	private JTextField textFieldDni;
+	private JButton btnDNI;
+	private JPanel panelComments;
+	private JTextField txtComments;
+	private JPanel panelSouthButtons;
+	private JButton btnSendRequest;
+
+	private static String docID;
+	private JPanel panelDate;
+	private JDateChooser dateChooser;
+	private JRadioButton rdbtnNoDatePreference;
 
 	/**
 	 * Create the frame.
 	 * 
 	 * @throws Exception
 	 */
-	public EditAppointmentView(BigInteger id, BigInteger doctorid, BigInteger patientid, BigInteger officeid,
-			int urgency, String information, String startDate, String endDate) throws Exception {
+	public CreateRequestAppointmentView(String id) throws Exception {
+		CreateRequestAppointmentView.docID = id;
 
-		this.doctorid = doctorid;
-		this.patientid = patientid;
-		this.officeid = officeid;
-		this.urgency = urgency;
-		this.information = information;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.id = id;
-		setTitle("Edition of appointment");
-		setIconImage(Toolkit.getDefaultToolkit().getImage(EditAppointmentView.class.getResource("/img/descarga.jpg")));
-		doctors = d;
-		doctorsReset = d;
+		setTitle("Create request of appointment");
+		setIconImage(Toolkit.getDefaultToolkit()
+				.getImage(CreateRequestAppointmentView.class.getResource("/img/descarga.jpg")));
+		doctors = ConnectionFactory.getDoctors();
+		doctorsReset = ConnectionFactory.getDoctors();
 
-		patients = p;
-		patientsReset = p;
+		patients = ConnectionFactory.getPatients();
+		patientsReset = ConnectionFactory.getPatients();
 
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -188,14 +194,14 @@ public class EditAppointmentView extends JFrame {
 		}
 		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 906, 553);
+		setBounds(100, 100, 1003, 555);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		contentPane.add(getPanel_title(), BorderLayout.NORTH);
 		contentPane.add(getPanelGeneral(), BorderLayout.CENTER);
-		contentPane.add(getPanel_buttons(), BorderLayout.SOUTH);
+		contentPane.add(getPanelSouth(), BorderLayout.SOUTH);
 
 		// doctors
 		panel_doctor_Center.add(scrollPaneDoctor, BorderLayout.CENTER);
@@ -225,7 +231,7 @@ public class EditAppointmentView extends JFrame {
 	private JPanel getPanelGeneral() {
 		if (panelGeneral == null) {
 			panelGeneral = new JPanel();
-			panelGeneral.setLayout(new GridLayout(2, 2, 0, 0));
+			panelGeneral.setLayout(new GridLayout(0, 2, 0, 0));
 			panelGeneral.add(getPanel_doctor());
 			panelGeneral.add(getPanel_patient());
 			panelGeneral.add(getPanel_office());
@@ -236,7 +242,7 @@ public class EditAppointmentView extends JFrame {
 
 	private JLabel getLblTitle() {
 		if (lblTitle == null) {
-			lblTitle = new JLabel("Edit Appointment");
+			lblTitle = new JLabel("Request of appointment");
 			lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		}
 		return lblTitle;
@@ -273,6 +279,7 @@ public class EditAppointmentView extends JFrame {
 			panel_office
 					.setBorder(new TitledBorder(null, "Office ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panel_office.add(getPanel_office_north(), BorderLayout.NORTH);
+			panel_office.add(getPanelDate(), BorderLayout.CENTER);
 		}
 		return panel_office;
 	}
@@ -289,93 +296,71 @@ public class EditAppointmentView extends JFrame {
 		return panel_information;
 	}
 
-	private JPanel getPanel_buttons() {
-		if (panel_buttons == null) {
-			panel_buttons = new JPanel();
-			FlowLayout flowLayout = (FlowLayout) panel_buttons.getLayout();
-			flowLayout.setAlignment(FlowLayout.TRAILING);
-			panel_buttons.add(getBtnFinish());
+	private JPanel getPanelSouth() {
+		if (panelSouth == null) {
+			panelSouth = new JPanel();
+			panelSouth.setLayout(new BorderLayout(0, 0));
+			panelSouth.add(getPanelComments(), BorderLayout.CENTER);
+			panelSouth.add(getPanelSouthButtons(), BorderLayout.SOUTH);
 		}
-		return panel_buttons;
-	}
-
-	private JButton getBtnFinish() {
-		if (btnFinish == null) {
-			btnFinish = new JButton("Edit Appointment");
-			btnFinish.setEnabled(false);
-
-			btnFinish.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// si el doctor no trabaja a esa hora ese día
-
-					for (int i = 0; i < listDoctor.getSelectedValuesList().size(); i++) {
-						try {
-							if (!ConnectionFactory.isWorking(new java.sql.Date(selectDate.getDay().getTime()),
-									selectDate.getFrom(), selectDate.getTo(),
-									listDoctor.getSelectedValuesList().get(i).getId())) {
-								JOptionPane.showMessageDialog(EditAppointmentView.this, "The doctor is not working.",
-										"Warning", JOptionPane.INFORMATION_MESSAGE);
-								System.out.println("no está trabajando");
-							} else {
-								System.out.println("está trabajando");
-								// el doctor tiene otra cita a esa hora
-//								try {
-//									if (ConnectionFactory.hasAnAppointment(listDoctor.getSelectedValuesList().get(i),
-//											new java.sql.Date(selectDate.getDay().getTime()) + " "
-//													+ selectDate.getFrom() + ":00",
-//											new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo()
-//													+ ":00")) {
-////										int opcion2 = JOptionPane.showConfirmDialog(EditAppointmentView.this,
-////												"The doctor has another appointment at that time, do you want to edit this appointment either?",
-////												"Confirmation", JOptionPane.YES_NO_OPTION);
-//
-//									} else {
-								areYouSureJOP();
-//								} catch (Exception e1) {
-//									e1.printStackTrace();
-//								}
-							}
-						} catch (Exception e1) {
-							JOptionPane.showMessageDialog(EditAppointmentView.this, "The day has passed", "Warning",
-									JOptionPane.INFORMATION_MESSAGE);
-						}
-
-					}
-
-				}
-
-			});
-		}
-		return btnFinish;
+		return panelSouth;
 	}
 
 	private void areYouSureJOP() throws Exception {
-		int opcion = JOptionPane.showConfirmDialog(EditAppointmentView.this,
-				"Are you sure you want to edit the appointment " + id + " between the doctor(s) "
-						+ listDoctor.getSelectedValuesList() + " and the patient " + list_patients.getSelectedValue()
-						+ " on  " + selectDate.getDay().getDate() + " at " + selectDate.getFrom() + " in the office "
-						+ getComboBoxOffices().getSelectedItem() + "?",
-				"Confirmation", JOptionPane.YES_NO_OPTION);
+		int opcion = JOptionPane.showConfirmDialog(CreateRequestAppointmentView.this,
+				"Are you sure you want to send the request?", "Confirmation", JOptionPane.YES_NO_OPTION);
 
 		// Verificar la respuesta del usuario
 		if (opcion == JOptionPane.YES_OPTION) {
 			// El usuario ha confirmado, realiza la acción
 			// Puedes poner aquí el código que quieras ejecutar después de la confirmación
-			System.out.println("Acción realizada.");
+			BigInteger id = BigInteger.valueOf(Long.valueOf(CreateRequestAppointmentView.docID));
+			Patient p = (Patient) list_patients.getSelectedValue();
 			if (rdbtnUrgent.isSelected()) {
 				for (int j = 0; j < listDoctor.getSelectedValuesList().size(); j++) {
 					sendEmail(((Doctor) listDoctor.getSelectedValuesList().get(j)).getEmail());
 				}
-			}
-			Patient p = (Patient) list_patients.getSelectedValue();
-			if (rdbtnUrgent.isSelected()) {
-				update(p, 1);
+				if (getRdbtnNoDatePreference().isSelected()) {
+					// the most distant date is selected as a "provisional date" since there is no
+					// date preference on the part of the doctor
+					Calendar maxDate = Calendar.getInstance();
+					maxDate.set(2037, Calendar.DECEMBER, 31); // WARNING: the max date supported by java.sql.Date is jan 19, 2038
+					maxDate.getTime().getTime();
+
+					ConnectionFactory.createRequestForAppointment(p.getId(), listDoctor.getSelectedValue().getId(),
+							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00",
+							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00", 1,
+							ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+							newContactInfo, getTxtComments().getText());
+					System.out.println("Request sent.");
+				}
 
 			} else {
-				update(p, 0);
+				if (getRdbtnNoDatePreference().isSelected()) {
+					// the most distant date is selected as a "provisional date" since there is no
+					// date preference on the part of the doctor
+					Calendar maxDate = Calendar.getInstance();
+					maxDate.set(9999, Calendar.DECEMBER, 31);
+					maxDate.getTime().getTime();
+					
+					ConnectionFactory.createRequestForAppointment(p.getId(), id,
+							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00",
+							new java.sql.Date(maxDate.getTime().getTime()) + " 00:00:00", 1,
+							ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+							newContactInfo, getTxtComments().getText());
+					System.out.println("Request sent.");
+					
+				}
+				else {
+				ConnectionFactory.createRequestForAppointment(p.getId(), id,
+						new java.sql.Date(getDateChooser().getDate().getTime()) + " 00:00:00",
+						new java.sql.Date(getDateChooser().getDate().getTime()) + " 00:00:00", 0,
+						ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString()),
+						newContactInfo, getTxtComments().getText());
+				System.out.println("Request sent.");
+				}
 			}
+
 		} else {
 			// El usuario ha cancelado la acción
 			System.out.println("Acción cancelada.");
@@ -383,20 +368,10 @@ public class EditAppointmentView extends JFrame {
 
 	}
 
-	private void update(Patient p, int urgency) throws Exception {
-		int officeIdFrom = ConnectionFactory.officeIdFrom(getComboBoxOffices().getSelectedItem().toString());
-		ConnectionFactory.updateAppointment(id, listDoctor.getSelectedValue().getId(), p.getId(),
-				new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom() + ":00",
-				new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getTo() + ":00", urgency,
-				officeIdFrom, newContactInfo);
-	}
-
 	// TODO: poner más datos
 	private void sendEmail(String destinatario) {
 		String asunto = "Urgent appointment";
-		String mensaje = "You have a new urgent appointment with the patient " + list_patients.getSelectedValue()
-				+ " at " + new java.sql.Date(selectDate.getDay().getTime()) + " " + selectDate.getFrom()
-				+ ":00 the day " + selectDate.getDateChooser().getDate().getDate();
+		String mensaje = "You have a new urgent appointment with the patient " + list_patients.getSelectedValue();
 
 		// Configurar propiedades para la conexión SMTP
 		Properties propiedades = new Properties();
@@ -440,9 +415,12 @@ public class EditAppointmentView extends JFrame {
 			panel_patient_filter.add(getLblSSNumber());
 			panel_patient_filter.add(getTextFieldSSNumber());
 			panel_patient_filter.add(getBtnFilterSS());
-			panel_patient_filter.add(getLblSurname());
+			panel_patient_filter.add(getLblsurname());
 			panel_patient_filter.add(getTextFieldSurname());
 			panel_patient_filter.add(getBtnFilterSurname());
+			panel_patient_filter.add(getLblDNI());
+			panel_patient_filter.add(getTextFieldDni());
+			panel_patient_filter.add(getBtnDNI());
 		}
 		return panel_patient_filter;
 	}
@@ -476,14 +454,9 @@ public class EditAppointmentView extends JFrame {
 		if (list_patients == null) {
 			list_patients = new JList<>(patients); // Asegúrate de especificar el tipo de elemento en la JList
 			list_patients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			for (int i = 0; i < list_patients.getModel().getSize(); i++) {
-				Patient p = (Patient) list_patients.getModel().getElementAt(i);
-				if (p.getId() == patientid) {
-					list_patients.setSelectedIndex(i);
-				}
-			}
 			list_patients.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
+
 					Patient p = (Patient) getList_patients().getSelectedValue();
 					if (p != null) {
 						getTxtContactInfo().setText(p.getContactInfo());
@@ -491,7 +464,7 @@ public class EditAppointmentView extends JFrame {
 
 						patientChoosed = true;
 
-						checkFinishBtnEnabled();
+						checkSendRequestBtnEnabled();
 
 						newContactInfo = p.getContactInfo();
 					} else {
@@ -509,16 +482,19 @@ public class EditAppointmentView extends JFrame {
 	public JList getListDoctor() {
 		if (listDoctor == null) {
 			listDoctor = new JList<>(doctors);
-			for (int i = 0; i < listDoctor.getModel().getSize(); i++) {
-				if (listDoctor.getModel().getElementAt(i).getId().equals(doctorid)) {
-					listDoctor.setSelectedIndex(i);
-				}
-			}
+			listDoctor.setSelectedValue(getDoctorByID(CreateRequestAppointmentView.docID), true);
+//			int index = listDoctor.getSelectedIndex();
+//			listDoctor.ensureIndexIsVisible(index);
+			
 			listDoctor.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
+					try {
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 					if (!listDoctor.getSelectedValuesList().isEmpty()) {
 						doctorChoosed = true;
-						btnSelectDate.setEnabled(true);
 
 					} else {
 						doctorChoosed = false;
@@ -528,6 +504,16 @@ public class EditAppointmentView extends JFrame {
 			});
 		}
 		return listDoctor;
+	}
+
+	private Doctor getDoctorByID(String id) {
+		for (int i = 0; i < doctors.getSize(); i++) {
+			if (doctors.get(i).getPersonal_id().toLowerCase().equals(id.toLowerCase()))
+				return doctors.get(i);
+		}
+		// this method is never going to return null because the checking of the doctor
+		// ID was done in the previous window
+		return null;
 	}
 
 	private JScrollPane getScrollPaneDoctor() {
@@ -563,6 +549,9 @@ public class EditAppointmentView extends JFrame {
 			panelNameAndNumber.add(getLblTypeDoctor_1());
 			panelNameAndNumber.add(getTextNameDoctor());
 			panelNameAndNumber.add(getBtnFilterName());
+			panelNameAndNumber.add(getLblSurnameDoctor());
+			panelNameAndNumber.add(getTextFieldSurnameDoctor());
+			panelNameAndNumber.add(getBtnSurnameDoctor());
 			panelNameAndNumber.add(getLblRegistrationNumber_1());
 			panelNameAndNumber.add(getTextRegNumber());
 			panelNameAndNumber.add(getBtnRegNumber());
@@ -678,8 +667,8 @@ public class EditAppointmentView extends JFrame {
 					if (!getTextFieldNamePatient().getText().isBlank()
 							&& !getTextFieldNamePatient().getText().isEmpty()) {
 						for (int i = 0; i < patients.getSize(); i++) {
-							if (getTextFieldNamePatient().getText().toLowerCase()
-									.equals(patients.get(i).getFirstName().toLowerCase())) {
+							if (patients.get(i).getFirstName().toLowerCase()
+									.contains(getTextFieldNamePatient().getText().toLowerCase())) {
 								filteredByName.addElement(patients.get(i));
 							}
 						}
@@ -750,7 +739,7 @@ public class EditAppointmentView extends JFrame {
 					textFieldNamePatient.setText("");
 					textFieldSSNumber.setText("");
 					textFieldSurname.setText("");
-					btnFinish.setEnabled(false);
+					btnSendRequest.setEnabled(false);
 
 				}
 			});
@@ -785,10 +774,9 @@ public class EditAppointmentView extends JFrame {
 	private JPanel getPanelSurDoctor_1() {
 		if (panelSurDoctor == null) {
 			panelSurDoctor = new JPanel();
-			panelSurDoctor.setLayout(new GridLayout(0, 3, 0, 0));
+			panelSurDoctor.setLayout(new GridLayout(0, 2, 0, 0));
 			panelSurDoctor.add(getRdbtnUrgent_1());
 			panelSurDoctor.add(getBtnResetDoctor());
-			panelSurDoctor.add(getBtnSelectDate());
 		}
 		return panelSurDoctor;
 	}
@@ -796,10 +784,6 @@ public class EditAppointmentView extends JFrame {
 	private JRadioButton getRdbtnUrgent_1() {
 		if (rdbtnUrgent == null) {
 			rdbtnUrgent = new JRadioButton("Urgent");
-			if (urgency == 1) {
-				rdbtnUrgent.setSelected(true);
-			} else
-				rdbtnUrgent.setSelected(false);
 		}
 		return rdbtnUrgent;
 	}
@@ -817,9 +801,8 @@ public class EditAppointmentView extends JFrame {
 					textRegNumber.setText("");
 					textFieldFrom.setEnabled(false);
 					textFieldTo.setEnabled(false);
-					btnFinish.setEnabled(false);
-					btnSelectDate.setEnabled(false);
-					btnFinish.setEnabled(false);
+					btnSendRequest.setEnabled(false);
+					btnSendRequest.setEnabled(false);
 
 				}
 			});
@@ -828,11 +811,28 @@ public class EditAppointmentView extends JFrame {
 		return btnReset;
 	}
 
+	private JDateChooser getDateChooser_1() {
+		if (dateChooser == null) {
+			dateChooser = new JDateChooser();
+			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					textFieldFrom.setEnabled(true);
+					textFieldFrom.setEditable(true);
+					textFieldTo.setEnabled(true);
+					textFieldTo.setEditable(true);
+				}
+			});
+			dateChooser.getCalendarButton().setEnabled(false);
+			dateChooser.setMinSelectableDate(new Date(System.currentTimeMillis()));
+
+		}
+		return dateChooser;
+	}
+
 	private JTextArea getTxtContactInfo() {
 		if (txtContactInfo == null) {
 			txtContactInfo = new JTextArea();
 			txtContactInfo.setEditable(false);
-			txtContactInfo.setText(information);
 		}
 		return txtContactInfo;
 	}
@@ -850,6 +850,7 @@ public class EditAppointmentView extends JFrame {
 	private JButton getBtnEdit() {
 		if (btnEdit == null) {
 			btnEdit = new JButton("Edit");
+			btnEdit.setEnabled(false);
 			btnEdit.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					btnEdit.setEnabled(false); // by default, the edit button is disabled until a patient is selected
@@ -904,23 +905,9 @@ public class EditAppointmentView extends JFrame {
 	private JComboBox<String> getComboBoxOffices() {
 		if (comboBoxOffices == null) {
 			comboBoxOffices = new JComboBox<String>();
-			comboBoxOffices.setModel(new DefaultComboBoxModel<>(offices));
-
-			comboBoxOffices.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					officeChoosed = true;
-
-					checkFinishBtnEnabled();
-				}
-			});
 			try {
-				String office = ConnectionFactory.getOffice(officeid);
-
-				for (int i = 0; i < offices.length; i++) {
-					if (offices[i].equals(office)) {
-						comboBoxOffices.setSelectedIndex(i);
-					}
-				}
+				String[] of = { "SIN-ASIGNAR" };
+				comboBoxOffices.setModel(new DefaultComboBoxModel<>(of));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -929,10 +916,68 @@ public class EditAppointmentView extends JFrame {
 		return comboBoxOffices;
 	}
 
-	private void checkFinishBtnEnabled() {
-		if (doctorChoosed && patientChoosed && officeChoosed)
-			getBtnFinish().setEnabled(true);
+	private void checkSendRequestBtnEnabled() {
+		if (doctorChoosed && patientChoosed)
+			getBtnSendRequest().setEnabled(true);
+	}
 
+	private JTextField getTextFieldFrom() {
+		if (textFieldFrom == null) {
+			textFieldFrom = new JTextField();
+
+			textFieldFrom.setEnabled(false);
+			textFieldFrom.setEditable(false);
+			textFieldFrom.setColumns(10);
+			SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm:ss");
+
+//			textFieldFrom.addFocusListener(new FocusAdapter() {
+//				@Override
+//				public void focusLost(FocusEvent e) {
+//					try {
+//						if (sdf3.parse(textFieldFrom.getText() + ":00").after(sdf3.parse(textFieldTo.getText()+ ":00"))) {
+//							JOptionPane.showMessageDialog(MedicalRecepcionistView.this,
+//									"The end hour of the appointment must be later than the start one.", "Warning",
+//									JOptionPane.INFORMATION_MESSAGE);
+//							btnFinish.setEnabled(false);
+//
+//						}
+//					} catch (HeadlessException | ParseException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//				}
+//			});
+		}
+		return textFieldFrom;
+	}
+
+	private JTextField getTextFieldTo() {
+		if (textFieldTo == null) {
+			textFieldTo = new JTextField();
+			textFieldTo.setEnabled(false);
+			textFieldTo.setEditable(false);
+			textFieldTo.setColumns(10);
+			SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm:ss");
+			textFieldTo.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					try {
+						if (sdf3.parse(textFieldFrom.getText() + ":00")
+								.after(sdf3.parse(textFieldTo.getText() + ":00"))) {
+							JOptionPane.showMessageDialog(CreateRequestAppointmentView.this,
+									"The end hour of the appointment must be later than the start one.", "Warning",
+									JOptionPane.INFORMATION_MESSAGE);
+							btnSendRequest.setEnabled(false);
+						}
+					} catch (HeadlessException | ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				}
+			});
+		}
+		return textFieldTo;
 	}
 
 	private JPanel getPanel_patient_center() {
@@ -956,34 +1001,12 @@ public class EditAppointmentView extends JFrame {
 		return panel_doctor_Center;
 	}
 
-	private JButton getBtnSelectDate() {
-		if (btnSelectDate == null) {
-			btnSelectDate = new JButton("Select date");
-			btnSelectDate.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					try {
-						selectDate = new SelectDateForEdition(getSelectedDoctors(), startDate, endDate);
-						selectDate.setVisible(true);
-						selectDate.setLocationRelativeTo(null);
-						btnFinish.setEnabled(true);
-
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-
-				}
-			});
+	private JLabel getLblsurname() {
+		if (lblsurname == null) {
+			lblsurname = new JLabel("By surname");
+			lblsurname.setFont(new Font("Tahoma", Font.BOLD, 11));
 		}
-		return btnSelectDate;
-	}
-
-	private JLabel getLblSurname() {
-		if (lblSurname == null) {
-			lblSurname = new JLabel("By Surname");
-			lblSurname.setFont(new Font("Tahoma", Font.BOLD, 11));
-		}
-		return lblSurname;
+		return lblsurname;
 	}
 
 	private JTextField getTextFieldSurname() {
@@ -1000,7 +1023,7 @@ public class EditAppointmentView extends JFrame {
 			btnFilterSurname.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					DefaultListModel<Patient> filteredBySurname = new DefaultListModel<>();
-					if (!getTextFieldSSNumber().getText().isBlank() && !getTextFieldSSNumber().getText().isEmpty()) {
+					if (!getTextFieldSurname().getText().isBlank() && !getTextFieldSurname().getText().isEmpty()) {
 						for (int i = 0; i < patients.getSize(); i++) {
 							if ((patients.get(i).getSurName().contains(getTextFieldSurname().getText()))) {
 								filteredBySurname.addElement(patients.get(i));
@@ -1018,5 +1041,183 @@ public class EditAppointmentView extends JFrame {
 			});
 		}
 		return btnFilterSurname;
+	}
+
+	private JLabel getLblSurnameDoctor() {
+		if (lblSurnameDoctor == null) {
+			lblSurnameDoctor = new JLabel("By surname:");
+			lblSurnameDoctor.setFont(new Font("Tahoma", Font.BOLD, 10));
+		}
+		return lblSurnameDoctor;
+	}
+
+	private JTextField getTextFieldSurnameDoctor() {
+		if (textFieldSurnameDoctor == null) {
+			textFieldSurnameDoctor = new JTextField();
+			textFieldSurnameDoctor.setColumns(10);
+		}
+		return textFieldSurnameDoctor;
+	}
+
+	private JButton getBtnSurnameDoctor() {
+		if (btnSurnameDoctor == null) {
+			btnSurnameDoctor = new JButton("Filter");
+			btnSurnameDoctor.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					DefaultListModel<Doctor> filteredBySurname = new DefaultListModel<>();
+					if (!getTextFieldSurnameDoctor().getText().isBlank()
+							&& !getTextFieldSurnameDoctor().getText().isEmpty()) {
+						for (int i = 0; i < patients.getSize(); i++) {
+							if ((doctors.get(i).getSurname().contains(getTextFieldSurname().getText()))) {
+								filteredBySurname.addElement(doctors.get(i));
+							}
+						}
+					}
+
+					doctors.removeAllElements();
+					for (int i = 0; i < filteredBySurname.size(); i++) {
+						if (!doctors.contains(filteredBySurname.get(i))) {
+							doctors.addElement(filteredBySurname.get(i));
+						}
+					}
+				}
+			});
+		}
+		return btnSurnameDoctor;
+	}
+
+	private JLabel getLblDNI() {
+		if (lblDNI == null) {
+			lblDNI = new JLabel("By DNI:");
+			lblDNI.setFont(new Font("Tahoma", Font.BOLD, 10));
+		}
+		return lblDNI;
+	}
+
+	private JTextField getTextFieldDni() {
+		if (textFieldDni == null) {
+			textFieldDni = new JTextField();
+			textFieldDni.setColumns(10);
+		}
+		return textFieldDni;
+	}
+
+	private JButton getBtnDNI() {
+		if (btnDNI == null) {
+			btnDNI = new JButton("Filter");
+			btnDNI.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					DefaultListModel<Patient> filteredByDNI = new DefaultListModel<>();
+					if (!getTextFieldDni().getText().isBlank() && !getTextFieldDni().getText().isEmpty()) {
+						for (int i = 0; i < patients.getSize(); i++) {
+							if (patients.get(i).getDni().contains(getTextFieldDni().getText())) {
+								filteredByDNI.addElement(patients.get(i));
+							}
+						}
+					}
+
+					patients.removeAllElements();
+					for (int i = 0; i < filteredByDNI.size(); i++) {
+						if (!patients.contains(filteredByDNI.get(i))) {
+							patients.addElement(filteredByDNI.get(i));
+						}
+					}
+				}
+			});
+		}
+		return btnDNI;
+	}
+
+	private JPanel getPanelComments() {
+		if (panelComments == null) {
+			panelComments = new JPanel();
+			panelComments
+					.setBorder(new TitledBorder(null, "Comments", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			panelComments.setLayout(new GridLayout(0, 1, 0, 0));
+			panelComments.add(getTxtComments());
+		}
+		return panelComments;
+	}
+
+	private JTextField getTxtComments() {
+		if (txtComments == null) {
+			txtComments = new JTextField();
+			txtComments.setColumns(10);
+		}
+		return txtComments;
+	}
+
+	private JPanel getPanelSouthButtons() {
+		if (panelSouthButtons == null) {
+			panelSouthButtons = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) panelSouthButtons.getLayout();
+			flowLayout.setAlignment(FlowLayout.RIGHT);
+			panelSouthButtons.add(getBtnSendRequest());
+		}
+		return panelSouthButtons;
+	}
+
+	private JButton getBtnSendRequest() {
+		if (btnSendRequest == null) {
+			btnSendRequest = new JButton("Send request");
+			btnSendRequest.setEnabled(false);
+			btnSendRequest.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					try {
+						areYouSureJOP();
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
+		}
+		return btnSendRequest;
+	}
+
+	private JPanel getPanelDate() {
+		if (panelDate == null) {
+			panelDate = new JPanel();
+			panelDate.setLayout(new GridLayout(2, 1, 0, 0));
+			panelDate.add(getRdbtnNoDatePreference());
+			panelDate.add(getDateChooser());
+		}
+		return panelDate;
+	}
+
+	public JDateChooser getDateChooser() {
+		if (dateChooser == null) {
+			dateChooser = new JDateChooser(new Date());
+
+			dateChooser.getCalendarButton().addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					try {
+						// TODO
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
+			dateChooser.setMinSelectableDate(new Date());
+
+		}
+		return dateChooser;
+	}
+
+	private JRadioButton getRdbtnNoDatePreference() {
+		if (rdbtnNoDatePreference == null) {
+			rdbtnNoDatePreference = new JRadioButton("No date preference");
+			rdbtnNoDatePreference.addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) {
+						getDateChooser().setEnabled(false);
+					} else {
+						getDateChooser().setEnabled(true);
+					}
+				}
+			});
+
+		}
+		return rdbtnNoDatePreference;
 	}
 }

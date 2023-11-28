@@ -5,15 +5,43 @@ import java.math.BigInteger;
 import util.ConnectionFactory;
 
 public class Appointment {
+
 	private BigInteger id;
 	private BigInteger patientid;
 	private BigInteger doctorid, officeId;;
-	private String startdate, enddate, information, checkedin, checkedout, status;
+	private String startdate, enddate, information, checkedin, checkedout, status, comments, p, doctor;
 	private int urgency, attended;
 
 	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
 			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
-			String status) {
+			String status, String comments) throws Exception {
+		super();
+		this.id = id;
+		this.patientid = patientid;
+		this.doctorid = doctorid;
+		this.startdate = startdate;
+		this.enddate = enddate;
+		this.urgency = urgency;
+		this.attended = attended;
+		if (checkedin == "null" || checkedout == "null") {
+			this.checkedin = "";
+			this.checkedout = "";
+		} else {
+			this.checkedin = checkedin;
+			this.checkedout = checkedout;
+		}
+
+		this.officeId = officeId;
+		this.information = information;
+		this.status = status;
+		this.comments = comments;
+		p = ConnectionFactory.getPatient(patientid);
+		doctor = ConnectionFactory.getDoctor(doctorid);
+	}
+
+	public Appointment(BigInteger id, BigInteger patientid, BigInteger doctorid, String startdate, String enddate,
+			int urgency, int attended, String checkedin, String checkedout, BigInteger officeId, String information,
+			String status) throws Exception {
 		super();
 		this.id = id;
 		this.patientid = patientid;
@@ -27,6 +55,9 @@ public class Appointment {
 		this.officeId = officeId;
 		this.information = information;
 		this.status = status;
+		this.comments = "";
+		p = ConnectionFactory.getPatient(patientid);
+		doctor = ConnectionFactory.getDoctor(doctorid);
 	}
 
 	public String getStatus() {
@@ -125,18 +156,16 @@ public class Appointment {
 		this.information = information;
 	}
 
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+
 	@Override
 	public String toString() {
-		String p = "";
-		String doctor = "";
-		try {
-			p = ConnectionFactory.getPatient(patientid);
-			doctor = ConnectionFactory.getDoctor(doctorid);
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		if (urgency == 1) {
 			if (getStatus() != null) {
 				if (getStatus().toLowerCase().equals("cancelled")) {
@@ -144,16 +173,37 @@ public class Appointment {
 						return " (cancelled) [URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: "
 								+ startdate + "; \n\tTo: " + enddate;
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 
 					}
-				} else {
+				} else if (getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "[URGENT] \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
 								+ "; \n\tTo: " + enddate;
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
+					try {
+						return "[URGENT] \n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						e.printStackTrace();
+
+					}
+
+				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
+					try {
+						return "\n\t[URGENT] Specialization: " + comments + "; Patient " + p + "; \n\tFrom: "
+								+ startdate + "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						e.printStackTrace();
+
+					}
+				} else if (getStatus().toLowerCase().equals("requested")) {
+					try {
+						return "\n\tPatient: " + p + "; \n\t Doctor: " + doctor;
+					} catch (Exception e) {
 						e.printStackTrace();
 
 					}
@@ -170,16 +220,37 @@ public class Appointment {
 						return " (cancelled) \n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate
 								+ "; \n\tTo: " + enddate;
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 
 					}
-				} else {
+				} else if (getStatus().toLowerCase().equals("booked")) {
 					try {
 						return "\n\tPatient: " + p + "; \n\tDc.: " + doctor + "; \n\tFrom: " + startdate + "; \n\tTo: "
 								+ enddate;
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
+					try {
+						return "\n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						e.printStackTrace();
+
+					}
+				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
+					try {
+						return "\n\tSpecialization: " + comments + "; Patient " + p + "; \n\tFrom: " + startdate
+								+ "; \n\tTo: " + enddate;
+					} catch (Exception e) {
+						e.printStackTrace();
+
+					}
+
+				} else if (getStatus().toLowerCase().equals("requested")) {
+					try {
+						return "\n\tPatient: " + p + "; \n\t Doctor: " + doctor;
+					} catch (Exception e) {
 						e.printStackTrace();
 
 					}

@@ -31,7 +31,7 @@ public class MenuDoctor extends JFrame {
 	private JLabel lblToDo;
 	private JPanel panelCenter;
 	private JButton btnSch;
-	private JButton btnCreateRecipe;
+	private JButton btnCreateRequest;
 	private JPanel panelSouth;
 	private JButton btnCancel;
 
@@ -104,13 +104,14 @@ public class MenuDoctor extends JFrame {
 			panelCenter = new JPanel();
 			panelCenter.setLayout(new GridLayout(0, 2, 0, 0));
 			panelCenter.add(getBtnSch());
-			panelCenter.add(getBtnCreateRecipe());
+			panelCenter.add(getBtnCreateRequest());
 		}
 		return panelCenter;
 	}
 	private JButton getBtnSch() {
 		if (btnSch == null) {
 			btnSch = new JButton("Consult the schedule");
+			btnSch.setFont(new Font("Tahoma", Font.PLAIN, 12));
 			btnSch.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					Schedule mr;
@@ -128,25 +129,24 @@ public class MenuDoctor extends JFrame {
 		}
 		return btnSch;
 	}
-	private JButton getBtnCreateRecipe() {
-		if (btnCreateRecipe == null) {
-			btnCreateRecipe = new JButton("Create prescription");
-			btnCreateRecipe.addActionListener(new ActionListener() {
+	private JButton getBtnCreateRequest() {
+		if (btnCreateRequest == null) {
+			btnCreateRequest = new JButton("Create request for appointment");
+			btnCreateRequest.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			btnCreateRequest.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					AddPrescription mr;
+					DoctorIdentificationView div;
 					try {
-						mr = new AddPrescription();
-						mr.setVisible(true);
-						mr.setLocationRelativeTo(null);
-
+						div = new DoctorIdentificationView();
+						div.setVisible(true);
+						div.setLocationRelativeTo(null);
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}
 			});
 		}
-		return btnCreateRecipe;
+		return btnCreateRequest;
 	}
 	private JPanel getPanelSouth() {
 		if (panelSouth == null) {
