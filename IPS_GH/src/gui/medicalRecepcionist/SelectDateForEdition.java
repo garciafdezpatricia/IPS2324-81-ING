@@ -70,6 +70,7 @@ public class SelectDateForEdition extends JDialog {
 	private static List<Doctor> selectedDoctors;
 	private static String startDate, endDate;
 	private JTextArea textAreaDates;
+	private JButton btnShow;
 
 	/**
 	 * Create the dialog.
@@ -230,9 +231,10 @@ public class SelectDateForEdition extends JDialog {
 	private JPanel getPanelCenterSur() {
 		if (panelCenterSur == null) {
 			panelCenterSur = new JPanel();
-			panelCenterSur.setLayout(new GridLayout(0, 2, 0, 0));
+			panelCenterSur.setLayout(new GridLayout(0, 3, 0, 0));
 			panelCenterSur.add(getBtnPrevious());
 			panelCenterSur.add(getBtnNext());
+			panelCenterSur.add(getBtnShow());
 		}
 		return panelCenterSur;
 	}
@@ -489,13 +491,30 @@ public class SelectDateForEdition extends JDialog {
 		if (textAreaDates == null) {
 			textAreaDates = new JTextArea();
 			textAreaDates.setEditable(false);
-			try {
-				textAreaDates.setText(ConnectionFactory.getFreeHours(selectedDoctors,
-						new java.sql.Date(dateChooser.getDate().getTime())));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+//			try {
+//				textAreaDates.setText(ConnectionFactory.getFreeHours(selectedDoctors,
+//						new java.sql.Date(dateChooser.getDate().getTime())));
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 		}
 		return textAreaDates;
+	}
+	private JButton getBtnShow() {
+		if (btnShow == null) {
+			btnShow = new JButton("Show availability");
+			btnShow.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+						try {
+							textAreaDates.setText(ConnectionFactory.getFreeHours(selectedDoctors,
+									new java.sql.Date(dateChooser.getDate().getTime())));
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+				}
+			});
+		}
+		return btnShow;
 	}
 }
