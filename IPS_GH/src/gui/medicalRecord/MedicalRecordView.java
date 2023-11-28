@@ -127,6 +127,7 @@ public class MedicalRecordView extends JFrame {
 	private JList putPrescriptionList;
 	private JScrollPane scrollPane_7;
 	private JLabel lblNewLabel_12;
+	private Appointment apnmt;
 	/**
 	 * Launch the application.
 	 */
@@ -156,7 +157,7 @@ public class MedicalRecordView extends JFrame {
 				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Medical record");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		setBounds(100, 100, 813, 456);
+		setBounds(100, 100, 864, 456);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -534,7 +535,6 @@ public class MedicalRecordView extends JFrame {
 					if (listapptmnt.getSelectedValuesList().size() > 0) {
 						tabbedPane_1.setVisible(true);
 						// get the appointment
-						Appointment apnmt = null;
 						for (Appointment item : appointments) {
 							if (item.getStartdate() == listapptmnt.getSelectedValue())
 								apnmt = item;
@@ -549,7 +549,6 @@ public class MedicalRecordView extends JFrame {
 						lblPutCheckout.setText(apnmt.getCheckedout());
 						// fill the diagnosis
 						DefaultListModel<String> diagn = new DefaultListModel<String>();
-						String allDiagnosis = "";
 						List<String> result = ConnectionFactory.getDiagnosisFromAppointment(apnmt.getId()); 
 						if (result.size() > 0) {
 							for (String diagnosis : result) {
@@ -557,25 +556,6 @@ public class MedicalRecordView extends JFrame {
 							}
 						}
 						listPutDiagnosis.setModel(diagn);
-						// fill the causes
-						DefaultListModel<String> causesModel = new DefaultListModel<String>();
-						List<String> causes = ConnectionFactory.getCausesFromAppointment(apnmt.getId());
-						for (String item : causes)
-							causesModel.addElement(item);
-						listCausesOfAppointment.setModel(causesModel);
-						// fill the procedures
-						DefaultListModel<String> procModel = new DefaultListModel<String>();
-						List<String> proc = ConnectionFactory.getProceduresFromAppointment(apnmt.getId());
-						for (String item : proc)
-							procModel.addElement(item);
-						proceduresOfAppointmentList.setModel(procModel);
-						// fill the prescriptions
-						DefaultListModel<String> prescriptionsModel = new DefaultListModel<String>();
-						List<String> prescriptions = ConnectionFactory.getPrescriptionsFromAppointment(apnmt.getId());
-						prescriptions.addAll(ConnectionFactory.getVaccinesFromAppointment(apnmt.getId()));
-						for (String item : prescriptions)
-							prescriptionsModel.addElement(item);
-						putPrescriptionList.setModel(prescriptionsModel);
 					}
 					else
 						tabbedPane_1.setVisible(false);
@@ -605,6 +585,38 @@ public class MedicalRecordView extends JFrame {
 			tabbedPane_1.addTab("Procedures", null, getPanel_3(), null);
 			tabbedPane_1.addTab("Prescription", null, getPanel_2(), null);
 			tabbedPane_1.setVisible(false);
+			
+			tabbedPane_1.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					if (apnmt != null) {
+						if (tabbedPane_1.getSelectedIndex() == 1) {
+			   	             // fill the causes
+								DefaultListModel<String> causesModel = new DefaultListModel<String>();
+								List<String> causes = ConnectionFactory.getCausesFromAppointment(apnmt.getId());
+								for (String item : causes)
+									causesModel.addElement(item);
+								listCausesOfAppointment.setModel(causesModel);
+			                }
+			                else if (tabbedPane_1.getSelectedIndex() == 2) {
+								// fill the procedures
+								DefaultListModel<String> procModel = new DefaultListModel<String>();
+								List<String> proc = ConnectionFactory.getProceduresFromAppointment(apnmt.getId());
+								for (String item : proc)
+									procModel.addElement(item);
+								proceduresOfAppointmentList.setModel(procModel);
+			                }
+			                else if (tabbedPane_1.getSelectedIndex() == 3) {
+								// fill the prescriptions
+								DefaultListModel<String> prescriptionsModel = new DefaultListModel<String>();
+								List<String> prescriptions = ConnectionFactory.getPrescriptionsFromAppointment(apnmt.getId());
+								prescriptions.addAll(ConnectionFactory.getVaccinesFromAppointment(apnmt.getId()));
+								for (String item : prescriptions)
+									prescriptionsModel.addElement(item);
+								putPrescriptionList.setModel(prescriptionsModel);
+			                }
+					}
+				}
+			});
 		}
 		return tabbedPane_1;
 	}
@@ -856,7 +868,7 @@ public class MedicalRecordView extends JFrame {
 	private JLabel getLblNewLabel_12() {
 		if (lblNewLabel_12 == null) {
 			lblNewLabel_12 = new JLabel("Prescriptions of the appointment:");
-			lblNewLabel_12.setBounds(10, 11, 174, 14);
+			lblNewLabel_12.setBounds(10, 11, 240, 14);
 		}
 		return lblNewLabel_12;
 	}
