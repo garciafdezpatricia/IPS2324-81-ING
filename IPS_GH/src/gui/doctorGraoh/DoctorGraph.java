@@ -74,24 +74,16 @@ public class DoctorGraph extends JFrame {
 		selected = new ArrayList<>();
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 1204, 1000);
+		setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		getContentPane().add(getPnChart(), BorderLayout.CENTER);
-		getContentPane().add(getPnChart(), BorderLayout.CENTER);
+
 		getContentPane().add(getPanel(), BorderLayout.WEST);
 	}
 
-	 private CategoryDataset createDataset( ) {
-	         
-	      DefaultCategoryDataset dataset = 
-	      new DefaultCategoryDataset( );  
-	      for(var doctor:doctors)
-	    	  dataset.addValue( doctor.amount , doctor.specialization , "Specialization" );        
-	                   
 
-	      return dataset; 
-	   }
 
 	private JPanel getPnChart() {
 		if (pnChart == null) {
