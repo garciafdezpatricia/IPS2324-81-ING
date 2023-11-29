@@ -189,6 +189,8 @@ public class MedicalRecepcionistView extends JFrame {
 
 	private boolean requestedApp = false;
 	private Appointment a;
+	private JButton btnShowAvDoctor;
+	private JButton btnShowAvOffice;
 
 	/**
 	 * Create the frame.
@@ -527,16 +529,16 @@ public class MedicalRecepcionistView extends JFrame {
 									}
 								}
 								getTextAreaDoctorAvailability().removeAll();
-								try {
-									getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(
-											getSelectedDoctors(), new java.sql.Date(dateChooser.getDate().getTime())));
-								} catch (Exception e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
+//								try {
+//									getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(
+//											getSelectedDoctors(), new java.sql.Date(dateChooser.getDate().getTime())));
+//								} catch (Exception e1) {
+//									// TODO Auto-generated catch block
+//									e1.printStackTrace();
+//								}
 
 								getTextAreaOfficeAvailability().removeAll();
-								showFreeHours(dateChooser.getDate());
+//								showFreeHours(dateChooser.getDate());
 
 							}
 							System.out.println("done");
@@ -591,17 +593,17 @@ public class MedicalRecepcionistView extends JFrame {
 						newContactInfo, "Booked");
 			}
 			getTextAreaDoctorAvailability().removeAll();
-			try {
-				getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-						new java.sql.Date(dateChooser.getDate().getTime())));
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+//			try {
+//				getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
+//						new java.sql.Date(dateChooser.getDate().getTime())));
+//			} catch (Exception e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
 
 			getTextAreaOfficeAvailability().removeAll();
-			;
-			showFreeHours(dateChooser.getDate());
+			
+//			showFreeHours(dateChooser.getDate());
 		} else {
 			// El usuario ha cancelado la acción
 			System.out.println("Acción cancelada.");
@@ -734,13 +736,13 @@ public class MedicalRecepcionistView extends JFrame {
 			listDoctor.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
 					getTextAreaDoctorAvailability().removeAll();
-					try {
-						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-								new java.sql.Date(getDateChooser().getDate().getTime())));
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+//					try {
+//						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
+//								new java.sql.Date(getDateChooser().getDate().getTime())));
+//					} catch (Exception e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
 
 					if (!listDoctor.getSelectedValuesList().isEmpty()) {
 						doctorChoosed = true;
@@ -1164,7 +1166,7 @@ public class MedicalRecepcionistView extends JFrame {
 //					getBtnSeeFreeHours().setEnabled(true);
 
 					checkFinishBtnEnabled();
-					showFreeHours(getDateChooser().getDate());
+//					showFreeHours(getDateChooser().getDate());
 				}
 			});
 		}
@@ -1442,6 +1444,7 @@ public class MedicalRecepcionistView extends JFrame {
 			panelDoctorAvailability.setLayout(new BorderLayout(0, 0));
 			panelDoctorAvailability.add(getDateChooser(), BorderLayout.NORTH);
 			panelDoctorAvailability.add(getScrollPaneDoctorAvailability(), BorderLayout.CENTER);
+			panelDoctorAvailability.add(getBtnShowAvDoctor(), BorderLayout.SOUTH);
 		}
 		return panelDoctorAvailability;
 	}
@@ -1463,13 +1466,13 @@ public class MedicalRecepcionistView extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 //					btnNext.setEnabled(true);
 					getTextAreaDoctorAvailability().removeAll();
-					try {
-						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-								new java.sql.Date(getDateChooser().getDate().getTime())));
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+//					try {
+//						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
+//								new java.sql.Date(getDateChooser().getDate().getTime())));
+//					} catch (Exception e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
 				}
 			});
 			dateChooser.setMinSelectableDate(new Date());
@@ -1490,12 +1493,7 @@ public class MedicalRecepcionistView extends JFrame {
 		if (textAreaDoctorAvailability == null) {
 			textAreaDoctorAvailability = new JTextArea();
 			textAreaDoctorAvailability.setEditable(false);
-			try {
-				textAreaDoctorAvailability.setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-						new java.sql.Date(dateChooser.getDate().getTime())));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			
 		}
 		return textAreaDoctorAvailability;
 	}
@@ -1516,6 +1514,7 @@ public class MedicalRecepcionistView extends JFrame {
 			panelPrevAndNext.setLayout(new GridLayout(1, 0, 0, 0));
 			panelPrevAndNext.add(getBtnPrev());
 			panelPrevAndNext.add(getBtnNext());
+			panelPrevAndNext.add(getBtnShowAvOffice());
 		}
 		return panelPrevAndNext;
 	}
@@ -1588,18 +1587,18 @@ public class MedicalRecepcionistView extends JFrame {
 					dateChooser.setDate(newDate);
 					btnPrev.setEnabled(true);
 
-					getTextAreaDoctorAvailability().removeAll();
-					try {
-						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
-								new java.sql.Date(newDate.getTime())));
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+//					getTextAreaDoctorAvailability().removeAll();
+//					try {
+//						getTextAreaDoctorAvailability().setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
+//								new java.sql.Date(newDate.getTime())));
+//					} catch (Exception e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
 
 					getTextAreaOfficeAvailability().removeAll();
-					;
-					showFreeHours(newDate);
+					
+//					showFreeHours(newDate);
 				}
 			});
 		}
@@ -1660,7 +1659,7 @@ public class MedicalRecepcionistView extends JFrame {
 		if (textAreaOfficeAvailability == null) {
 			textAreaOfficeAvailability = new JTextArea();
 			textAreaOfficeAvailability.setEditable(false);
-			showFreeHours(getDateChooser().getDate());
+//			showFreeHours(getDateChooser().getDate());
 
 		}
 		return textAreaOfficeAvailability;
@@ -1793,5 +1792,41 @@ public class MedicalRecepcionistView extends JFrame {
 			lblSelectedSpecialzations = new JLabel("Selected specializations");
 		}
 		return lblSelectedSpecialzations;
+	}
+	private JButton getBtnShowAvDoctor() {
+		if (btnShowAvDoctor == null) {
+			btnShowAvDoctor = new JButton("Show doctor availability");
+			btnShowAvDoctor.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if(getListDoctor_1().getSelectedValuesList().size()>0) {
+						try {
+							textAreaDoctorAvailability.setText(ConnectionFactory.getFreeHours(getSelectedDoctors(),
+									new java.sql.Date(dateChooser.getDate().getTime())));
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						
+					}
+					else {
+						textAreaDoctorAvailability.setText("Select a doctor");
+					}
+						
+				}
+				
+			});
+		}
+		return btnShowAvDoctor;
+	}
+	private JButton getBtnShowAvOffice() {
+		if (btnShowAvOffice == null) {
+			btnShowAvOffice = new JButton("Show office availability");
+			btnShowAvOffice.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					showFreeHours(getDateChooser().getDate());
+				}
+			});
+		}
+		return btnShowAvOffice;
 	}
 }

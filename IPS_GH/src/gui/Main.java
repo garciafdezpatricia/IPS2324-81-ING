@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -21,7 +20,7 @@ import javax.swing.border.EmptyBorder;
 
 import gui.doctor.DoctorIdentificationView;
 import gui.doctor.MenuDoctor;
-import gui.manager.ManagerView;
+import gui.manager.ManagerMenu;
 import gui.medicalRecepcionist.MenuMedicalRecepcionist;
 
 public class Main extends JFrame {
@@ -57,8 +56,8 @@ public class Main extends JFrame {
 	 * Create the frame.
 	 */
 	public Main() {
-		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
+//		setIconImage(
+//				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Main menu");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -151,9 +150,9 @@ public class Main extends JFrame {
 			btnManager = new JButton("Manager");
 			btnManager.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					ManagerView mv;
+					ManagerMenu mv;
 					try {
-						mv = new ManagerView();
+						mv = new ManagerMenu();
 						mv.setVisible(true);
 						mv.setLocationRelativeTo(null);
 

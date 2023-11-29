@@ -1321,6 +1321,7 @@ public class DoctorAppointmentView extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					medicalRecord = new MedicalRecordView(appointment.patientid);
 					medicalRecord.setVisible(true);
+					medicalRecord.setLocationRelativeTo(null);
 				}
 			});
 		}
