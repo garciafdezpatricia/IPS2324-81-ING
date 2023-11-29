@@ -1,14 +1,14 @@
 package gui.medicalRecord;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.GridLayout;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
-import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,36 +20,26 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import com.toedter.calendar.JDateChooser;
 
 import db.Appointment;
 import db.Diagnosis;
 import db.DiagnosisReport;
-import db.MedicalRecord;
 import gui.doctor.DoctorAppointmentView;
 import gui.medicalRecepcionist.MenuMedicalRecepcionist;
-import oracle.sql.DATE;
-import util.AppointmentBLDto;
 import util.ConnectionFactory;
-import util.MedicalRecordBLDto;
-import javax.swing.JSplitPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import java.awt.CardLayout;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import java.awt.Font;
-import javax.swing.ListSelectionModel;
-import java.awt.Dimension;
-import javax.swing.ScrollPaneConstants;
 
 public class MedicalRecordView extends JFrame {
 
@@ -128,6 +118,14 @@ public class MedicalRecordView extends JFrame {
 	private JScrollPane scrollPane_7;
 	private JLabel lblNewLabel_12;
 	private Appointment apnmt;
+	private JPanel pnFilter;
+	private JLabel lblStartDate;
+	private JDateChooser dcStart;
+	private JDateChooser dcEnd;
+	private JLabel lblEnd;
+	private JButton btnShow;
+	private JButton btnReset;
+
 	/**
 	 * Launch the application.
 	 */
@@ -152,7 +150,7 @@ public class MedicalRecordView extends JFrame {
 		this.patientID = BigInteger.valueOf(patientId);
 		name = ConnectionFactory.getPatientInformation(patientId);
 		appointments = convertToList(ConnectionFactory.getAppointmentsByPatientID(BigInteger.valueOf(patientId)));
-	
+
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Medical record");
@@ -166,17 +164,17 @@ public class MedicalRecordView extends JFrame {
 		contentPane.add(getPnPatient(), BorderLayout.NORTH);
 		contentPane.add(getTabbedPane_1(), BorderLayout.CENTER);
 	}
-	
+
 	public List<Appointment> convertToList(DefaultListModel<Appointment> defaultListModel) {
-        List<Appointment> appointmentList = new ArrayList<Appointment>();
+		List<Appointment> appointmentList = new ArrayList<Appointment>();
 
-        // Recorre los elementos en el DefaultListModel y los agrega a la lista
-        for (int i = 0; i < defaultListModel.size(); i++) {
-            appointmentList.add(defaultListModel.get(i));
-        }
+		// Recorre los elementos en el DefaultListModel y los agrega a la lista
+		for (int i = 0; i < defaultListModel.size(); i++) {
+			appointmentList.add(defaultListModel.get(i));
+		}
 
-        return appointmentList;
-    }
+		return appointmentList;
+	}
 
 	private JPanel getPnButtons() {
 		if (pnButtons == null) {
@@ -214,15 +212,15 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblName;
 	}
-	
+
 	private JTabbedPane getTabbedPane_1() {
 		if (tabbedPane == null) {
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			tabbedPane.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
-	                if (tabbedPane.getSelectedIndex() == 1) {
-	                    cargarDiagnosticosPaciente();
-	                }
+					if (tabbedPane.getSelectedIndex() == 1) {
+						cargarDiagnosticosPaciente();
+					}
 				}
 			});
 			tabbedPane.addTab("Medical History", null, getPnHistory(), null);
@@ -230,31 +228,33 @@ public class MedicalRecordView extends JFrame {
 		}
 		return tabbedPane;
 	}
-	
+
 	private void cargarDiagnosticosPaciente() {
 		int selIndex = list.getSelectedIndex();
 		// Carga los diagnosticos desde la base de datos
-        List<Diagnosis> allDiagnosis = ConnectionFactory.getDiagnosisOfPatient(patientID);
-        DefaultListModel<Diagnosis> model = new DefaultListModel<Diagnosis>();
-        if (allDiagnosis.size()>0) {
-        	// construct each diagnosis
-        	for (Diagnosis item : allDiagnosis) {
-        		model.addElement(item);
-        	}
-        }
-        list.setModel(model);
-        list.setSelectedIndex(selIndex);
+		List<Diagnosis> allDiagnosis = ConnectionFactory.getDiagnosisOfPatient(patientID);
+		DefaultListModel<Diagnosis> model = new DefaultListModel<Diagnosis>();
+		if (allDiagnosis.size() > 0) {
+			// construct each diagnosis
+			for (Diagnosis item : allDiagnosis) {
+				model.addElement(item);
+			}
+		}
+		list.setModel(model);
+		list.setSelectedIndex(selIndex);
 	}
-	
+
 	private JPanel getPnDiagnosis() {
 		if (pnDiagnosis == null) {
 			pnDiagnosis = new JPanel();
 			pnDiagnosis.setLayout(new BorderLayout(0, 0));
 			pnDiagnosis.add(getPnDiagnosisList(), BorderLayout.WEST);
 			pnDiagnosis.add(getPnContent(), BorderLayout.CENTER);
+			pnDiagnosis.add(getPnFilter(), BorderLayout.NORTH);
 		}
 		return pnDiagnosis;
 	}
+
 	private JPanel getPnDiagnosisList() {
 		if (pnDiagnosisList == null) {
 			pnDiagnosisList = new JPanel();
@@ -265,6 +265,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return pnDiagnosisList;
 	}
+
 	private JList getList() {
 		if (list == null) {
 			list = new JList();
@@ -283,7 +284,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return list;
 	}
-	
+
 	private void cargarReports(Diagnosis diagnosis) {
 		DefaultListModel<DiagnosisReport> historial = new DefaultListModel<DiagnosisReport>();
 		List<DiagnosisReport> reports = ConnectionFactory.getReportFromDiagnosis(diagnosis.id);
@@ -291,7 +292,7 @@ public class MedicalRecordView extends JFrame {
 			historial.addElement(item);
 		listHistorial.setModel(historial);
 	}
-	
+
 	private JScrollPane getScrollPane() {
 		if (scrollPane == null) {
 			scrollPane = new JScrollPane();
@@ -300,6 +301,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return scrollPane;
 	}
+
 	private JPanel getPnContent() {
 		if (pnContent == null) {
 			pnContent = new JPanel();
@@ -319,6 +321,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return pnContent;
 	}
+
 	private JLabel getLblInitialDate() {
 		if (lblInitialDate == null) {
 			lblInitialDate = new JLabel("Initial date:");
@@ -327,12 +330,14 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblInitialDate;
 	}
+
 	private JList getListHistorial() {
 		if (listHistorial == null) {
 			listHistorial = new JList();
 		}
 		return listHistorial;
 	}
+
 	private JScrollPane getScrollPane_1() {
 		if (scrollPane_1 == null) {
 			scrollPane_1 = new JScrollPane();
@@ -341,6 +346,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return scrollPane_1;
 	}
+
 	private JLabel getLblHistory() {
 		if (lblHistory == null) {
 			lblHistory = new JLabel("History:");
@@ -348,6 +354,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblHistory;
 	}
+
 	private JLabel getLblDoctor() {
 		if (lblNewLabel_1 == null) {
 			lblNewLabel_1 = new JLabel("New label");
@@ -355,6 +362,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_1;
 	}
+
 	private JLabel getLblNewLabel_2() {
 		if (lblNewLabel_2 == null) {
 			lblNewLabel_2 = new JLabel("Doctor:");
@@ -363,6 +371,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_2;
 	}
+
 	private JLabel getLblPutDoctor() {
 		if (lblPutDoctor == null) {
 			lblPutDoctor = new JLabel("");
@@ -370,6 +379,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblPutDoctor;
 	}
+
 	private JLabel getLblPutDate() {
 		if (lblPutDate == null) {
 			lblPutDate = new JLabel("");
@@ -377,6 +387,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblPutDate;
 	}
+
 	private JPanel getPnHistory() {
 		if (pnHistory == null) {
 			pnHistory = new JPanel();
@@ -386,12 +397,14 @@ public class MedicalRecordView extends JFrame {
 		}
 		return pnHistory;
 	}
+
 	private JLabel getLblDiagnosisHistory() {
 		if (lblDiagnosisHistory == null) {
 			lblDiagnosisHistory = new JLabel("Diagnosis:");
 		}
 		return lblDiagnosisHistory;
 	}
+
 	private JButton getBtnAddReport() {
 		if (btnAddReport == null) {
 			btnAddReport = new JButton("Add report");
@@ -403,16 +416,16 @@ public class MedicalRecordView extends JFrame {
 							// TODO: poner el id del doctor que este logged in
 							BigInteger doctorId = new BigInteger("4");
 							Diagnosis selected = (Diagnosis) list.getSelectedValue();
-							String currentDate = LocalDate.now().toString(); 
+							String currentDate = LocalDate.now().toString();
 							ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);
 							cargarReports(selected);
+						} else {
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "No report to add!", "Warning",
+									JOptionPane.INFORMATION_MESSAGE);
 						}
-						else {
-							JOptionPane.showMessageDialog(MedicalRecordView.this, "No report to add!", "Warning", JOptionPane.INFORMATION_MESSAGE);
-						}
-					}
-					else {
-						JOptionPane.showMessageDialog(MedicalRecordView.this, "No report to add!", "Warning", JOptionPane.INFORMATION_MESSAGE);
+					} else {
+						JOptionPane.showMessageDialog(MedicalRecordView.this, "No report to add!", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
 					}
 				}
 			});
@@ -420,6 +433,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return btnAddReport;
 	}
+
 	private JButton getBtnCloseProcedure() {
 		if (btnCloseProcedure == null) {
 			btnCloseProcedure = new JButton("Close");
@@ -435,27 +449,29 @@ public class MedicalRecordView extends JFrame {
 								// TODO: poner el id del doctor que este logged in
 								BigInteger doctorId = new BigInteger("4");
 								Diagnosis selected = (Diagnosis) list.getSelectedValue();
-								String currentDate = LocalDate.now().toString(); 
+								String currentDate = LocalDate.now().toString();
 								ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);
 								cargarReports(selected);
 								cargarDiagnosticosPaciente();
-								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis closed", "Success", JOptionPane.INFORMATION_MESSAGE);
-							}
-							else
-								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis could not be closed", "Error", JOptionPane.INFORMATION_MESSAGE);
+								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis closed", "Success",
+										JOptionPane.INFORMATION_MESSAGE);
+							} else
+								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis could not be closed",
+										"Error", JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "This diagnosis is already closed!",
+									"Information", JOptionPane.INFORMATION_MESSAGE);
 						}
-						else {
-							JOptionPane.showMessageDialog(MedicalRecordView.this, "This diagnosis is already closed!", "Information", JOptionPane.INFORMATION_MESSAGE);
-						}
-					}
-					else {
-						JOptionPane.showMessageDialog(MedicalRecordView.this, "Select a diagnosis first!", "Warning", JOptionPane.INFORMATION_MESSAGE);
+					} else {
+						JOptionPane.showMessageDialog(MedicalRecordView.this, "Select a diagnosis first!", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
 					}
 				}
 			});
 		}
 		return btnCloseProcedure;
 	}
+
 	private JButton getBtnOpenDiagnosis() {
 		if (btnOpenDiagnosis == null) {
 			btnOpenDiagnosis = new JButton("Open");
@@ -470,21 +486,22 @@ public class MedicalRecordView extends JFrame {
 								// TODO: poner el id del doctor que este logged in
 								BigInteger doctorId = new BigInteger("4");
 								Diagnosis selected = (Diagnosis) list.getSelectedValue();
-								String currentDate = LocalDate.now().toString(); 
+								String currentDate = LocalDate.now().toString();
 								ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);
 								cargarReports(selected);
 								cargarDiagnosticosPaciente();
-								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis opened", "Success", JOptionPane.INFORMATION_MESSAGE);
-							}
-							else
-								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis could not be opened", "Error", JOptionPane.INFORMATION_MESSAGE);
+								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis opened", "Success",
+										JOptionPane.INFORMATION_MESSAGE);
+							} else
+								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis could not be opened",
+										"Error", JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							JOptionPane.showMessageDialog(MedicalRecordView.this, "This diagnosis is already opened!",
+									"Information", JOptionPane.INFORMATION_MESSAGE);
 						}
-						else {
-							JOptionPane.showMessageDialog(MedicalRecordView.this, "This diagnosis is already opened!", "Information", JOptionPane.INFORMATION_MESSAGE);
-						}
-					}
-					else {
-						JOptionPane.showMessageDialog(MedicalRecordView.this, "Select a diagnosis first!", "Warning", JOptionPane.INFORMATION_MESSAGE);
+					} else {
+						JOptionPane.showMessageDialog(MedicalRecordView.this, "Select a diagnosis first!", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
 					}
 				}
 			});
@@ -492,6 +509,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return btnOpenDiagnosis;
 	}
+
 	private JLabel getLblDetailHistory() {
 		if (lblDetailHistory == null) {
 			lblDetailHistory = new JLabel("Report:");
@@ -499,12 +517,14 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblDetailHistory;
 	}
+
 	private JTextArea getTxtAreaReport() {
 		if (txtAreaReport == null) {
 			txtAreaReport = new JTextArea();
 		}
 		return txtAreaReport;
 	}
+
 	private JScrollPane getScrollPane_2() {
 		if (scrollPane_2 == null) {
 			scrollPane_2 = new JScrollPane();
@@ -513,6 +533,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return scrollPane_2;
 	}
+
 	private JPanel getPnListAppointment() {
 		if (pnListAppointment == null) {
 			pnListAppointment = new JPanel();
@@ -522,6 +543,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return pnListAppointment;
 	}
+
 	private JList getListapptmnt() {
 		if (listapptmnt == null) {
 			DefaultListModel<String> model = new DefaultListModel<String>();
@@ -543,27 +565,27 @@ public class MedicalRecordView extends JFrame {
 						lblPutDoctorAppointment.setText(ConnectionFactory.getDoctorNameSurname(apnmt.getDoctorid()));
 						lblPutDateAppointment.setText(apnmt.getStartdate());
 						lblPutUrgencyAppointment.setText(apnmt.getUrgency() == 1 ? "Urgent" : "Not urgent");
-						lblPutAttendedAppointment.setText(apnmt.getAttended() == 1 ? "Attended" :
-							apnmt.getAttended() == 2 ? "Not registered" : "Not attended");
+						lblPutAttendedAppointment.setText(apnmt.getAttended() == 1 ? "Attended"
+								: apnmt.getAttended() == 2 ? "Not registered" : "Not attended");
 						lblPutCheckin.setText(apnmt.getCheckedin());
 						lblPutCheckout.setText(apnmt.getCheckedout());
 						// fill the diagnosis
 						DefaultListModel<String> diagn = new DefaultListModel<String>();
-						List<String> result = ConnectionFactory.getDiagnosisFromAppointment(apnmt.getId()); 
+						List<String> result = ConnectionFactory.getDiagnosisFromAppointment(apnmt.getId());
 						if (result.size() > 0) {
 							for (String diagnosis : result) {
 								diagn.addElement(diagnosis);
 							}
 						}
 						listPutDiagnosis.setModel(diagn);
-					}
-					else
+					} else
 						tabbedPane_1.setVisible(false);
 				}
 			});
 		}
 		return listapptmnt;
 	}
+
 	private JScrollPane getScrollPane_3() {
 		if (scrollPane_3 == null) {
 			scrollPane_3 = new JScrollPane();
@@ -571,12 +593,14 @@ public class MedicalRecordView extends JFrame {
 		}
 		return scrollPane_3;
 	}
+
 	private JLabel getLblApptmnt() {
 		if (lblApptmnt == null) {
 			lblApptmnt = new JLabel("Appointment:");
 		}
 		return lblApptmnt;
 	}
+
 	private JTabbedPane getTabbedPane_1_1() {
 		if (tabbedPane_1 == null) {
 			tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
@@ -585,41 +609,41 @@ public class MedicalRecordView extends JFrame {
 			tabbedPane_1.addTab("Procedures", null, getPanel_3(), null);
 			tabbedPane_1.addTab("Prescription", null, getPanel_2(), null);
 			tabbedPane_1.setVisible(false);
-			
+
 			tabbedPane_1.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (apnmt != null) {
 						if (tabbedPane_1.getSelectedIndex() == 1) {
-			   	             // fill the causes
-								DefaultListModel<String> causesModel = new DefaultListModel<String>();
-								List<String> causes = ConnectionFactory.getCausesFromAppointment(apnmt.getId());
-								for (String item : causes)
-									causesModel.addElement(item);
-								listCausesOfAppointment.setModel(causesModel);
-			                }
-			                else if (tabbedPane_1.getSelectedIndex() == 2) {
-								// fill the procedures
-								DefaultListModel<String> procModel = new DefaultListModel<String>();
-								List<String> proc = ConnectionFactory.getProceduresFromAppointment(apnmt.getId());
-								for (String item : proc)
-									procModel.addElement(item);
-								proceduresOfAppointmentList.setModel(procModel);
-			                }
-			                else if (tabbedPane_1.getSelectedIndex() == 3) {
-								// fill the prescriptions
-								DefaultListModel<String> prescriptionsModel = new DefaultListModel<String>();
-								List<String> prescriptions = ConnectionFactory.getPrescriptionsFromAppointment(apnmt.getId());
-								prescriptions.addAll(ConnectionFactory.getVaccinesFromAppointment(apnmt.getId()));
-								for (String item : prescriptions)
-									prescriptionsModel.addElement(item);
-								putPrescriptionList.setModel(prescriptionsModel);
-			                }
+							// fill the causes
+							DefaultListModel<String> causesModel = new DefaultListModel<String>();
+							List<String> causes = ConnectionFactory.getCausesFromAppointment(apnmt.getId());
+							for (String item : causes)
+								causesModel.addElement(item);
+							listCausesOfAppointment.setModel(causesModel);
+						} else if (tabbedPane_1.getSelectedIndex() == 2) {
+							// fill the procedures
+							DefaultListModel<String> procModel = new DefaultListModel<String>();
+							List<String> proc = ConnectionFactory.getProceduresFromAppointment(apnmt.getId());
+							for (String item : proc)
+								procModel.addElement(item);
+							proceduresOfAppointmentList.setModel(procModel);
+						} else if (tabbedPane_1.getSelectedIndex() == 3) {
+							// fill the prescriptions
+							DefaultListModel<String> prescriptionsModel = new DefaultListModel<String>();
+							List<String> prescriptions = ConnectionFactory
+									.getPrescriptionsFromAppointment(apnmt.getId());
+							prescriptions.addAll(ConnectionFactory.getVaccinesFromAppointment(apnmt.getId()));
+							for (String item : prescriptions)
+								prescriptionsModel.addElement(item);
+							putPrescriptionList.setModel(prescriptionsModel);
+						}
 					}
 				}
 			});
 		}
 		return tabbedPane_1;
 	}
+
 	private JPanel getPanel() {
 		if (panel == null) {
 			panel = new JPanel();
@@ -641,6 +665,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return panel;
 	}
+
 	private JPanel getPanel_1() {
 		if (panel_1 == null) {
 			panel_1 = new JPanel();
@@ -650,6 +675,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return panel_1;
 	}
+
 	private JPanel getPanel_2() {
 		if (panel_2 == null) {
 			panel_2 = new JPanel();
@@ -659,6 +685,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return panel_2;
 	}
+
 	private JPanel getPanel_3() {
 		if (panel_3 == null) {
 			panel_3 = new JPanel();
@@ -668,6 +695,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return panel_3;
 	}
+
 	private JLabel getLblNewLabel_3() {
 		if (lblNewLabel_3 == null) {
 			lblNewLabel_3 = new JLabel("Doctor:");
@@ -676,6 +704,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_3;
 	}
+
 	private JLabel getLblPutDoctorAppointment() {
 		if (lblPutDoctorAppointment == null) {
 			lblPutDoctorAppointment = new JLabel("");
@@ -683,6 +712,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblPutDoctorAppointment;
 	}
+
 	private JLabel getLblNewLabel_4() {
 		if (lblNewLabel_4 == null) {
 			lblNewLabel_4 = new JLabel("Date:");
@@ -691,6 +721,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_4;
 	}
+
 	private JLabel getLblPutDateAppointment() {
 		if (lblPutDateAppointment == null) {
 			lblPutDateAppointment = new JLabel("");
@@ -698,6 +729,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblPutDateAppointment;
 	}
+
 	private JLabel getLblNewLabel_5() {
 		if (lblNewLabel_5 == null) {
 			lblNewLabel_5 = new JLabel("Urgency:");
@@ -706,6 +738,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_5;
 	}
+
 	private JLabel getLblPutUrgencyAppointment() {
 		if (lblPutUrgencyAppointment == null) {
 			lblPutUrgencyAppointment = new JLabel("");
@@ -713,6 +746,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblPutUrgencyAppointment;
 	}
+
 	private JLabel getLblNewLabel_6() {
 		if (lblNewLabel_6 == null) {
 			lblNewLabel_6 = new JLabel("Attended:");
@@ -721,6 +755,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_6;
 	}
+
 	private JLabel getLblPutAttendedAppointment() {
 		if (lblPutAttendedAppointment == null) {
 			lblPutAttendedAppointment = new JLabel("");
@@ -728,6 +763,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblPutAttendedAppointment;
 	}
+
 	private JLabel getLblNewLabel_7() {
 		if (lblNewLabel_7 == null) {
 			lblNewLabel_7 = new JLabel("Check-in:");
@@ -736,6 +772,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_7;
 	}
+
 	private JLabel getLblNewLabel_8() {
 		if (lblNewLabel_8 == null) {
 			lblNewLabel_8 = new JLabel("Check-out:");
@@ -744,6 +781,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_8;
 	}
+
 	private JLabel getLblPutCheckin() {
 		if (lblPutCheckin == null) {
 			lblPutCheckin = new JLabel("");
@@ -751,6 +789,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblPutCheckin;
 	}
+
 	private JLabel getLblPutCheckout() {
 		if (lblPutCheckout == null) {
 			lblPutCheckout = new JLabel("");
@@ -758,6 +797,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblPutCheckout;
 	}
+
 	private JLabel getLblNewLabel_9() {
 		if (lblNewLabel_9 == null) {
 			lblNewLabel_9 = new JLabel("Diagnosis:");
@@ -766,12 +806,14 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_9;
 	}
+
 	private JList getListPutDiagnosis() {
 		if (listPutDiagnosis == null) {
 			listPutDiagnosis = new JList();
 		}
 		return listPutDiagnosis;
 	}
+
 	private JScrollPane getScrollPane_4() {
 		if (scrollPane_4 == null) {
 			scrollPane_4 = new JScrollPane();
@@ -780,6 +822,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return scrollPane_4;
 	}
+
 	private JLabel getLblNewLabel_10() {
 		if (lblNewLabel_10 == null) {
 			lblNewLabel_10 = new JLabel("Causes of the appointment:");
@@ -787,12 +830,14 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_10;
 	}
+
 	private JList getListCausesOfAppointment() {
 		if (listCausesOfAppointment == null) {
 			listCausesOfAppointment = new JList();
 		}
 		return listCausesOfAppointment;
 	}
+
 	private JScrollPane getScrollPane_5() {
 		if (scrollPane_5 == null) {
 			scrollPane_5 = new JScrollPane();
@@ -801,6 +846,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return scrollPane_5;
 	}
+
 	private JLabel getLblNewLabel_11() {
 		if (lblNewLabel_11 == null) {
 			lblNewLabel_11 = new JLabel("Procedures of the appointment:");
@@ -808,12 +854,14 @@ public class MedicalRecordView extends JFrame {
 		}
 		return lblNewLabel_11;
 	}
+
 	private JList getProceduresOfAppointmentList() {
 		if (proceduresOfAppointmentList == null) {
 			proceduresOfAppointmentList = new JList();
 		}
 		return proceduresOfAppointmentList;
 	}
+
 	private JScrollPane getScrollPane_6() {
 		if (scrollPane_6 == null) {
 			scrollPane_6 = new JScrollPane();
@@ -822,6 +870,7 @@ public class MedicalRecordView extends JFrame {
 		}
 		return scrollPane_6;
 	}
+
 	private JButton getBtnNewButton() {
 		if (btnNewButton == null) {
 			btnNewButton = new JButton("Don't track");
@@ -832,18 +881,20 @@ public class MedicalRecordView extends JFrame {
 							selected.status = 0;
 							boolean result = ConnectionFactory.updateDiagnosis(selected);
 							if (result) {
-								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis untracked", "Success", JOptionPane.INFORMATION_MESSAGE);
+								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis untracked", "Success",
+										JOptionPane.INFORMATION_MESSAGE);
 								cargarDiagnosticosPaciente();
-							}
-							else
-								JOptionPane.showMessageDialog(MedicalRecordView.this, "Diagnosis could not be untracked", "Error", JOptionPane.INFORMATION_MESSAGE);
+							} else
+								JOptionPane.showMessageDialog(MedicalRecordView.this,
+										"Diagnosis could not be untracked", "Error", JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							JOptionPane.showMessageDialog(MedicalRecordView.this,
+									"This diagnosis is already untracked!", "Information",
+									JOptionPane.INFORMATION_MESSAGE);
 						}
-						else {
-							JOptionPane.showMessageDialog(MedicalRecordView.this, "This diagnosis is already untracked!", "Information", JOptionPane.INFORMATION_MESSAGE);
-						}
-					}
-					else {
-						JOptionPane.showMessageDialog(MedicalRecordView.this, "Select a diagnosis first!", "Warning", JOptionPane.INFORMATION_MESSAGE);
+					} else {
+						JOptionPane.showMessageDialog(MedicalRecordView.this, "Select a diagnosis first!", "Warning",
+								JOptionPane.INFORMATION_MESSAGE);
 					}
 				}
 			});
@@ -851,12 +902,14 @@ public class MedicalRecordView extends JFrame {
 		}
 		return btnNewButton;
 	}
+
 	private JList getPutPrescriptionList() {
 		if (putPrescriptionList == null) {
 			putPrescriptionList = new JList();
 		}
 		return putPrescriptionList;
 	}
+
 	private JScrollPane getScrollPane_7() {
 		if (scrollPane_7 == null) {
 			scrollPane_7 = new JScrollPane();
@@ -865,11 +918,115 @@ public class MedicalRecordView extends JFrame {
 		}
 		return scrollPane_7;
 	}
+
 	private JLabel getLblNewLabel_12() {
 		if (lblNewLabel_12 == null) {
 			lblNewLabel_12 = new JLabel("Prescriptions of the appointment:");
 			lblNewLabel_12.setBounds(10, 11, 240, 14);
 		}
 		return lblNewLabel_12;
+	}
+
+	private JPanel getPnFilter() {
+		if (pnFilter == null) {
+			pnFilter = new JPanel();
+			pnFilter.add(getLblStartDate());
+			pnFilter.add(getDcStart());
+			pnFilter.add(getLblEnd());
+			pnFilter.add(getDcEnd());
+			pnFilter.add(getBtnShow());
+			pnFilter.add(getBtnReset());
+		}
+		return pnFilter;
+	}
+
+	private JLabel getLblStartDate() {
+		if (lblStartDate == null) {
+			lblStartDate = new JLabel("Start Date");
+		}
+		return lblStartDate;
+	}
+
+	private JDateChooser getDcStart() {
+		if (dcStart == null) {
+			dcStart = new JDateChooser();
+		}
+		return dcStart;
+	}
+
+	private JDateChooser getDcEnd() {
+		if (dcEnd == null) {
+			dcEnd = new JDateChooser();
+		}
+		return dcEnd;
+	}
+
+	private JLabel getLblEnd() {
+		if (lblEnd == null) {
+			lblEnd = new JLabel("End Date");
+		}
+		return lblEnd;
+	}
+
+	private JButton getBtnShow() {
+		if (btnShow == null) {
+			btnShow = new JButton("Show");
+			btnShow.addActionListener(new ActionListener() {
+			
+
+				public void actionPerformed(ActionEvent e) {
+					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+
+					int selIndex = list.getSelectedIndex();
+					// Carga los diagnosticos desde la base de datos
+					List<Diagnosis> allDiagnosis = ConnectionFactory.getDiagnosisOfPatient(patientID);
+					
+					DefaultListModel<Diagnosis> model = new DefaultListModel<Diagnosis>();
+					if (allDiagnosis.size() > 0) {
+						// construct each diagnosis
+						try {
+						for (Diagnosis item : allDiagnosis) {
+							if (formatter.parse(item.date).after(getDcStart().getDate())
+									&& formatter.parse(item.date).before(getDcEnd().getDate()))
+								model.addElement(item);
+						}
+					}catch(Exception err) {
+						err.printStackTrace();
+					}
+					}
+					list.setModel(model);
+					list.setSelectedIndex(selIndex);
+				}
+			});
+		}
+		return btnShow;
+	}
+
+	private JButton getBtnReset() {
+		if (btnReset == null) {
+			btnReset = new JButton("Reset");
+			btnReset.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+
+					int selIndex = list.getSelectedIndex();
+					// Carga los diagnosticos desde la base de datos
+
+					List<Diagnosis> allDiagnosis = ConnectionFactory.getDiagnosisOfPatient(patientID);
+
+					DefaultListModel<Diagnosis> model = new DefaultListModel<Diagnosis>();
+					if (allDiagnosis.size() > 0) {
+						// construct each diagnosis
+						for (Diagnosis item : allDiagnosis) {
+							model.addElement(item);
+						}
+						System.out.println(model);
+					}
+					list.setModel(model);
+					list.setSelectedIndex(selIndex);
+				}
+			});
+		}
+		return btnReset;
 	}
 }
