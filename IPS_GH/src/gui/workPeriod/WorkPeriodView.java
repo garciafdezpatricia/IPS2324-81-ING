@@ -175,7 +175,6 @@ public class WorkPeriodView extends JFrame {
 
 			ConnectionFactory.createWorkPeriod(wp.getId(), wp.getStartDate(), wp.getEndDate(), wp.getId_doctor());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -210,7 +209,6 @@ public class WorkPeriodView extends JFrame {
 				aux.add(monday);
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -228,7 +226,6 @@ public class WorkPeriodView extends JFrame {
 				aux.add(tuesday);
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -246,7 +243,6 @@ public class WorkPeriodView extends JFrame {
 				aux.add(wednesday);
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -264,7 +260,6 @@ public class WorkPeriodView extends JFrame {
 				aux.add(thursday);
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -282,7 +277,6 @@ public class WorkPeriodView extends JFrame {
 				aux.add(friday);
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -300,7 +294,6 @@ public class WorkPeriodView extends JFrame {
 				aux.add(saturday);
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -318,7 +311,6 @@ public class WorkPeriodView extends JFrame {
 				aux.add(sunday);
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -328,7 +320,7 @@ public class WorkPeriodView extends JFrame {
 	/**
 	 * public WorkPeriod(int id, Date startDate, Date endDate, int id_doctor)
 	 */
-	private BigInteger createWorkPeriod() {
+	private void createWorkPeriod() {
 		// ID
 		BigInteger id = generateID();
 
@@ -361,13 +353,13 @@ public class WorkPeriodView extends JFrame {
 		}
 
 		// id_doctor
-		BigInteger id_doctor = iw.getSelectedDoctor().getId();
-
-		if (startSQL != null && endSQL != null) {
-			wp = new WorkPeriod(id, startSQL, endSQL, id_doctor);
+		// TODOOOOOOOOOOOOOOOOOOOOOOO
+		for (int i = 0; i < iw.getSelectedDoctor().size(); i++) {
+			BigInteger id_doctor = iw.getSelectedDoctor().get(i).getId();
+			if (startSQL != null && endSQL != null) {
+				wp = new WorkPeriod(id, startSQL, endSQL, id_doctor);
+			}
 		}
-
-		return id;
 	}
 
 	public static BigInteger generateID() {

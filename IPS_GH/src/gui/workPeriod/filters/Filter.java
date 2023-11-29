@@ -12,6 +12,5 @@ public interface Filter {
 	DefaultListModel<Doctor> filter();
 	
 	
-	
 
 }

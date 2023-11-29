@@ -2779,14 +2779,23 @@ public class ConnectionFactory {
 	}
 
 	public static Doctor doctorFromNameAndSurname(String ns) throws Exception {
-		for (int i = 0; i < getDoctors().size(); i++) {
-			String a = getDoctors().get(i).getName().toLowerCase() + " "
-					+ getDoctors().get(i).getSurname().toLowerCase();
-			if (a.toLowerCase().equals(ns.toLowerCase())) {
-//				System.out.println(a);
-				return getDoctors().get(i);
+		Doctor d = null;
+		String obtained = ns.replaceAll("\\s", "");
+		DefaultListModel<Doctor> list = getDoctors();
+		
+		for (int i = 0; i < list.size(); i++) {			
+			d = list.get(i);
+			String a = d.getName() + " "
+					+ d.getSurname();
+			
+			String expected = a.replaceAll("\\s", "");
+						
+			if (expected.equalsIgnoreCase(obtained)) {
+				System.out.println("!!!!!!!!!!!!! FOUND !!!!!!!!!!!!!!!");
+				return d;
 			}
 		}
+		System.out.println("----------- NOT FOUND -----------");
 		return null;
 	}
 

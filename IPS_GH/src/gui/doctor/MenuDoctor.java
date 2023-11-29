@@ -34,6 +34,8 @@ public class MenuDoctor extends JFrame {
 	private JButton btnCreateRequest;
 	private JPanel panelSouth;
 	private JButton btnCancel;
+	
+	private String docID;
 
 	/**
 	 * Launch the application.
@@ -58,6 +60,37 @@ public class MenuDoctor extends JFrame {
 	 * Create the frame.
 	 */
 	public MenuDoctor() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
+		setTitle("Doctor menu");
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
+		setContentPane(contentPane);
+		contentPane.setLayout(new BorderLayout(0, 0));
+		contentPane.add(getPanelNorth(), BorderLayout.NORTH);
+		contentPane.add(getPanelCenter(), BorderLayout.CENTER);
+		contentPane.add(getPanelSouth(), BorderLayout.SOUTH);
+	}
+	
+	/**
+	 * Create the frame.
+	 */
+	public MenuDoctor(String id) {
+		this.docID = id;
+		
 		setIconImage(Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Doctor menu");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -135,11 +168,11 @@ public class MenuDoctor extends JFrame {
 			btnCreateRequest.setFont(new Font("Tahoma", Font.PLAIN, 12));
 			btnCreateRequest.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					DoctorIdentificationView div;
+					CreateRequestAppointmentView crav;
 					try {
-						div = new DoctorIdentificationView();
-						div.setVisible(true);
-						div.setLocationRelativeTo(null);
+						crav = new CreateRequestAppointmentView(docID);
+						crav.setVisible(true);
+						crav.setLocationRelativeTo(null);
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}

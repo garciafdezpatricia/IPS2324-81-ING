@@ -114,9 +114,16 @@ public class DoctorIdentificationView extends JDialog {
 	 */
 	private void checkDoctor(String id) throws Exception {
 		if (ConnectionFactory.checkIfDoctorIDExists(id) != -1) {
-			crav = new CreateRequestAppointmentView(id);
-			crav.setVisible(true);
-			crav.setLocationRelativeTo(null);
+			MenuDoctor md;
+			try {
+				md = new MenuDoctor(id);
+				md.setVisible(true);
+				md.setLocationRelativeTo(null);
+
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		else {
 			JOptionPane.showMessageDialog(DoctorIdentificationView.this,

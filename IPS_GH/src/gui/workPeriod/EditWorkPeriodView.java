@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -40,6 +41,7 @@ import gui.workPeriod.filters.FilterPersonalID;
 import gui.workPeriod.filters.FilterSpecialization;
 import gui.workPeriod.filters.FilterSurname;
 import util.ConnectionFactory;
+import javax.swing.BoxLayout;
 
 public class EditWorkPeriodView extends JFrame {
 
@@ -81,10 +83,6 @@ public class EditWorkPeriodView extends JFrame {
 	private JLabel lblNewLastDay;
 	private JTextField txtNewLastDay;
 	private JPanel panel_south;
-	private JButton btnSaveChange;
-	private JButton btnAddJustification;
-	private JLabel lblNewLabel;
-	private JLabel lblNewLabel_3;
 	private JPanel panel_center_north_unique_center;
 	private JLabel lblSelectFIlter;
 	private JComboBox<String> comboBoxFilter;
@@ -107,6 +105,17 @@ public class EditWorkPeriodView extends JFrame {
 	private JustificationView jv;
 	private WorkPeriod wp;
 	private BigInteger wpID;
+	private JPanel panel_south_south;
+	private JLabel lblNewLabel;
+	private JLabel lblNewLabel_1;
+	private JButton btnAddJustification;
+	private JButton btnSaveChange;
+	private JPanel panel_south_center;
+	private JLabel lblNewLabel_3;
+	private JLabel lblNewLabel_4;
+	private JComboBox<String> comboBoxWorkperiods;
+	
+	List<WorkPeriod> workperiods;
 
 	/**
 	 * Launch the application.
@@ -459,6 +468,7 @@ public class EditWorkPeriodView extends JFrame {
 					TitledBorder.TOP, null, null));
 			panel_center_north_unique.setLayout(new BorderLayout(0, 0));
 			panel_center_north_unique.add(getPanel_center_north_unique_center(), BorderLayout.NORTH);
+			panel_center_north_unique.add(getComboBoxWorkperiods(), BorderLayout.SOUTH);
 		}
 		return panel_center_north_unique;
 	}
@@ -532,31 +542,11 @@ public class EditWorkPeriodView extends JFrame {
 	private JPanel getPanel_south() {
 		if (panel_south == null) {
 			panel_south = new JPanel();
-			panel_south.setLayout(new GridLayout(2, 0, 0, 0));
-			panel_south.add(getLblNewLabel_3());
-			panel_south.add(getLblNewLabel());
-			panel_south.add(getBtnAddJustification());
-			panel_south.add(getBtnSaveChange());
+			panel_south.setLayout(new BorderLayout(0, 0));
+			panel_south.add(getPanel_south_south(), BorderLayout.SOUTH);
+			panel_south.add(getPanel_south_center(), BorderLayout.NORTH);
 		}
 		return panel_south;
-	}
-
-	private JButton getBtnSaveChange() {
-		if (btnSaveChange == null) {
-			btnSaveChange = new JButton("Save change");
-			btnSaveChange.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-
-					if (checkChanges()) {
-						createAndSave();
-					} else
-						JOptionPane.showMessageDialog(null, "There are no changes to save.");
-
-				}
-			});
-			btnSaveChange.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		}
-		return btnSaveChange;
 	}
 
 	private void createAndSave() {
@@ -576,29 +566,6 @@ public class EditWorkPeriodView extends JFrame {
 			// do nothing
 		}
 
-	}
-
-	private JButton getBtnAddJustification() {
-		if (btnAddJustification == null) {
-			btnAddJustification = new JButton("Add justification");
-			btnAddJustification.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					jv = new JustificationView();
-					jv.setVisible(true);
-					jv.setLocationRelativeTo(null);
-				}
-			});
-			btnAddJustification.setFont(new Font("Tahoma", Font.PLAIN, 12));
-
-		}
-		return btnAddJustification;
-	}
-
-	private JLabel getLblNewLabel() {
-		if (lblNewLabel == null) {
-			lblNewLabel = new JLabel("");
-		}
-		return lblNewLabel;
 	}
 
 	/**
@@ -635,13 +602,6 @@ public class EditWorkPeriodView extends JFrame {
 				"Filtering by medical license ID", "Filtering by specialization" };
 
 		return f;
-	}
-
-	private JLabel getLblNewLabel_3() {
-		if (lblNewLabel_3 == null) {
-			lblNewLabel_3 = new JLabel("");
-		}
-		return lblNewLabel_3;
 	}
 
 	private JPanel getPanel_center_north_unique_center() {
@@ -750,6 +710,7 @@ public class EditWorkPeriodView extends JFrame {
 		for (int i = 0; i < doctors.size(); i++) {
 			aux[i] = doctors.get(i).getName() + " " + doctors.get(i).getSurname();
 		}
+		Arrays.sort(aux);
 		return aux;
 	}
 
@@ -767,10 +728,17 @@ public class EditWorkPeriodView extends JFrame {
 			btnSelect.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					try {
-						selectedDocID = ConnectionFactory
-								.doctorFromNameAndSurname(getComboBoxDoctors().getSelectedItem().toString()).getId();
-
-						showSchedule(selectedDocID);
+						Doctor d = ConnectionFactory
+								.doctorFromNameAndSurname(getComboBoxDoctors().getSelectedItem().toString());
+						if (d == null) {
+							System.out.println("The doctor is null");
+						} else {
+							System.out.println("Selected doctor: " + d.toString());
+							BigInteger id = d.getId();
+							selectedDocID = id;
+	
+							showSchedule(selectedDocID);
+						}
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -786,32 +754,42 @@ public class EditWorkPeriodView extends JFrame {
 	}
 
 	private void showSchedule(BigInteger selectedDocID) {
-		if (ConnectionFactory.doctorHasWorkPeriod(selectedDocID)) {
+		if (!ConnectionFactory.doctorHasWorkPeriod(selectedDocID)) {
 			JOptionPane.showMessageDialog(null, "The selected doctor does not have any work period.");
 		} else {
 
-			List<WorkPeriod> workperiods = ConnectionFactory.getWorkPeriodByDoctorId(selectedDocID);
+			workperiods = ConnectionFactory.getWorkPeriodByDoctorId(selectedDocID);
 
-//			if (workperiods.size() > 1) {
-//				getBtnOtherWPs().setEnabled(true);
-//				// TODO: no se sabe si se puede tener más de un workperiod a la vez
-//			} else {
-			wpID = workperiods.get(0).getId();
-			List<WorkDay> workdays = ConnectionFactory.getWorkDayByWPId(wpID);
+			if (workperiods.size() > 1) {
+				getComboBoxWorkperiods().setEnabled(true);
+				getComboBoxWorkperiods().setModel(new DefaultComboBoxModel<>(getWorkperiodsArray(workperiods)));
+				getComboBoxWorkperiods().setSelectedIndex(0);
+			} else {
+				wpID = workperiods.get(0).getId();
+				List<WorkDay> workdays = ConnectionFactory.getWorkDayByWPId(wpID);
 
-			setTimetable(workdays);
+				setTimetable(workdays);
 
-			getLblShowFirstDay().setText(String.valueOf(workperiods.get(0).getStartDate()));
-			getLblShowLastDay().setText(String.valueOf(workperiods.get(0).getEndDate()));
-
-//			}
+				getLblShowFirstDay().setText(String.valueOf(workperiods.get(0).getStartDate()));
+				getLblShowLastDay().setText(String.valueOf(workperiods.get(0).getEndDate()));
+			}
 		}
 
+	}
+	
+	private String[] getWorkperiodsArray(List<WorkPeriod> ws) {
+		String [] a = new String[ws.size()];
+		
+		for (int i = 0; i < ws.size(); i++) {
+			int num = i+1;
+			a[i] = "Workperiod " +num + ":\t" + ws.get(i).getStartDate() + " - " + ws.get(i).getEndDate();
+		}
+	
+		return a;
 	}
 
 	private void setTimetable(List<WorkDay> wds) {
 		for (int i = 0; i < wds.size(); i++) {
-			System.out.println(wds.get(i).toString());
 			if (wds.get(i).getWeekday().toLowerCase().equals("monday")) {
 				getTxtMondayIn().setText(wds.get(i).getStartHour());
 				getTxtMondayOut().setText(wds.get(i).getEndHour());
@@ -1149,5 +1127,82 @@ public class EditWorkPeriodView extends JFrame {
 		}
 		return wds;
 	}
+	private JPanel getPanel_south_south() {
+		if (panel_south_south == null) {
+			panel_south_south = new JPanel();
+			panel_south_south.add(getLblNewLabel_1());
+			panel_south_south.add(getLblNewLabel_1_1());
+			panel_south_south.add(getBtnAddJustification_1());
+			panel_south_south.add(getBtnSaveChange_1());
+		}
+		return panel_south_south;
+	}
+	private JLabel getLblNewLabel_1() {
+		if (lblNewLabel == null) {
+			lblNewLabel = new JLabel("");
+		}
+		return lblNewLabel;
+	}
+	private JLabel getLblNewLabel_1_1() {
+		if (lblNewLabel_1 == null) {
+			lblNewLabel_1 = new JLabel("");
+		}
+		return lblNewLabel_1;
+	}
+	private JButton getBtnAddJustification_1() {
+		if (btnAddJustification == null) {
+			btnAddJustification = new JButton("Add justification");
+			btnAddJustification.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		}
+		return btnAddJustification;
+	}
+	private JButton getBtnSaveChange_1() {
+		if (btnSaveChange == null) {
+			btnSaveChange = new JButton("Save change");
+			btnSaveChange.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		}
+		return btnSaveChange;
+	}
+	private JPanel getPanel_south_center() {
+		if (panel_south_center == null) {
+			panel_south_center = new JPanel();
+			panel_south_center.setLayout(new GridLayout(0, 2, 0, 0));
+			panel_south_center.add(getLblNewLabel_3());
+			panel_south_center.add(getLblNewLabel_4());
+		}
+		return panel_south_center;
+	}
+	private JLabel getLblNewLabel_3() {
+		if (lblNewLabel_3 == null) {
+			lblNewLabel_3 = new JLabel("");
+		}
+		return lblNewLabel_3;
+	}
+	private JLabel getLblNewLabel_4() {
+		if (lblNewLabel_4 == null) {
+			lblNewLabel_4 = new JLabel("");
+		}
+		return lblNewLabel_4;
+	}
+	private JComboBox<String> getComboBoxWorkperiods() {
+		if (comboBoxWorkperiods == null) {
+			comboBoxWorkperiods = new JComboBox<String>();
+			comboBoxWorkperiods.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					wpID = workperiods.get(comboBoxWorkperiods.getSelectedIndex()).getId();
+					List<WorkDay> workdays = ConnectionFactory.getWorkDayByWPId(wpID);
 
+					setTimetable(workdays);
+
+					getLblShowFirstDay().setText(String.valueOf(workperiods.get(comboBoxWorkperiods.getSelectedIndex()).getStartDate()));
+					getLblShowLastDay().setText(String.valueOf(workperiods.get(comboBoxWorkperiods.getSelectedIndex()).getEndDate()));
+				}
+			});
+			comboBoxWorkperiods.setEnabled(false);
+			
+			
+			
+		}
+		return comboBoxWorkperiods;
+	}
 }
