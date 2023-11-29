@@ -19,7 +19,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 
 import gui.doctor.MenuDoctor;
-import gui.manager.ManagerView;
+import gui.manager.ManagerMenu;
 import gui.medicalRecepcionist.MenuMedicalRecepcionist;
 
 public class Main extends JFrame {
@@ -156,9 +156,9 @@ public class Main extends JFrame {
 			btnManager = new JButton("Manager");
 			btnManager.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					ManagerView mv;
+					ManagerMenu mv;
 					try {
-						mv = new ManagerView();
+						mv = new ManagerMenu();
 						mv.setVisible(true);
 						mv.setLocationRelativeTo(null);
 
