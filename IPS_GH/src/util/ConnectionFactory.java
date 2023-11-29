@@ -4011,4 +4011,35 @@ public class ConnectionFactory {
 		return aux;
 	}
 
+	public static BigInteger getDoctorIDByPersonalID(String docID) {
+		BigInteger res;
+
+		try {
+			// Establecer la conexión
+			Connection connection = ConnectionFactory.getOracleConnection();
+
+			// Ejecutar una consulta SQL
+			String sql = "SELECT * FROM DOCTOR WHERE personal_id = ?";
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setString(1, docID);
+			ResultSet resultSet = statement.executeQuery();
+
+			// Procesar los resultados
+			while (resultSet.next()) {
+				BigDecimal id = resultSet.getBigDecimal("id");
+				res = id.toBigInteger();
+				return res;
+			}
+
+			// Cerrar la conexión
+			resultSet.close();
+			statement.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new BigInteger("-1");
+	}
+
 }

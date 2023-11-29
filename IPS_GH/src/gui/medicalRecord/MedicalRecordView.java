@@ -167,6 +167,9 @@ public class MedicalRecordView extends JFrame {
 		contentPane.add(getTabbedPane_1(), BorderLayout.CENTER);
 	}
 	
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public MedicalRecordView(int patientId, String id) {
 		this.docID = id;
 		
@@ -468,7 +471,7 @@ public class MedicalRecordView extends JFrame {
 							boolean result = ConnectionFactory.updateDiagnosis(selected);
 							if (result) {
 								String report = "Diagnosis closed";
-								BigInteger doctorId = new BigInteger(docID);
+								BigInteger doctorId = ConnectionFactory.getDoctorIDByPersonalID(docID);
 								Diagnosis selected = (Diagnosis) list.getSelectedValue();
 								String currentDate = LocalDate.now().toString();
 								ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);
@@ -504,7 +507,7 @@ public class MedicalRecordView extends JFrame {
 							boolean result = ConnectionFactory.updateDiagnosis(selected);
 							if (result) {
 								String report = "Diagnosis opened";
-								BigInteger doctorId = new BigInteger(docID);
+								BigInteger doctorId = ConnectionFactory.getDoctorIDByPersonalID(docID);
 								Diagnosis selected = (Diagnosis) list.getSelectedValue();
 								String currentDate = LocalDate.now().toString();
 								ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);

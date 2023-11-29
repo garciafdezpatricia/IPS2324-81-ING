@@ -6,10 +6,19 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,9 +35,6 @@ import javax.swing.border.TitledBorder;
 import util.AppointmentBLDto;
 import util.ConnectionFactory;
 import util.FileUtil;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class NotifiableDiseasesReportView extends JFrame {
 
@@ -65,11 +71,9 @@ public class NotifiableDiseasesReportView extends JFrame {
 	private JLabel lblTreatment;
 	private JTextField txtTreatment;
 	private JPanel panelVaccinationStatus;
-	private JRadioButton rdBtnVaccinated;
-	private JPanel panelEmpty;
+	private JPanel panelDose;
 	private JPanel panelDiseaseInfo;
 	private JLabel lblNameOfDisease;
-	private JTextField txtNameDisease;
 	private JLabel lblDateOfDiagnosis;
 	private JTextField txtDateDiagnosis;
 	private JLabel lblDateOfSymptoms;
@@ -78,12 +82,28 @@ public class NotifiableDiseasesReportView extends JFrame {
 
 	private AppointmentBLDto ap;
 	private JTextArea txtPatientName;
-	
-	
-	
+
 	private String patientName;
 	private String patientSurname;
-	
+	private JPanel panelSympthoms;
+	private JLabel lblTypeOfDiagnosis;
+	private JRadioButton rdBtnClinicalSuspicion;
+	private JRadioButton rdBtnAnalyticalConfirmation;
+	private JLabel lblRequestedLabTests;
+	private JTextField txtRequestedLabTests;
+	private JLabel lblNewLabel;
+	private JLabel lblVaccinationStatus;
+	private JRadioButton rdBtnComplete;
+	private JRadioButton rdBtnIncomplete;
+	private JRadioButton rdBtnNotVaccinated;
+	private JRadioButton rdBtnNotProvided;
+	private JLabel lblDateLastDose;
+	private JLabel lblNumOfDose;
+	private JTextField txtNumOfDoses;
+	private JTextField txtDateOfLastDose;
+	private JPanel panel1;
+	private JPanel panelEmpty;
+	private JComboBox<String> comboBoxDiseases;
 
 	/**
 	 * Launch the application.
@@ -105,6 +125,7 @@ public class NotifiableDiseasesReportView extends JFrame {
 	 * Create the frame.
 	 */
 	public NotifiableDiseasesReportView() {
+		setResizable(false);
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
@@ -117,13 +138,12 @@ public class NotifiableDiseasesReportView extends JFrame {
 			e.printStackTrace();
 		}
 		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
-		
 
 		setIconImage(Toolkit.getDefaultToolkit()
 				.getImage(NotifiableDiseasesReportView.class.getResource("/img/descarga.jpg")));
 		setTitle("Notifiable diseases report");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 922, 667);
+		setBounds(100, 100, 950, 823);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -285,6 +305,7 @@ public class NotifiableDiseasesReportView extends JFrame {
 			panelSouth = new JPanel();
 			panelSouth.setBorder(null);
 			panelSouth.setLayout(new GridLayout(0, 1, 0, 0));
+			panelSouth.add(getPanelSympthoms());
 			panelSouth.add(getPanelPatientConsent());
 			panelSouth.add(getPanelAdditionalInfo());
 			panelSouth.add(getPanelButtons());
@@ -356,7 +377,7 @@ public class NotifiableDiseasesReportView extends JFrame {
 	private JPanel getPanelButtons() {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
-			panelButtons.setLayout(null);
+			panelButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 			panelButtons.add(getBtnCancel());
 			panelButtons.add(getBtnSave());
 			panelButtons.add(getBtnSend());
@@ -367,7 +388,6 @@ public class NotifiableDiseasesReportView extends JFrame {
 	private JButton getBtnCancel() {
 		if (btnCancel == null) {
 			btnCancel = new JButton("Cancel");
-			btnCancel.setBounds(485, 20, 120, 30);
 		}
 		return btnCancel;
 	}
@@ -380,7 +400,6 @@ public class NotifiableDiseasesReportView extends JFrame {
 					generatePDF();
 				}
 			});
-			btnSave.setBounds(615, 20, 120, 30);
 		}
 		return btnSave;
 	}
@@ -388,7 +407,6 @@ public class NotifiableDiseasesReportView extends JFrame {
 	private JButton getBtnSend() {
 		if (btnSend == null) {
 			btnSend = new JButton("Send report");
-			btnSend.setBounds(745, 20, 120, 30);
 		}
 		return btnSend;
 	}
@@ -409,10 +427,8 @@ public class NotifiableDiseasesReportView extends JFrame {
 			panelClinicalInfo.setBorder(
 					new TitledBorder(null, "Clinical information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panelClinicalInfo.setLayout(new GridLayout(0, 2, 0, 0));
-			panelClinicalInfo.add(getLblSymptomsPresent_1());
-			panelClinicalInfo.add(getTxtSymptoms());
-			panelClinicalInfo.add(getLblTreatment_1());
-			panelClinicalInfo.add(getTxtTreatment());
+			panelClinicalInfo.add(getPanel1());
+			panelClinicalInfo.add(getPanelEmpty());
 			panelClinicalInfo.add(getPanelVaccinationStatus());
 			panelClinicalInfo.add(getPanelEmpty_1());
 		}
@@ -453,23 +469,25 @@ public class NotifiableDiseasesReportView extends JFrame {
 		if (panelVaccinationStatus == null) {
 			panelVaccinationStatus = new JPanel();
 			panelVaccinationStatus.setLayout(new GridLayout(0, 1, 0, 0));
-			panelVaccinationStatus.add(getRdBtnVaccinated());
+			panelVaccinationStatus.add(getLblVaccinationStatus());
+			panelVaccinationStatus.add(getRdBtnComplete());
+			panelVaccinationStatus.add(getRdBtnIncomplete());
+			panelVaccinationStatus.add(getRdBtnNotVaccinated());
+			panelVaccinationStatus.add(getRdBtnNotProvided());
 		}
 		return panelVaccinationStatus;
 	}
 
-	private JRadioButton getRdBtnVaccinated() {
-		if (rdBtnVaccinated == null) {
-			rdBtnVaccinated = new JRadioButton("Vaccinated");
-		}
-		return rdBtnVaccinated;
-	}
-
 	private JPanel getPanelEmpty_1() {
-		if (panelEmpty == null) {
-			panelEmpty = new JPanel();
+		if (panelDose == null) {
+			panelDose = new JPanel();
+			panelDose.setLayout(new GridLayout(0, 2, 0, 0));
+			panelDose.add(getLblNumOfDose());
+			panelDose.add(getTxtNumOfDoses());
+			panelDose.add(getLblDateLastDose());
+			panelDose.add(getTxtDateOfLastDose());
 		}
-		return panelEmpty;
+		return panelDose;
 	}
 
 	private JPanel getPanelDiseaseInfo_1() {
@@ -479,7 +497,7 @@ public class NotifiableDiseasesReportView extends JFrame {
 					new TitledBorder(null, "Disease information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			panelDiseaseInfo.setLayout(new GridLayout(0, 2, 0, 0));
 			panelDiseaseInfo.add(getLblNameOfDisease_1());
-			panelDiseaseInfo.add(getTxtNameDisease());
+			panelDiseaseInfo.add(getComboBoxDiseases());
 			panelDiseaseInfo.add(getLblDateOfDiagnosis_1());
 			panelDiseaseInfo.add(getTxtDateDiagnosis());
 			panelDiseaseInfo.add(getLblDateOfSymptoms_1());
@@ -493,14 +511,6 @@ public class NotifiableDiseasesReportView extends JFrame {
 			lblNameOfDisease = new JLabel("Name of the disease:");
 		}
 		return lblNameOfDisease;
-	}
-
-	private JTextField getTxtNameDisease() {
-		if (txtNameDisease == null) {
-			txtNameDisease = new JTextField();
-			txtNameDisease.setColumns(10);
-		}
-		return txtNameDisease;
 	}
 
 	private JLabel getLblDateOfDiagnosis_1() {
@@ -561,35 +571,235 @@ public class NotifiableDiseasesReportView extends JFrame {
 		return txtPatientName;
 	}
 
+	private JPanel getPanelSympthoms() {
+		if (panelSympthoms == null) {
+			panelSympthoms = new JPanel();
+			panelSympthoms
+					.setBorder(new TitledBorder(null, "Sympthoms", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+			panelSympthoms.setLayout(new GridLayout(0, 3, 0, 0));
+			panelSympthoms.add(getLblTypeOfDiagnosis());
+			panelSympthoms.add(getRdBtnClinicalSuspicion());
+			panelSympthoms.add(getRdBtnAnalyticalConfirmation());
+			panelSympthoms.add(getLblRequestedLabTests());
+			panelSympthoms.add(getTxtRequestedLabTests());
+			panelSympthoms.add(getLblNewLabel());
+		}
+		return panelSympthoms;
+	}
+
+	private JLabel getLblTypeOfDiagnosis() {
+		if (lblTypeOfDiagnosis == null) {
+			lblTypeOfDiagnosis = new JLabel("Type of diagnosis:");
+		}
+		return lblTypeOfDiagnosis;
+	}
+
+	private JRadioButton getRdBtnClinicalSuspicion() {
+		if (rdBtnClinicalSuspicion == null) {
+			rdBtnClinicalSuspicion = new JRadioButton("Clinical suspicion");
+		}
+		return rdBtnClinicalSuspicion;
+	}
+
+	private JRadioButton getRdBtnAnalyticalConfirmation() {
+		if (rdBtnAnalyticalConfirmation == null) {
+			rdBtnAnalyticalConfirmation = new JRadioButton("Analytical confirmation");
+		}
+		return rdBtnAnalyticalConfirmation;
+	}
+
+	private JLabel getLblRequestedLabTests() {
+		if (lblRequestedLabTests == null) {
+			lblRequestedLabTests = new JLabel("Requested lab tests:");
+		}
+		return lblRequestedLabTests;
+	}
+
+	private JTextField getTxtRequestedLabTests() {
+		if (txtRequestedLabTests == null) {
+			txtRequestedLabTests = new JTextField();
+			txtRequestedLabTests.setColumns(10);
+		}
+		return txtRequestedLabTests;
+	}
+
+	private JLabel getLblNewLabel() {
+		if (lblNewLabel == null) {
+			lblNewLabel = new JLabel("");
+		}
+		return lblNewLabel;
+	}
+
+	private JLabel getLblVaccinationStatus() {
+		if (lblVaccinationStatus == null) {
+			lblVaccinationStatus = new JLabel("Vaccination status:");
+		}
+		return lblVaccinationStatus;
+	}
+
+	private JRadioButton getRdBtnComplete() {
+		if (rdBtnComplete == null) {
+			rdBtnComplete = new JRadioButton("Complete");
+		}
+		return rdBtnComplete;
+	}
+
+	private JRadioButton getRdBtnIncomplete() {
+		if (rdBtnIncomplete == null) {
+			rdBtnIncomplete = new JRadioButton("Incomplete");
+		}
+		return rdBtnIncomplete;
+	}
+
+	private JRadioButton getRdBtnNotVaccinated() {
+		if (rdBtnNotVaccinated == null) {
+			rdBtnNotVaccinated = new JRadioButton("Not vaccinated");
+		}
+		return rdBtnNotVaccinated;
+	}
+
+	private JRadioButton getRdBtnNotProvided() {
+		if (rdBtnNotProvided == null) {
+			rdBtnNotProvided = new JRadioButton("Not provided");
+		}
+		return rdBtnNotProvided;
+	}
+
+	private JLabel getLblDateLastDose() {
+		if (lblDateLastDose == null) {
+			lblDateLastDose = new JLabel("Date of the last dose:");
+		}
+		return lblDateLastDose;
+	}
+
+	private JLabel getLblNumOfDose() {
+		if (lblNumOfDose == null) {
+			lblNumOfDose = new JLabel("Number of doses:");
+		}
+		return lblNumOfDose;
+	}
+
+	private JTextField getTxtNumOfDoses() {
+		if (txtNumOfDoses == null) {
+			txtNumOfDoses = new JTextField();
+			txtNumOfDoses.setColumns(10);
+		}
+		return txtNumOfDoses;
+	}
+
+	private JTextField getTxtDateOfLastDose() {
+		if (txtDateOfLastDose == null) {
+			txtDateOfLastDose = new JTextField();
+			txtDateOfLastDose.setColumns(10);
+		}
+		return txtDateOfLastDose;
+	}
+
+	private JPanel getPanel1() {
+		if (panel1 == null) {
+			panel1 = new JPanel();
+			panel1.setLayout(new GridLayout(0, 2, 0, 0));
+			panel1.add(getLblSymptomsPresent_1());
+			panel1.add(getTxtSymptoms());
+			panel1.add(getLblTreatment_1());
+			panel1.add(getTxtTreatment());
+		}
+		return panel1;
+	}
+
+	private JPanel getPanelEmpty() {
+		if (panelEmpty == null) {
+			panelEmpty = new JPanel();
+		}
+		return panelEmpty;
+	}
+
+	private JComboBox<String> getComboBoxDiseases() {
+		if (comboBoxDiseases == null) {
+			comboBoxDiseases = new JComboBox<String>();
+			comboBoxDiseases.setModel(new DefaultComboBoxModel<String>(diseasesToArray()));
+		}
+		return comboBoxDiseases;
+	}
+
+	private String[] diseasesToArray() {
+		String[] lines = new String[0];
+
+		try {
+			lines = Files.readAllLines(Path.of("files/diseases.txt")).toArray(new String[0]);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return lines;
+	}
+
 	private void generatePDF() {
 		String aux = "";
 		String result = "NOTIFIABLE DISEASE REPORT\n\n";
-		
+
+		// PATIENT INFORMATION
+		result += "   · Patient information\n";
 		result += "Patient name:\t" + patientName + "\n";
 		result += "Patient surname:\t" + patientSurname + "\n";
 
 		result += "Gender: ";
 		aux = getRdBtnFemale().isSelected() ? "Female" : "Male";
 		result += aux + "\n";
-		
-		result += "Address:\t" + getTxtAddress().getText() + "\n";
-		result += "Occupation:\t" + getTxtOccupation().getText() +"\n";
-		result += "Contact information:\t" + ap.getInformation() + "\n\n";
 
-		result += "Disease name:\t" + getTxtNameDisease().getText() + "\n";
+		result += "Address:\t" + getTxtAddress().getText() + "\n";
+		result += "Occupation:\t" + getTxtOccupation().getText() + "\n";
+		result += "Contact information:\t" + ap.getInformation() + "\n\n";
+		result += "\n\n";
+
+		// DISEASE INFORMATION
+		result += "   · Disease information\n";
+		result += "Disease name:\t" + getComboBoxDiseases().getSelectedItem().toString() + "\n";
 		result += "Diagnosis date:\t" + getTxtDateDiagnosis().getText() + "\n";
 		result += "Date of onset of symptoms:\t" + getTxtDateSymptoms().getText() + "\n";
-		result += "Symptoms:\t" + getTxtSymptoms().getText() +  "\n";
+		result += "Symptoms:\t" + getTxtSymptoms().getText() + "\n";
 		result += "Treatment given:\t" + getTxtTreatment().getText() + "\n";
-		
-		result += "Vaccinated:\t";
-		aux = getRdBtnVaccinated().isSelected() ? "Yes" : "No";
+
+		result += "Vaccination status:\t";
+		if (getRdBtnComplete().isSelected())
+			aux = "Complete";
+		else if (getRdBtnIncomplete().isSelected())
+			aux = "Incomplete";
+		if (getRdBtnComplete().isSelected())
+			aux = "Complete";
+		else if (getRdBtnNotVaccinated().isSelected())
+			aux = "Not vaccinated";
+		else if (getRdBtnNotProvided().isSelected())
+			aux = "Not provided";
 		result += aux + "\n";
+
+		result += "Number of doses:\t" + getTxtNumOfDoses() + "\n";
+		result += "Date of the last dose:\t" + getTxtDateOfLastDose() + "\n";
+		result += "\n\n";
+
 		
+		// SYMPTOMS
+		result += "   · Symptoms information\n";
+		result += "Type of diagnosis::\t";
+		if (getRdBtnClinicalSuspicion().isSelected())
+			aux = "Clinical suspicion";
+		else if (getRdBtnAnalyticalConfirmation().isSelected())
+			aux = "Analytical confirmation";
+		
+		result += aux + "\n";
+		result += "\n\n";
+
+		// CONSENT
+		result += "   · Patient consent\n";
 		result += "Consent for reporting the disease to public health authorities:\t" + "\n";
 		aux = getRdBtnPatientConsent().isSelected() ? "Yes" : "No";
-		result += "Additional notes:\t" + getTxtNotes() + "\n";
-		
+		result += "\n\n";
+
+		// CONSENT
+		result += "   · Notes\n";
+		result += "Additional notes:\t" + getTxtNotes().getText() + "\n";
+
 		FileUtil.saveToFile("result", result);
 	}
+
 }

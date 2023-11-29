@@ -1,16 +1,33 @@
-Notifiable Disease Report
-Patient name:	Alejandro
-Patient surname:	Bernal Garcia
-Gender: Male
-Address:	Calle Buenavista
-Occupation:	Fontanero
+NOTIFIABLE DISEASE REPORT
+
+   · Patient information
+Patient name:	Paula
+Patient surname:	Lopez Rodriguez
+Gender: Female
+Address:	calle buenavista
+Occupation:	fontanera
 Contact information:	This is information of contact
 
-Disease name:	Gripe A
-Diagnosis date:	28/11/2023
+
+
+   · Disease information
+Disease name:	Hepatitis A
+Diagnosis date:	29/11/2023
 Date of onset of symptoms:	25/11/2023
-Symptoms:	Tos, mocos y dolor de cabeza
-Treatment given:	Ibuprofeno de 600mg cada 8h
-Vaccinated:	Yes
+Symptoms:	fiebre y dolor de cabeza
+Treatment given:	ibuprofeno cada 8h durante 1 semana
+Vaccination status:	Complete
+Number of doses:	javax.swing.JTextField[,108,0,108x48,layout=javax.swing.plaf.basic.BasicTextUI$UpdateHandler,alignmentX=0.0,alignmentY=0.0,border=javax.swing.plaf.synth.SynthBorder@39aece35,flags=288,maximumSize=,minimumSize=,preferredSize=,caretColor=,disabledTextColor=DerivedColor(color=142,143,145 parent=nimbusDisabledText offsets=0.0,0.0,0.0,0 pColor=142,143,145,editable=true,margin=javax.swing.plaf.InsetsUIResource[top=0,left=0,bottom=0,right=0],selectedTextColor=DerivedColor(color=255,255,255 parent=nimbusSelectedText offsets=0.0,0.0,0.0,0 pColor=255,255,255,selectionColor=DerivedColor(color=57,105,138 parent=nimbusSelectionBackground offsets=0.0,0.0,0.0,0 pColor=57,105,138,columns=10,columnWidth=0,command=,horizontalAlignment=LEADING]
+Date of the last dose:	javax.swing.JTextField[,108,48,108x48,layout=javax.swing.plaf.basic.BasicTextUI$UpdateHandler,alignmentX=0.0,alignmentY=0.0,border=javax.swing.plaf.synth.SynthBorder@19a8f980,flags=288,maximumSize=,minimumSize=,preferredSize=,caretColor=,disabledTextColor=DerivedColor(color=142,143,145 parent=nimbusDisabledText offsets=0.0,0.0,0.0,0 pColor=142,143,145,editable=true,margin=javax.swing.plaf.InsetsUIResource[top=0,left=0,bottom=0,right=0],selectedTextColor=DerivedColor(color=255,255,255 parent=nimbusSelectedText offsets=0.0,0.0,0.0,0 pColor=255,255,255,selectionColor=DerivedColor(color=57,105,138 parent=nimbusSelectionBackground offsets=0.0,0.0,0.0,0 pColor=57,105,138,columns=10,columnWidth=0,command=,horizontalAlignment=LEADING]
+
+
+   · Symptoms information
+Type of diagnosis::	Clinical suspicion
+
+
+   · Patient consent
 Consent for reporting the disease to public health authorities:	
-Additional notes:	
+
+
+   · Notes
+Additional notes:	javax.swing.JTextField[,14,46,898x28,layout=javax.swing.plaf.basic.BasicTextUI$UpdateHandler,alignmentX=0.0,alignmentY=0.0,border=javax.swing.plaf.synth.SynthBorder@325ed9a1,flags=288,maximumSize=,minimumSize=,preferredSize=,caretColor=,disabledTextColor=DerivedColor(color=142,143,145 parent=nimbusDisabledText offsets=0.0,0.0,0.0,0 pColor=142,143,145,editable=true,margin=javax.swing.plaf.InsetsUIResource[top=0,left=0,bottom=0,right=0],selectedTextColor=DerivedColor(color=255,255,255 parent=nimbusSelectedText offsets=0.0,0.0,0.0,0 pColor=255,255,255,selectionColor=DerivedColor(color=57,105,138 parent=nimbusSelectionBackground offsets=0.0,0.0,0.0,0 pColor=57,105,138,columns=10,columnWidth=10,command=,horizontalAlignment=LEADING]

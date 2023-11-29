@@ -1696,6 +1696,7 @@ public class DoctorAppointmentView extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					NotifiableDiseasesReportView ndrv = new NotifiableDiseasesReportView(appointment);
 					ndrv.setVisible(true);
+					ndrv.setBounds(100, 100, 950, 823);
 					ndrv.setLocationRelativeTo(null);
 				}
 			});

@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -141,7 +142,8 @@ public class Schedule extends JFrame {
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Schedule");
-		appointments = ConnectionFactory.getAppointmentsByDoctorId(doctorId);
+		BigInteger id_aux = ConnectionFactory.getDoctorIDByPersonalID(docID);
+		appointments = ConnectionFactory.getAppointmentsByDoctorId(id_aux.intValue());
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {

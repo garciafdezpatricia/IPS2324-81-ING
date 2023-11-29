@@ -1,0 +1,63 @@
+Botulismo
+Brucelosis
+Campilobacteriosis
+Carbunco
+Cólera
+Criptosporidiosis
+Difteria
+Encefalopatías espongiformes transmisibles humanas 
+Enfermedad de Lyme
+Enf. invasora por H. influenzae tipo b 
+Enf. invasora por S. pneumoniae
+Enfermedad meningocócica 
+Fiebre amarill
+Fiebre exantemática mediterránea
+Fiebres hemorrágicas virales
+Fiebre recurrente por garrapatas
+Fiebre Q
+Fiebre tifoidea y paratifoidea
+Giardiasis
+Hepatitis A
+Hepatitis B
+Hepatitis C
+Hepatitis víricas (otras)
+Hidatidosis 
+Infección gonocócica
+Infecciones por Chlamydia
+Infección por E. coli enterohemorrágico 
+Infección por VIH
+Infecciones humanas por virus de la gripe aviar H5N (u otros subtipos)
+Leishmaniasis
+Legionelosis
+Lepra
+Leptospirosis
+Listeriosis 
+Meningitis vírica
+Otras enf. de transmisión sexual
+Otras meningitis bacterianas
+Paludismo
+Parálisis flácida aguda en menores de 15 años 
+Parotiditis 
+Peste
+Poliomielitis 
+Rabia
+Rubéola
+Salmonelosis de transmisión alimentaria (excepto por 5. typhi y S. parotyphi)
+Sarampión 
+Shigelosis
+Sifilis
+Sifilis congénita 4
+Sindrome de inmunodeficiencia adquirida (SIDA)
+Sindrome de rubéola congénita
+Síndrome respiratorio agudo severo (SRAS)
+Tétanos
+Tétanos neonatal 
+Tifus exantemático 
+Tos ferina 
+Toxoplasmosis
+Triquinosis 4
+Tuberculosis (cualquier localización) 
+Tularemia
+Varicela
+Yersiniosis
+Brotes epidémicos de cualquier etiología

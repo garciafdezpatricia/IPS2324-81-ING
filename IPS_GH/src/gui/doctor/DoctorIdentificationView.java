@@ -93,7 +93,7 @@ public class DoctorIdentificationView extends JDialog {
 					} else {
 						docID = getTxtMedicalID().getText();
 						try {
-							checkDoctor(docID);
+							checkDoctor();
 						} catch (Exception e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -112,11 +112,11 @@ public class DoctorIdentificationView extends JDialog {
 	 * appointment is created and the id of the doctor is passed as a parameter, so
 	 * the doctor is selected by default when the new window is opened
 	 */
-	private void checkDoctor(String id) throws Exception {
-		if (ConnectionFactory.checkIfDoctorIDExists(id) != -1) {
+	private void checkDoctor() throws Exception {
+		if (ConnectionFactory.checkIfDoctorIDExists(docID) != -1) {
 			MenuDoctor md;
 			try {
-				md = new MenuDoctor(id);
+				md = new MenuDoctor(docID);
 				md.setVisible(true);
 				md.setLocationRelativeTo(null);
 
