@@ -48,7 +48,7 @@ public class Schedule extends JFrame {
 	private static int doctorId = 1;
 
 	private JPanel panel;
-	private JButton btnBack;
+	private JButton btnCancel;
 	private JButton btnFilter;
 	private JPanel pnAppointments;
 
@@ -215,22 +215,22 @@ public class Schedule extends JFrame {
 	private JPanel getPanel() {
 		if (panel == null) {
 			panel = new JPanel();
-			panel.add(getBtnBack());
+			panel.add(getBtnCancel());
 			panel.add(getBtnFilter());
 		}
 		return panel;
 	}
 
-	private JButton getBtnBack() {
-		if (btnBack == null) {
-			btnBack = new JButton("Back");
-			btnBack.addActionListener(new ActionListener() {
+	private JButton getBtnCancel() {
+		if (btnCancel == null) {
+			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					dispose();
 				}
 			});
 		}
-		return btnBack;
+		return btnCancel;
 	}
 
 	private JButton getBtnFilter() {

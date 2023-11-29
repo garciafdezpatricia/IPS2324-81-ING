@@ -46,7 +46,7 @@ public class MedicalRecordView extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JPanel pnButtons;
-	private JButton btnBack;
+	private JButton btnCancel;
 	private List<Appointment> appointments;
 	private Diagnosis selected;
 	private JPanel pnPatient;
@@ -206,22 +206,22 @@ public class MedicalRecordView extends JFrame {
 		if (pnButtons == null) {
 			pnButtons = new JPanel();
 			pnButtons.setLayout(new BorderLayout(0, 0));
-			pnButtons.add(getBtnBack(), BorderLayout.WEST);
+			pnButtons.add(getBtnCancel(), BorderLayout.WEST);
 		}
 		return pnButtons;
 	}
 
-	private JButton getBtnBack() {
-		if (btnBack == null) {
-			btnBack = new JButton("Back");
-			btnBack.addActionListener(new ActionListener() {
+	private JButton getBtnCancel() {
+		if (btnCancel == null) {
+			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					dispose();
 				}
 			});
-			btnBack.setHorizontalAlignment(SwingConstants.LEFT);
+			btnCancel.setHorizontalAlignment(SwingConstants.LEFT);
 		}
-		return btnBack;
+		return btnCancel;
 	}
 
 	private JPanel getPnPatient() {

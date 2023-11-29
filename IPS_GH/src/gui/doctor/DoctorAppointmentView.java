@@ -69,7 +69,7 @@ public class DoctorAppointmentView extends JFrame {
 	private JPanel contentPane;
 	private JPanel patientInfoPanel;
 	private JPanel buttonsPanel;
-	private JButton btnBack;
+	private JButton btnCancel;
 	private JButton btnSave;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private CausesCreator causesCreator;
@@ -317,15 +317,15 @@ public class DoctorAppointmentView extends JFrame {
 	}
 
 	private JButton getBtnExit() {
-		if (btnBack == null) {
-			btnBack = new JButton("Back");
-			btnBack.addActionListener(new ActionListener() {
+		if (btnCancel == null) {
+			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					dispose();
 				}
 			});
 		}
-		return btnBack;
+		return btnCancel;
 	}
 
 	private JButton getBtnSave() {

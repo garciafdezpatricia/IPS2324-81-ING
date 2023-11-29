@@ -388,6 +388,11 @@ public class NotifiableDiseasesReportView extends JFrame {
 	private JButton getBtnCancel() {
 		if (btnCancel == null) {
 			btnCancel = new JButton("Cancel");
+			btnCancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					dispose();
+				}
+			});
 		}
 		return btnCancel;
 	}
