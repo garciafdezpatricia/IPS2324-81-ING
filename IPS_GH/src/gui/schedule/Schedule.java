@@ -60,6 +60,8 @@ public class Schedule extends JFrame {
 	private JLabel lblOffice;
 
 	private JButton btnOpen;
+	
+	private String docID;
 
 	/**
 	 * Launch the application.
@@ -106,6 +108,36 @@ public class Schedule extends JFrame {
 	 * Create the frame.
 	 */
 	public Schedule() {
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
+		setTitle("Schedule");
+		appointments = ConnectionFactory.getAppointmentsByDoctorId(doctorId);
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
+		filterAppointments();
+		setBounds(100, 100, 877, 467);
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		getContentPane().setLayout(new GridLayout(1, 0, 0, 0));
+		getContentPane().add(getLeftPanel());
+		getContentPane().add(getRightPanel());
+
+	}
+	
+	/**
+	 * Create the frame.
+	 */
+	public Schedule(String id) {
+		this.docID = id;
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
 		setTitle("Schedule");
@@ -319,7 +351,7 @@ public class Schedule extends JFrame {
 			btnOpen.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					doctorView = new DoctorAppointmentView(p);
+					doctorView = new DoctorAppointmentView(p, docID);
 					doctorView.setVisible(true);
 					doctorView.setLocationRelativeTo(null);
 				}

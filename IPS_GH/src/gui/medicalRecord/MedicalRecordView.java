@@ -125,6 +125,8 @@ public class MedicalRecordView extends JFrame {
 	private JLabel lblEnd;
 	private JButton btnShow;
 	private JButton btnReset;
+	
+	private String docID;
 
 	/**
 	 * Launch the application.
@@ -147,6 +149,27 @@ public class MedicalRecordView extends JFrame {
 	 * Create the frame.
 	 */
 	public MedicalRecordView(int patientId) {
+		this.patientID = BigInteger.valueOf(patientId);
+		name = ConnectionFactory.getPatientInformation(patientId);
+		appointments = convertToList(ConnectionFactory.getAppointmentsByPatientID(BigInteger.valueOf(patientId)));
+
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(MenuMedicalRecepcionist.class.getResource("/img/descarga.jpg")));
+		setTitle("Medical record");
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setBounds(100, 100, 864, 456);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(new BorderLayout(0, 0));
+		contentPane.add(getPnButtons(), BorderLayout.SOUTH);
+		contentPane.add(getPnPatient(), BorderLayout.NORTH);
+		contentPane.add(getTabbedPane_1(), BorderLayout.CENTER);
+	}
+	
+	public MedicalRecordView(int patientId, String id) {
+		this.docID = id;
+		
 		this.patientID = BigInteger.valueOf(patientId);
 		name = ConnectionFactory.getPatientInformation(patientId);
 		appointments = convertToList(ConnectionFactory.getAppointmentsByPatientID(BigInteger.valueOf(patientId)));
@@ -413,8 +436,7 @@ public class MedicalRecordView extends JFrame {
 					if (selected != null) {
 						String report = txtAreaReport.getText();
 						if (report != "") {
-							// TODO: poner el id del doctor que este logged in
-							BigInteger doctorId = new BigInteger("4");
+							BigInteger doctorId = new BigInteger(docID);
 							Diagnosis selected = (Diagnosis) list.getSelectedValue();
 							String currentDate = LocalDate.now().toString();
 							ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);
@@ -446,8 +468,7 @@ public class MedicalRecordView extends JFrame {
 							boolean result = ConnectionFactory.updateDiagnosis(selected);
 							if (result) {
 								String report = "Diagnosis closed";
-								// TODO: poner el id del doctor que este logged in
-								BigInteger doctorId = new BigInteger("4");
+								BigInteger doctorId = new BigInteger(docID);
 								Diagnosis selected = (Diagnosis) list.getSelectedValue();
 								String currentDate = LocalDate.now().toString();
 								ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);
@@ -483,8 +504,7 @@ public class MedicalRecordView extends JFrame {
 							boolean result = ConnectionFactory.updateDiagnosis(selected);
 							if (result) {
 								String report = "Diagnosis opened";
-								// TODO: poner el id del doctor que este logged in
-								BigInteger doctorId = new BigInteger("4");
+								BigInteger doctorId = new BigInteger(docID);
 								Diagnosis selected = (Diagnosis) list.getSelectedValue();
 								String currentDate = LocalDate.now().toString();
 								ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);

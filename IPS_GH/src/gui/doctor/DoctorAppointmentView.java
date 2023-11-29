@@ -181,6 +181,8 @@ public class DoctorAppointmentView extends JFrame {
 	private JTextArea txtAreaProcedureComments;
 	private JScrollPane scrollPane_13;
 	private JLabel lblProcedureComments;
+	
+	private String docID;
 
 	/**
 	 * Launch the application.
@@ -201,6 +203,7 @@ public class DoctorAppointmentView extends JFrame {
 
 	/**
 	 * Create the frame.
+	 * @wbp.parser.constructor
 	 */
 	public DoctorAppointmentView(AppointmentBLDto appointment) {
 		setIconImage(
@@ -244,6 +247,54 @@ public class DoctorAppointmentView extends JFrame {
 		contentPane.add(getTabbedPane());
 	}
 
+	
+	/**
+	 * Create the frame.
+	 */
+	public DoctorAppointmentView(AppointmentBLDto appointment, String id) {
+		this.docID = id;
+		setIconImage(
+				Toolkit.getDefaultToolkit().getImage(DoctorAppointmentView.class.getResource("/img/descarga.jpg")));
+		setTitle("Appointment");
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				System.out.println("width: " + e.getComponent().getBounds().width);
+				System.out.println("height: " + e.getComponent().getBounds().height);
+			}
+		});
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// TODO: make confirmation message
+				setVisible(false);
+			}
+		});
+		this.appointment = appointment;
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setBounds(100, 100, 668, 656);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
+		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
+		setContentPane(contentPane);
+		contentPane.setLayout(new BorderLayout(0, 0));
+		contentPane.add(getPatientInfoPanel(), BorderLayout.NORTH);
+		contentPane.add(getButtonsPanel(), BorderLayout.SOUTH);
+		contentPane.add(getTabbedPane());
+	}
+	
+	
 	private JPanel getPatientInfoPanel() {
 		if (patientInfoPanel == null) {
 			patientInfoPanel = new JPanel();
@@ -1319,7 +1370,7 @@ public class DoctorAppointmentView extends JFrame {
 			btnMedicalRecord.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
-					medicalRecord = new MedicalRecordView(appointment.patientid);
+					medicalRecord = new MedicalRecordView(appointment.patientid, docID);
 					medicalRecord.setVisible(true);
 					medicalRecord.setLocationRelativeTo(null);
 				}

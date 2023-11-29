@@ -149,7 +149,7 @@ public class MenuDoctor extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					Schedule mr;
 					try {
-						mr = new Schedule();
+						mr = new Schedule(docID);
 						mr.setVisible(true);
 						mr.setLocationRelativeTo(null);
 
