@@ -439,7 +439,7 @@ public class MedicalRecordView extends JFrame {
 					if (selected != null) {
 						String report = txtAreaReport.getText();
 						if (report != "") {
-							BigInteger doctorId = new BigInteger(docID);
+							BigInteger doctorId = ConnectionFactory.getDoctorIDByPersonalID(docID);
 							Diagnosis selected = (Diagnosis) list.getSelectedValue();
 							String currentDate = LocalDate.now().toString();
 							ConnectionFactory.addReportToDiagnosis(selected.id, doctorId, currentDate, report);

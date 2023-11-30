@@ -8,6 +8,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import gui.medicalRecepcionist.MedicalRecepcionistView;
 import util.ConnectionFactory;
 
 import java.awt.GridLayout;
@@ -50,8 +51,7 @@ public class DoctorIdentificationView extends JDialog {
 	 */
 	public DoctorIdentificationView() {
 		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(DoctorIdentificationView.class.getResource("/img/descarga.jpg")));
-		setTitle("Doctor identification");
+				Toolkit.getDefaultToolkit().getImage(DoctorIdentificationView.class.getResource("/img/descarga.jpg")));		setTitle("Doctor identification");
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));

@@ -778,8 +778,8 @@ public class NotifiableDiseasesReportView extends JFrame {
 			aux = "Not provided";
 		result += aux + "\n";
 
-		result += "Number of doses:\t" + getTxtNumOfDoses() + "\n";
-		result += "Date of the last dose:\t" + getTxtDateOfLastDose() + "\n";
+		result += "Number of doses:\t" + getTxtNumOfDoses().getText() + "\n";
+		result += "Date of the last dose:\t" + getTxtDateOfLastDose().getText() + "\n";
 		result += "\n\n";
 
 		
