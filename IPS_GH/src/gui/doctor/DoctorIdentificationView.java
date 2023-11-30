@@ -68,9 +68,9 @@ public class DoctorIdentificationView extends JDialog {
 
 	private JLabel getLblIdentification() {
 		if (lblIdentification == null) {
-			lblIdentification = new JLabel("Introduce your medical identification:");
+			lblIdentification = new JLabel("Introduce your personal ID:");
 			lblIdentification.setFont(new Font("Tahoma", Font.PLAIN, 12));
-			lblIdentification.setBounds(111, 79, 215, 27);
+			lblIdentification.setBounds(124, 79, 215, 27);
 		}
 		return lblIdentification;
 	}

@@ -19,6 +19,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 
+import gui.doctor.DoctorIdentificationView;
 import gui.workPeriod.EditWorkPeriodView;
 import gui.workPeriod.WorkPeriodView;
 

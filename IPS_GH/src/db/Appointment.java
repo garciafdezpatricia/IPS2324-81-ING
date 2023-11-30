@@ -184,13 +184,13 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
-					try {
-						return "[URGENT] \n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
-					} catch (Exception e) {
-						e.printStackTrace();
-
-					}
+//				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
+//					try {
+//						return "[URGENT] \n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//
+//					}
 
 				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
 					try {
@@ -231,13 +231,13 @@ public class Appointment {
 						e.printStackTrace();
 
 					}
-				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
-					try {
-						return "\n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
-					} catch (Exception e) {
-						e.printStackTrace();
-
-					}
+//				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
+//					try {
+//						return "\n\tPatient: " + p + "; \n\tFrom: " + startdate + "; \n\tTo: " + enddate;
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//
+//					}
 				} else if (getStatus().toLowerCase().equals("pending of assigning")) {
 					try {
 						return "\n\tSpecialization: " + comments + "; Patient " + p + "; \n\tFrom: " + startdate

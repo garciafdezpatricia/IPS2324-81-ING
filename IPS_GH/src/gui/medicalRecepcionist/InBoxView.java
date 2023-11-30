@@ -70,7 +70,7 @@ public class InBoxView extends JFrame {
 
 		setTitle("Inbox");
 		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(MedicalRecepcionistView.class.getResource("/img/descarga.jpg")));
+				Toolkit.getDefaultToolkit().getImage(InBoxView.class.getResource("/img/descarga.jpg")));
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
@@ -83,7 +83,7 @@ public class InBoxView extends JFrame {
 			e.printStackTrace();
 		}
 		UIManager.getLookAndFeelDefaults().put("nimbusBase", new Color(51, 153, 255)); // Cambiar el color bases
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -214,7 +214,10 @@ public class InBoxView extends JFrame {
 	private JList getListAppointmentsRequested() {
 		if (listAppointmentsRequested == null) {
 			listAppointmentsRequested = new JList(ConnectionFactory.getAppointmentsRequested());
-		}
+			if (ConnectionFactory.getAppointmentsRequested().size() > 0) {
+				getBtnSeeRequest().setEnabled(true);
+			}
+		} 
 		return listAppointmentsRequested;
 	}
 	private JPanel getPanelButtonsRequested() {
@@ -228,6 +231,7 @@ public class InBoxView extends JFrame {
 	private JButton getBtnSeeRequest() {
 		if (btnSeeRequest == null) {
 			btnSeeRequest = new JButton("See request");
+			btnSeeRequest.setEnabled(false);
 			btnSeeRequest.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					Appointment a = (Appointment) getListAppointmentsRequested().getSelectedValue();
