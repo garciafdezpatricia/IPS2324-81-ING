@@ -13,14 +13,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.AbstractListModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -199,14 +203,14 @@ public class DiseaseGraph extends JFrame {
 					});
 
 					getListSelected().setModel(new AbstractListModel() {
-						String[] values = new String[0];
+						String[] v = new String[0];
 
 						public int getSize() {
-							return values.length;
+							return v.length;
 						}
 
 						public Object getElementAt(int index) {
-							return values[index];
+							return v[index];
 						}
 					});
 
@@ -226,6 +230,7 @@ public class DiseaseGraph extends JFrame {
 	private JDateChooser getDcStart() {
 		if (dcStart == null) {
 			dcStart = new JDateChooser();
+			dcStart.setDate(minDate);
 		}
 		return dcStart;
 	}
@@ -233,6 +238,7 @@ public class DiseaseGraph extends JFrame {
 	private JDateChooser getDcEnd() {
 		if (dcEnd == null) {
 			dcEnd = new JDateChooser();
+			dcEnd.setDate(maxDate);
 		}
 		return dcEnd;
 	}
@@ -279,9 +285,43 @@ public class DiseaseGraph extends JFrame {
 		if (textField == null) {
 			textField = new JTextField();
 			textField.setColumns(10);
+			textField.getDocument().addDocumentListener(new DocumentListener() {
+	            @Override
+	            public void insertUpdate(DocumentEvent e) {
+	                filterElements();
+	            }
+	            @Override
+	            public void removeUpdate(DocumentEvent e) {
+	                filterElements();
+	            }
+	            @Override
+	            public void changedUpdate(DocumentEvent e) {
+	                // Cambios en estilos, no se utiliza en este ejemplo
+	            }
+	        });
 		}
 		return textField;
 	}
+	
+	private void filterElements() {
+		DefaultListModel<String> model = new DefaultListModel();
+		List<String> elements = new ArrayList<String>();
+		for (DiagnosisBLDto item : diagnosis) {
+				elements.add(item.diagnosis);
+		}	
+		String searchText = getTextField().getText().toLowerCase();
+
+        List<String> filteredElements = elements.stream()
+                .filter(element -> element.toLowerCase().contains(searchText))
+                .collect(Collectors.toList());
+
+        for (String element : filteredElements) {
+            model.addElement(element);
+        }
+        
+        getList().setModel(model);
+    }
+
 
 	private JList getList() {
 		if (list == null) {
